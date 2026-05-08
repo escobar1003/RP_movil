@@ -1,15 +1,13 @@
 // lib/screens/main_navigation.dart
 
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
-// ── Importamos todas las pantallas principales ──────────
 import 'home.dart';
 import 'reciclar_screen.dart';
 import 'recompensas_screen.dart';
 import 'perfil_screen.dart';
 
-// ── StatefulWidget porque el índice del tab CAMBIA ──────
-// Un StatelessWidget no puede "recordar" en qué tab estás
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
 
@@ -18,12 +16,8 @@ class MainNavigation extends StatefulWidget {
 }
 
 class _MainNavigationState extends State<MainNavigation> {
-
-  // ── Esta variable guarda en qué tab estamos (0, 1, 2 o 3)
   int _currentIndex = 0;
 
-  // ── Lista de pantallas en el mismo orden que los tabs ──
-  // Índice 0 → Inicio, 1 → Reciclar, 2 → Recompensas, 3 → Perfil
   final List<Widget> _screens = const [
     HomeScreen(),
     ReciclarScreen(),
@@ -34,51 +28,73 @@ class _MainNavigationState extends State<MainNavigation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
-      // ── Muestra la pantalla que corresponde al tab activo
-      body: _screens[_currentIndex],
-
-      // ── La barra de navegación inferior ────────────────
-      bottomNavigationBar: BottomNavigationBar(
-
-        currentIndex: _currentIndex, // ← cuál tab está activo
-
-        // ── Se ejecuta cuando el usuario toca un tab ─────
-        onTap: (index) {
-          setState(() {
-            // setState le dice a Flutter: "algo cambió, redibuja"
-            _currentIndex = index;
-          });
-        },
-
-        // ── Color del ícono y texto del tab ACTIVO ────────
-        selectedItemColor: Colors.green,
-
-        // ── Color de los tabs INACTIVOS ───────────────────
-        unselectedItemColor: Colors.grey,
-
-        // ── Siempre mostrar texto debajo del ícono ────────
-        type: BottomNavigationBarType.fixed,
-
-        // ── Los 4 tabs ───────────────────────────────────
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Inicio',
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _screens,
+      ),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.07), blurRadius: 16, offset: const Offset(0, -4))],
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _NavItem(icon: Icons.home_rounded,     label: 'Inicio',      index: 0, current: _currentIndex, onTap: _setTab),
+                _NavItem(icon: Icons.recycling,        label: 'Reciclar',    index: 1, current: _currentIndex, onTap: _setTab),
+                _NavItem(icon: Icons.card_giftcard,    label: 'Recompensas', index: 2, current: _currentIndex, onTap: _setTab),
+                _NavItem(icon: Icons.person_rounded,   label: 'Perfil',      index: 3, current: _currentIndex, onTap: _setTab),
+              ],
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.recycling),
-            label: 'Reciclar',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.card_giftcard),
-            label: 'Recompensas',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Perfil',
-          ),
-        ],
+        ),
+      ),
+    );
+  }
+
+  void _setTab(int i) => setState(() => _currentIndex = i);
+}
+
+class _NavItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final int index, current;
+  final void Function(int) onTap;
+
+  const _NavItem({
+    required this.icon,
+    required this.label,
+    required this.index,
+    required this.current,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final active = index == current;
+    return GestureDetector(
+      onTap: () => onTap(index),
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: active ? AppColors.primary : AppColors.textLight, size: 26),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                color: active ? AppColors.primary : AppColors.textLight,
+                fontSize: 11,
+                fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
