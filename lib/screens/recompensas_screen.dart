@@ -1,7 +1,9 @@
 // lib/screens/recompensas_screen.dart
 
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
+import '../data/recompensas_data.dart';
+import '../models/recompensa_model.dart';
+import 'recompensa_detalle_screen.dart';
 
 class RecompensasScreen extends StatefulWidget {
   const RecompensasScreen({super.key});
@@ -12,136 +14,370 @@ class RecompensasScreen extends StatefulWidget {
 
 class _RecompensasScreenState extends State<RecompensasScreen>
     with SingleTickerProviderStateMixin {
-  late TabController _tab;
+
+  // ── TabController para los 3 tabs de categoría ──────────
+  // SingleTickerProviderStateMixin es necesario para animaciones de tabs
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tab = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
-  final _recompensas = [
-    {'titulo': '10% de descuento', 'subtitulo': 'SuperNorms', 'descripcion': '10% de descuento en toda la tienda', 'puntos': 100, 'disponibles': 500, 'logo': Icons.store},
-    {'titulo': 'Bono \$20,000',     'subtitulo': 'SuperNorms', 'descripcion': 'Descuento en compras mayores a \$50,000', 'puntos': 200, 'disponibles': 300, 'logo': Icons.local_offer},
-    {'titulo': 'Bono \$50,000',     'subtitulo': 'SuperNorms', 'descripcion': 'Descuento en compras mayores a \$100,000', 'puntos': 400, 'disponibles': 150, 'logo': Icons.card_giftcard},
-  ];
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  // Filtra recompensas por categoría
+  List<RecompensaModel> _filtradas(String categoria) {
+    if (categoria == 'todos') return recompensasEjemplo;
+    return recompensasEjemplo
+        .where((r) => r.categoria == categoria)
+        .toList();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Recompensas'),
-        bottom: TabBar(
-          controller: _tab,
-          labelColor: AppColors.primary,
-          unselectedLabelColor: AppColors.textLight,
-          indicatorColor: AppColors.primary,
-          tabs: const [
-            Tab(text: 'Disponibles'),
-            Tab(text: 'Canjeados'),
-            Tab(text: 'Próximos'),
+      backgroundColor: const Color(0xFFF4F6EF),
+      body: SafeArea(
+        child: Column(
+          children: [
+
+            // ── HEADER con puntos ──────────────────────────
+            _buildHeader(),
+
+            // ── TABS ───────────────────────────────────────
+            _buildTabs(),
+
+            // ── LISTA de recompensas ───────────────────────
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildLista(_filtradas('descuento')),
+                  _buildLista(_filtradas('producto')),
+                  _buildLista(_filtradas('premio')),
+                ],
+              ),
+            ),
+
           ],
         ),
       ),
-      body: Column(
+    );
+  }
+
+  // ── HEADER ──────────────────────────────────────────────
+  Widget _buildHeader() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+      decoration: const BoxDecoration(
+        color: Color(0xFF2D5A1B),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(28),
+          bottomRight: Radius.circular(28),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Banner de puntos ───────────────────────────
+
+          const Text(
+            'Recompensas',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          const SizedBox(height: 4),
+
+          Text(
+            'Canjea tus puntos por grandes beneficios',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.65),
+              fontSize: 13,
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          // Tarjeta de saldo de puntos
           Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
-            color: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(16),
+            ),
             child: Row(
               children: [
-                const Icon(Icons.star, color: AppColors.accent, size: 22),
-                const SizedBox(width: 8),
-                const Text('Tus puntos:', style: TextStyle(color: AppColors.textMid, fontSize: 13)),
-                const SizedBox(width: 6),
-                const Text('2,560',
-                    style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w800, fontSize: 18)),
+
+                // Ícono de puntos
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF7BC043),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.stars_rounded,
+                      color: Colors.white, size: 24),
+                ),
+
+                const SizedBox(width: 14),
+
+                // Puntos disponibles
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Tus puntos disponibles',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.65),
+                        fontSize: 12,
+                      ),
+                    ),
+                    const Text(
+                      '2,560 pts',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+
               ],
             ),
           ),
 
-          Expanded(
-            child: TabBarView(
-              controller: _tab,
-              children: [
-                // Tab 1: Disponibles
-                ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _recompensas.length,
-                  itemBuilder: (_, i) => _RecompensaCard(
-                    data: _recompensas[i],
-                    onCanjear: () => _mostrarDetalle(context, _recompensas[i]),
-                  ),
-                ),
-                // Tab 2 y 3: placeholder
-                const Center(child: Text('Sin canjes aún', style: TextStyle(color: AppColors.textLight))),
-                const Center(child: Text('Próximamente', style: TextStyle(color: AppColors.textLight))),
-              ],
-            ),
-          ),
         ],
       ),
     );
   }
 
-  void _mostrarDetalle(BuildContext context, Map<String, dynamic> data) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+  // ── TABS ────────────────────────────────────────────────
+  Widget _buildTabs() {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+          ),
+        ],
       ),
-      builder: (_) => _DetalleBottomSheet(data: data),
+      child: TabBar(
+        controller: _tabController,
+        // Estilo del tab seleccionado
+        indicator: BoxDecoration(
+          color: const Color(0xFF2D5A1B),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        indicatorSize: TabBarIndicatorSize.tab,
+        labelColor: Colors.white,
+        unselectedLabelColor: Colors.grey[600],
+        labelStyle: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+        ),
+        unselectedLabelStyle: const TextStyle(fontSize: 13),
+        dividerColor: Colors.transparent,
+        tabs: const [
+          Tab(text: 'Descuentos'),
+          Tab(text: 'Productos'),
+          Tab(text: 'Premios'),
+        ],
+      ),
     );
   }
-}
 
-class _RecompensaCard extends StatelessWidget {
-  final Map<String, dynamic> data;
-  final VoidCallback onCanjear;
-  const _RecompensaCard({required this.data, required this.onCanjear});
+  // ── LISTA de tarjetas ───────────────────────────────────
+  Widget _buildLista(List<RecompensaModel> lista) {
+    if (lista.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.inbox_outlined, size: 60, color: Colors.grey[300]),
+            const SizedBox(height: 12),
+            Text(
+              'No hay recompensas\nen esta categoría',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey[400], fontSize: 14),
+            ),
+          ],
+        ),
+      );
+    }
 
-  @override
-  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+      itemCount: lista.length,
+      itemBuilder: (context, index) => _buildCard(context, lista[index]),
+    );
+  }
+
+  // ── TARJETA de recompensa ───────────────────────────────
+  Widget _buildCard(BuildContext context, RecompensaModel r) {
+    final bool esProducto = r.descuentoPorcentaje == 0;
+
     return GestureDetector(
-      onTap: onCanjear,
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => RecompensaDetalleScreen(recompensa: r),
+        ),
+      ),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(14),
+        margin: const EdgeInsets.only(bottom: 14),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 52, height: 52,
-              decoration: BoxDecoration(
-                color: AppColors.green100,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Icon(data['logo'] as IconData, color: AppColors.primary, size: 26),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(data['titulo']!,
-                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: AppColors.textDark)),
-                  Text(data['subtitulo']!,
-                      style: const TextStyle(color: AppColors.textMid, fontSize: 12)),
-                  const SizedBox(height: 4),
-                  Text('${data['puntos']} puntos',
-                      style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700, fontSize: 13)),
-                ],
-              ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
             ),
             const Icon(Icons.chevron_right, color: AppColors.textLight),
           ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+
+              // ── Descuento grande a la izquierda ───────────
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEAF3DE),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Center(
+                  child: esProducto
+                      ? const Icon(Icons.card_giftcard_outlined,
+                          color: Color(0xFF3B6D11), size: 32)
+                      : Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '${r.descuentoPorcentaje}%',
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF2D5A1B),
+                              ),
+                            ),
+                            Text(
+                              'dscto',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey[500],
+                              ),
+                            ),
+                          ],
+                        ),
+                ),
+              ),
+
+              const SizedBox(width: 14),
+
+              // ── Info central ───────────────────────────────
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+
+                    // Nombre de la tienda
+                    Text(
+                      r.tienda,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1E3A0F),
+                      ),
+                    ),
+
+                    const SizedBox(height: 3),
+
+                    // Descripción
+                    Text(
+                      r.descripcion,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[500],
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    // Puntos requeridos
+                    Row(
+                      children: [
+                        const Icon(Icons.stars_rounded,
+                            size: 14, color: Color(0xFF7BC043)),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${r.puntosRequeridos} puntos',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF3B6D11),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                  ],
+                ),
+              ),
+
+              const SizedBox(width: 8),
+
+              // ── Botón canjear ──────────────────────────────
+              Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2D5A1B),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      'Canjear',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '${r.disponibles} disp.',
+                    style: TextStyle(fontSize: 10, color: Colors.grey[400]),
+                  ),
+                ],
+              ),
+
+            ],
+          ),
         ),
       ),
     );

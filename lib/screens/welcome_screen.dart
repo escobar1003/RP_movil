@@ -11,86 +11,218 @@ class WelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFF1E3A0F), // verde muy oscuro del fondo
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 28),
-          child: Column(
-            children: [
-              const Spacer(),
+        child: Column(
+          children: [
 
-              // ── Ilustración central ─────────────────────────
-              Container(
-                width: 180,
-                height: 180,
-                decoration: BoxDecoration(
-                  color: AppColors.green100,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.recycling, size: 90, color: AppColors.primary),
+            // ── PARTE SUPERIOR: ilustración ─────────────────
+            Expanded(
+              flex: 5,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+
+                  // Círculo verde medio de fondo
+                  Positioned(
+                    top: 30,
+                    child: Container(
+                      width: 260,
+                      height: 260,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2D5A1B),
+                        borderRadius: BorderRadius.circular(130),
+                      ),
+                    ),
+                  ),
+
+                  // Hojas decorativas arriba izquierda
+                  Positioned(
+                    top: 10,
+                    left: 40,
+                    child: _buildLeaf(size: 50, angle: -0.5),
+                  ),
+
+                  // Hojas decorativas arriba derecha
+                  Positioned(
+                    top: 20,
+                    right: 35,
+                    child: _buildLeaf(size: 40, angle: 0.4),
+                  ),
+
+                  // Hojas pequeñas abajo
+                  Positioned(
+                    bottom: 60,
+                    left: 55,
+                    child: _buildLeaf(size: 30, angle: 0.8),
+                  ),
+
+                  // Ícono principal: cubo de reciclaje
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Cubo (simulado con ícono grande)
+                      Container(
+                        width: 110,
+                        height: 110,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF3D7A25),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Icon(
+                          Icons.delete_outline_rounded,
+                          size: 64,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      // Símbolo de reciclaje debajo del cubo
+                      const Icon(
+                        Icons.recycling,
+                        size: 36,
+                        color: Color(0xFF7BC043),
+                      ),
+                    ],
+                  ),
+
+                ],
               ),
+            ),
 
-              const SizedBox(height: 32),
-
-              // ── Título ──────────────────────────────────────
-              const Text(
-                '¡Hola!\nBienvenido reciclador',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textDark,
-                  height: 1.25,
-                ),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'Cada acción cuenta para\nun planeta más limpio.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 15,
-                  color: AppColors.textMid,
-                  height: 1.5,
-                ),
-              ),
-
-              const Spacer(),
-
-              // ── Botón Comenzar ──────────────────────────────
-              SizedBox(
+            // ── PARTE INFERIOR: textos y botones ────────────
+            Expanded(
+              flex: 4,
+              child: Container(
                 width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                padding: const EdgeInsets.fromLTRB(32, 32, 32, 32),
+                decoration: const BoxDecoration(
+                  // Panel inferior ligeramente más oscuro
+                  color: Color(0xFF162D0A),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(36),
+                    topRight: Radius.circular(36),
                   ),
                   child: const Text('Comenzar'),
                 ),
-              ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
 
-              const SizedBox(height: 14),
+                    // Título
+                    const Text(
+                      '¡Hola!',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 34,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
 
-              // ── Enlace Iniciar sesión ────────────────────────
-              TextButton(
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    const SizedBox(height: 8),
+
+                    // Subtítulo
+                    const Text(
+                      'Bienvenido reciclador',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+
+                    const SizedBox(height: 4),
+
+                    Text(
+                      'recicla y gana.',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.55),
+                        fontSize: 14,
+                      ),
+                    ),
+
+                    const Spacer(),
+
+                    // ── BOTÓN COMENZAR ──────────────────────
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const RegisterScreen(),
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF7BC043),
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        child: const Text(
+                          'Comenzar',
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 14),
+
+                    // ── BOTÓN INICIAR SESIÓN ────────────────
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const LoginScreen(),
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: BorderSide(
+                            color: Colors.white.withOpacity(0.4),
+                            width: 1.5,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        child: const Text(
+                          'Iniciar sesión',
+                          style: TextStyle(fontSize: 17),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 8),
+
+                  ],
                 ),
-                child: const Text(
-                  'Iniciar sesión',
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 15,
-                  ),
-                ),
               ),
+            ),
 
-              const SizedBox(height: 24),
-            ],
-          ),
+          ],
         ),
+      ),
+    );
+  }
+
+  // ── Hoja decorativa ──────────────────────────────────────
+  // Usamos un Transform.rotate para darle ángulo a cada hoja
+  Widget _buildLeaf({required double size, required double angle}) {
+    return Transform.rotate(
+      angle: angle,
+      child: Icon(
+        Icons.eco,
+        size: size,
+        color: const Color(0xFF7BC043).withOpacity(0.85),
       ),
     );
   }
