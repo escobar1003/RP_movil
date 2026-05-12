@@ -250,6 +250,7 @@ class _RecompensasScreenState extends State<RecompensasScreen>
               blurRadius: 10,
               offset: const Offset(0, 3),
             ),
+            const Icon(Icons.chevron_right, color: AppColors.textLight),
           ],
         ),
         child: Padding(
@@ -378,6 +379,55 @@ class _RecompensasScreenState extends State<RecompensasScreen>
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _DetalleBottomSheet extends StatelessWidget {
+  final Map<String, dynamic> data;
+  const _DetalleBottomSheet({required this.data});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 80, height: 80,
+              decoration: BoxDecoration(
+                color: AppColors.green100,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Icon(data['logo'] as IconData, color: AppColors.primary, size: 40),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(data['titulo']!,
+              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 20, color: AppColors.textDark)),
+          const SizedBox(height: 4),
+          Text(data['subtitulo']!,
+              style: const TextStyle(color: AppColors.textMid, fontSize: 14)),
+          const SizedBox(height: 12),
+          Text(data['descripcion']!,
+              style: const TextStyle(color: AppColors.textMid, fontSize: 14, height: 1.5)),
+          const SizedBox(height: 8),
+          Text('Disponible: ${data['disponibles']} unidades',
+              style: const TextStyle(color: AppColors.textLight, fontSize: 13)),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity, height: 52,
+            child: ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Canjear · ${data['puntos']} puntos'),
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
       ),
     );
   }

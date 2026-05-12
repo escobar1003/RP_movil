@@ -157,6 +157,11 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                   ),
+                  CircleAvatar(
+                    radius: 22,
+                    backgroundColor: AppColors.green100,
+                    child: const Icon(Icons.person, color: AppColors.primary),
+                  ),
                 ],
               ),
 

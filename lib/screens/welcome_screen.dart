@@ -1,6 +1,7 @@
 // lib/screens/welcome_screen.dart
 
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import 'login_screen.dart';
 import 'register_screen.dart';
 
@@ -101,6 +102,7 @@ class WelcomeScreen extends StatelessWidget {
                     topLeft: Radius.circular(36),
                     topRight: Radius.circular(36),
                   ),
+                  child: const Text('Comenzar'),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
