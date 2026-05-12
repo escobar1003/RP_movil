@@ -9,40 +9,26 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7F0), // ← fondo gris verdoso suave
+      backgroundColor: const Color(0xFFF4F6EF),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
 
-              // ── 1. HEADER ────────────────────────────────
               _buildHeader(),
-
               const SizedBox(height: 20),
-
-              // ── 2. TARJETA DE PUNTOS ─────────────────────
               _buildPointsCard(),
-
-              const SizedBox(height: 20),
-
-              // ── 3. RESUMEN DE IMPACTO ────────────────────
-              _buildImpactSummary(),
-
-              const SizedBox(height: 20),
-
-              // ── 4. TU PROGRESO ───────────────────────────
-              _buildProgress(),
-
-              const SizedBox(height: 20),
-
-              // ── 5. ACCIONES RÁPIDAS ──────────────────────
+              const SizedBox(height: 16),
+              _buildImpactRow(),
+              const SizedBox(height: 16),
+              _buildProgressCard(),
+              const SizedBox(height: 24),
               _buildSectionTitle('Acciones rápidas'),
               const SizedBox(height: 12),
               _buildQuickActions(context),
-
-              const SizedBox(height: 32),
+              const SizedBox(height: 20),
 
             ],
           ),
@@ -51,15 +37,13 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // ────────────────────────────────────────────────────────
-  // HEADER: saludo + avatar
-  // ────────────────────────────────────────────────────────
+  // ── HEADER ──────────────────────────────────────────────
   Widget _buildHeader() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
 
-        // Saludo
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -68,186 +52,206 @@ class HomeScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF2D5A1B),
+                color: Color(0xFF1E3A0F),
               ),
             ),
-            const SizedBox(height: 2),
-            Text(
-              'Reciclador comprometido',
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.grey[600],
+            const SizedBox(height: 4),
+            // Badge "Reciclador comprometido"
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+              decoration: BoxDecoration(
+                color: const Color(0xFFEAF3DE),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Text(
+                'Reciclador comprometido',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Color(0xFF3B6D11),
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],
         ),
 
-        // Avatar
+        // Avatar con foto (usamos ícono por ahora)
         Container(
-          width: 48,
-          height: 48,
+          width: 50,
+          height: 50,
           decoration: BoxDecoration(
             color: const Color(0xFF7BC043),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: const Color(0xFF2D5A1B),
-              width: 2,
-            ),
+            borderRadius: BorderRadius.circular(25),
+            border: Border.all(color: const Color(0xFF3B6D11), width: 2),
           ),
-          child: const Icon(Icons.person, color: Colors.white, size: 28),
+          child: const Icon(Icons.person, color: Colors.white, size: 30),
         ),
 
       ],
     );
   }
 
-  // ────────────────────────────────────────────────────────
-  // TARJETA DE PUNTOS
-  // ────────────────────────────────────────────────────────
+  // ── TARJETA DE PUNTOS ────────────────────────────────────
   Widget _buildPointsCard() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        color: const Color(0xFF2D5A1B), // verde oscuro
+        color: const Color(0xFF2D5A1B),
         borderRadius: BorderRadius.circular(24),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
 
-          // Etiqueta superior
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.white12,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Text(
-              'Tus puntos EcoRecicla',
-              style: TextStyle(color: Colors.white70, fontSize: 12),
+          // Hoja decorativa fondo
+          Positioned(
+            right: -10,
+            top: -10,
+            child: Icon(
+              Icons.eco,
+              size: 100,
+              color: Colors.white.withOpacity(0.06),
             ),
           ),
 
-          const SizedBox(height: 16),
-
-          // Puntos grandes
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                '2,560',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 48,
-                  fontWeight: FontWeight.bold,
-                  height: 1,
+
+              // Label superior
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Text(
+                  'Tus puntos EcoRecicla',
+                  style: TextStyle(color: Colors.white70, fontSize: 11),
                 ),
               ),
-              const SizedBox(width: 8),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Text(
-                  'pts',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
-                    fontSize: 18,
+
+              const SizedBox(height: 14),
+
+              // Número grande de puntos
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  const Text(
+                    '2,560',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 52,
+                      fontWeight: FontWeight.bold,
+                      height: 1,
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Text(
+                      'pts',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.65),
+                        fontSize: 20,
+                      ),
+                    ),
+                  ),
+                ],
               ),
+
+              const SizedBox(height: 18),
+
+              Divider(color: Colors.white.withOpacity(0.15), height: 1),
+              const SizedBox(height: 16),
+
+              // Stats inferiores dentro de la tarjeta
+              Row(
+                children: [
+                  _buildCardStat(
+                    icon: Icons.scale_outlined,
+                    value: '8.4 kg',
+                    label: 'Reciclados',
+                  ),
+                  const SizedBox(width: 28),
+                  _buildCardStat(
+                    icon: Icons.stars_outlined,
+                    value: '2,560',
+                    label: 'Puntos ganados',
+                  ),
+                ],
+              ),
+
             ],
           ),
-
-          const SizedBox(height: 16),
-
-          // Divider
-          Divider(color: Colors.white.withOpacity(0.2), height: 1),
-
-          const SizedBox(height: 16),
-
-          // Resumen inferior de la tarjeta
-          Row(
-            children: [
-              _buildCardStat('8.4 kg', 'Reciclados'),
-              const SizedBox(width: 24),
-              _buildCardStat('2,560', 'Puntos ganados'),
-            ],
-          ),
-
         ],
       ),
     );
   }
 
-  // Estadística pequeña dentro de la tarjeta
-  Widget _buildCardStat(String value, String label) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildCardStat({
+    required IconData icon,
+    required String value,
+    required String label,
+  }) {
+    return Row(
       children: [
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.6),
-            fontSize: 12,
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ────────────────────────────────────────────────────────
-  // RESUMEN DE IMPACTO (2 tarjetas lado a lado)
-  // ────────────────────────────────────────────────────────
-  Widget _buildImpactSummary() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-
-        _buildSectionTitle('Resumen de impacto'),
-        const SizedBox(height: 12),
-
-        Row(
+        Icon(icon, color: const Color(0xFF7BC043), size: 18),
+        const SizedBox(width: 6),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
-            // Tarjeta kg reciclados
-            Expanded(
-              child: _buildImpactCard(
-                icon: Icons.scale_outlined,
-                iconColor: const Color(0xFF7BC043),
-                value: '8.4 kg',
-                label: 'Reciclados',
+            Text(
+              value,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
               ),
             ),
-
-            const SizedBox(width: 12),
-
-            // Tarjeta entregas
-            Expanded(
-              child: _buildImpactCard(
-                icon: Icons.local_shipping_outlined,
-                iconColor: const Color(0xFF2D5A1B),
-                value: '23',
-                label: 'Entregas',
+            Text(
+              label,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.55),
+                fontSize: 11,
               ),
             ),
-
           ],
         ),
       ],
     );
   }
 
-  // Tarjeta individual de impacto
+  // ── RESUMEN DE IMPACTO (fila de 2 tarjetas) ─────────────
+  Widget _buildImpactRow() {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildImpactCard(
+            icon: Icons.scale_outlined,
+            iconBg: const Color(0xFFEAF3DE),
+            iconColor: const Color(0xFF3B6D11),
+            value: '45.8 kg',
+            label: 'Total reciclado',
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildImpactCard(
+            icon: Icons.local_shipping_outlined,
+            iconBg: const Color(0xFFE6F1FB),
+            iconColor: const Color(0xFF185FA5),
+            value: '23',
+            label: 'Entregas',
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildImpactCard({
     required IconData icon,
+    required Color iconBg,
     required Color iconColor,
     required String value,
     required String label,
@@ -256,11 +260,10 @@ class HomeScreen extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        // Sombra suave
+        borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -268,20 +271,16 @@ class HomeScreen extends StatelessWidget {
       ),
       child: Row(
         children: [
-
-          // Ícono con fondo circular
           Container(
-            width: 42,
-            height: 42,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.12),
+              color: iconBg,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: iconColor, size: 22),
           ),
-
           const SizedBox(width: 12),
-
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -290,36 +289,30 @@ class HomeScreen extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF2D5A1B),
+                  color: Color(0xFF1E3A0F),
                 ),
               ),
               Text(
                 label,
-                style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                style: TextStyle(fontSize: 11, color: Colors.grey[500]),
               ),
             ],
           ),
-
         ],
       ),
     );
   }
 
-  // ────────────────────────────────────────────────────────
-  // TU PROGRESO (barra de nivel)
-  // ────────────────────────────────────────────────────────
-  Widget _buildProgress() {
-    // 90% de progreso hacia el siguiente nivel
-    const double progress = 0.9;
-
+  // ── PROGRESO ─────────────────────────────────────────────
+  Widget _buildProgressCard() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -329,44 +322,50 @@ class HomeScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
 
-          // Título de la sección + nivel
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
                 'Tu progreso',
                 style: TextStyle(
-                  fontSize: 15,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF2D5A1B),
+                  color: Color(0xFF1E3A0F),
                 ),
               ),
+              // Badge nivel
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: const Color(0xFFEAF3DE),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Text(
-                  'Nivel Verde',
-                  style: TextStyle(
-                    color: Color(0xFF3B6D11),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.eco, size: 13, color: Color(0xFF3B6D11)),
+                    const SizedBox(width: 4),
+                    const Text(
+                      'Flor Verde',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFF3B6D11),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
 
           // Barra de progreso
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 10,
+              value: 0.9,
+              minHeight: 9,
               backgroundColor: const Color(0xFFEAF3DE),
               valueColor: const AlwaysStoppedAnimation<Color>(
                 Color(0xFF7BC043),
@@ -376,10 +375,9 @@ class HomeScreen extends StatelessWidget {
 
           const SizedBox(height: 8),
 
-          // Texto de progreso
           Text(
             'Te faltan 500 puntos para el siguiente nivel',
-            style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+            style: TextStyle(fontSize: 11, color: Colors.grey[500]),
           ),
 
         ],
@@ -387,105 +385,79 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // ────────────────────────────────────────────────────────
-  // ACCIONES RÁPIDAS
-  // ────────────────────────────────────────────────────────
+  // ── ACCIONES RÁPIDAS ────────────────────────────────────
   Widget _buildQuickActions(BuildContext context) {
-    return Row(
-      children: [
-
-        // Botón: Ver aliados
-        Expanded(
-          child: _buildActionButton(
-            icon: Icons.store_outlined,
-            label: 'Ver aliados',
-            color: const Color(0xFF2D5A1B),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const AliadosScreen()),
-              );
-            },
-          ),
-        ),
-
-        const SizedBox(width: 12),
-
-        // Botón: Mis puntos
-        Expanded(
-          child: _buildActionButton(
-            icon: Icons.stars_outlined,
-            label: 'Mis puntos',
-            color: const Color(0xFF7BC043),
-            onTap: () {
-              // TODO: navegar a historial de puntos
-            },
-          ),
-        ),
-
-        const SizedBox(width: 12),
-
-        // Botón: Reciclar
-        Expanded(
-          child: _buildActionButton(
-            icon: Icons.recycling,
-            label: 'Reciclar',
-            color: const Color(0xFF4A90A4),
-            onTap: () {
-              // TODO: navegar a selección de materiales
-            },
-          ),
-        ),
-
-      ],
-    );
-  }
-
-  // Botón de acción rápida individual
-  Widget _buildActionButton({
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withOpacity(0.3)),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 28),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: TextStyle(
-                color: color,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
-              textAlign: TextAlign.center,
+    final actions = [
+      {
+        'icon': Icons.store_outlined,
+        'label': 'Ver aliados',
+        'color': const Color(0xFF2D5A1B),
+        'bg': const Color(0xFFEAF3DE),
+        'onTap': () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const AliadosScreen()),
             ),
-          ],
-        ),
-      ),
+      },
+      {
+        'icon': Icons.recycling,
+        'label': 'Reciclar',
+        'color': const Color(0xFF185FA5),
+        'bg': const Color(0xFFE6F1FB),
+        'onTap': () {},
+      },
+      {
+        'icon': Icons.card_giftcard_outlined,
+        'label': 'Recompensas',
+        'color': const Color(0xFF854F0B),
+        'bg': const Color(0xFFFAEEDA),
+        'onTap': () {},
+      },
+    ];
+
+    return Row(
+      children: actions.map((a) {
+        return Expanded(
+          child: GestureDetector(
+            onTap: a['onTap'] as VoidCallback,
+            child: Container(
+              margin: actions.indexOf(a) < actions.length - 1
+                  ? const EdgeInsets.only(right: 10)
+                  : EdgeInsets.zero,
+              padding: const EdgeInsets.symmetric(vertical: 18),
+              decoration: BoxDecoration(
+                color: a['bg'] as Color,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                children: [
+                  Icon(a['icon'] as IconData,
+                      color: a['color'] as Color, size: 28),
+                  const SizedBox(height: 8),
+                  Text(
+                    a['label'] as String,
+                    style: TextStyle(
+                      color: a['color'] as Color,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 
-  // ────────────────────────────────────────────────────────
-  // TÍTULO DE SECCIÓN reutilizable
-  // ────────────────────────────────────────────────────────
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
       style: const TextStyle(
-        fontSize: 16,
+        fontSize: 15,
         fontWeight: FontWeight.bold,
-        color: Color(0xFF2D5A1B),
+        color: Color(0xFF1E3A0F),
       ),
     );
   }
