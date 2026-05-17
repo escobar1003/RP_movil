@@ -15,8 +15,6 @@ class RecompensasScreen extends StatefulWidget {
 class _RecompensasScreenState extends State<RecompensasScreen>
     with SingleTickerProviderStateMixin {
 
-  // ── TabController para los 3 tabs de categoría ──────────
-  // SingleTickerProviderStateMixin es necesario para animaciones de tabs
   late TabController _tabController;
 
   @override
@@ -31,12 +29,8 @@ class _RecompensasScreenState extends State<RecompensasScreen>
     super.dispose();
   }
 
-  // Filtra recompensas por categoría
   List<RecompensaModel> _filtradas(String categoria) {
-    if (categoria == 'todos') return recompensasEjemplo;
-    return recompensasEjemplo
-        .where((r) => r.categoria == categoria)
-        .toList();
+    return recompensasEjemplo.where((r) => r.categoria == categoria).toList();
   }
 
   @override
@@ -46,14 +40,8 @@ class _RecompensasScreenState extends State<RecompensasScreen>
       body: SafeArea(
         child: Column(
           children: [
-
-            // ── HEADER con puntos ──────────────────────────
             _buildHeader(),
-
-            // ── TABS ───────────────────────────────────────
             _buildTabs(),
-
-            // ── LISTA de recompensas ───────────────────────
             Expanded(
               child: TabBarView(
                 controller: _tabController,
@@ -64,14 +52,12 @@ class _RecompensasScreenState extends State<RecompensasScreen>
                 ],
               ),
             ),
-
           ],
         ),
       ),
     );
   }
 
-  // ── HEADER ──────────────────────────────────────────────
   Widget _buildHeader() {
     return Container(
       width: double.infinity,
@@ -86,7 +72,6 @@ class _RecompensasScreenState extends State<RecompensasScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           const Text(
             'Recompensas',
             style: TextStyle(
@@ -95,20 +80,12 @@ class _RecompensasScreenState extends State<RecompensasScreen>
               fontWeight: FontWeight.bold,
             ),
           ),
-
           const SizedBox(height: 4),
-
           Text(
             'Canjea tus puntos por grandes beneficios',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.65),
-              fontSize: 13,
-            ),
+            style: TextStyle(color: Colors.white.withOpacity(0.65), fontSize: 13),
           ),
-
           const SizedBox(height: 20),
-
-          // Tarjeta de saldo de puntos
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
             decoration: BoxDecoration(
@@ -117,8 +94,6 @@ class _RecompensasScreenState extends State<RecompensasScreen>
             ),
             child: Row(
               children: [
-
-                // Ícono de puntos
                 Container(
                   width: 44,
                   height: 44,
@@ -126,22 +101,15 @@ class _RecompensasScreenState extends State<RecompensasScreen>
                     color: const Color(0xFF7BC043),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.stars_rounded,
-                      color: Colors.white, size: 24),
+                  child: const Icon(Icons.stars_rounded, color: Colors.white, size: 24),
                 ),
-
                 const SizedBox(width: 14),
-
-                // Puntos disponibles
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Tus puntos disponibles',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.65),
-                        fontSize: 12,
-                      ),
+                      style: TextStyle(color: Colors.white.withOpacity(0.65), fontSize: 12),
                     ),
                     const Text(
                       '2,560 pts',
@@ -153,17 +121,14 @@ class _RecompensasScreenState extends State<RecompensasScreen>
                     ),
                   ],
                 ),
-
               ],
             ),
           ),
-
         ],
       ),
     );
   }
 
-  // ── TABS ────────────────────────────────────────────────
   Widget _buildTabs() {
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 16, 20, 8),
@@ -179,7 +144,6 @@ class _RecompensasScreenState extends State<RecompensasScreen>
       ),
       child: TabBar(
         controller: _tabController,
-        // Estilo del tab seleccionado
         indicator: BoxDecoration(
           color: const Color(0xFF2D5A1B),
           borderRadius: BorderRadius.circular(12),
@@ -187,10 +151,7 @@ class _RecompensasScreenState extends State<RecompensasScreen>
         indicatorSize: TabBarIndicatorSize.tab,
         labelColor: Colors.white,
         unselectedLabelColor: Colors.grey[600],
-        labelStyle: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-        ),
+        labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
         unselectedLabelStyle: const TextStyle(fontSize: 13),
         dividerColor: Colors.transparent,
         tabs: const [
@@ -202,7 +163,6 @@ class _RecompensasScreenState extends State<RecompensasScreen>
     );
   }
 
-  // ── LISTA de tarjetas ───────────────────────────────────
   Widget _buildLista(List<RecompensaModel> lista) {
     if (lista.isEmpty) {
       return Center(
@@ -228,7 +188,6 @@ class _RecompensasScreenState extends State<RecompensasScreen>
     );
   }
 
-  // ── TARJETA de recompensa ───────────────────────────────
   Widget _buildCard(BuildContext context, RecompensaModel r) {
     final bool esProducto = r.descuentoPorcentaje == 0;
 
@@ -244,13 +203,13 @@ class _RecompensasScreenState extends State<RecompensasScreen>
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
+          // ← solo BoxShadow aquí, sin íconos
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
               blurRadius: 10,
               offset: const Offset(0, 3),
             ),
-            const Icon(Icons.chevron_right, color: AppColors.textLight),
           ],
         ),
         child: Padding(
@@ -258,7 +217,7 @@ class _RecompensasScreenState extends State<RecompensasScreen>
           child: Row(
             children: [
 
-              // ── Descuento grande a la izquierda ───────────
+              // Descuento / ícono producto
               Container(
                 width: 72,
                 height: 72,
@@ -283,10 +242,7 @@ class _RecompensasScreenState extends State<RecompensasScreen>
                             ),
                             Text(
                               'dscto',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.grey[500],
-                              ),
+                              style: TextStyle(fontSize: 10, color: Colors.grey[500]),
                             ),
                           ],
                         ),
@@ -295,13 +251,11 @@ class _RecompensasScreenState extends State<RecompensasScreen>
 
               const SizedBox(width: 14),
 
-              // ── Info central ───────────────────────────────
+              // Info
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-
-                    // Nombre de la tienda
                     Text(
                       r.tienda,
                       style: const TextStyle(
@@ -310,23 +264,14 @@ class _RecompensasScreenState extends State<RecompensasScreen>
                         color: Color(0xFF1E3A0F),
                       ),
                     ),
-
                     const SizedBox(height: 3),
-
-                    // Descripción
                     Text(
                       r.descripcion,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[500],
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.grey[500]),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-
                     const SizedBox(height: 8),
-
-                    // Puntos requeridos
                     Row(
                       children: [
                         const Icon(Icons.stars_rounded,
@@ -342,19 +287,17 @@ class _RecompensasScreenState extends State<RecompensasScreen>
                         ),
                       ],
                     ),
-
                   ],
                 ),
               ),
 
               const SizedBox(width: 8),
 
-              // ── Botón canjear ──────────────────────────────
+              // Botón canjear
               Column(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
                       color: const Color(0xFF2D5A1B),
                       borderRadius: BorderRadius.circular(12),
@@ -379,55 +322,6 @@ class _RecompensasScreenState extends State<RecompensasScreen>
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _DetalleBottomSheet extends StatelessWidget {
-  final Map<String, dynamic> data;
-  const _DetalleBottomSheet({required this.data});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 80, height: 80,
-              decoration: BoxDecoration(
-                color: AppColors.green100,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Icon(data['logo'] as IconData, color: AppColors.primary, size: 40),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Text(data['titulo']!,
-              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 20, color: AppColors.textDark)),
-          const SizedBox(height: 4),
-          Text(data['subtitulo']!,
-              style: const TextStyle(color: AppColors.textMid, fontSize: 14)),
-          const SizedBox(height: 12),
-          Text(data['descripcion']!,
-              style: const TextStyle(color: AppColors.textMid, fontSize: 14, height: 1.5)),
-          const SizedBox(height: 8),
-          Text('Disponible: ${data['disponibles']} unidades',
-              style: const TextStyle(color: AppColors.textLight, fontSize: 13)),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity, height: 52,
-            child: ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Canjear · ${data['puntos']} puntos'),
-            ),
-          ),
-          const SizedBox(height: 8),
-        ],
       ),
     );
   }

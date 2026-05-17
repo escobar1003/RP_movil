@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
-
 import 'home.dart';
 import 'reciclar_screen.dart';
 import 'recompensas_screen.dart';

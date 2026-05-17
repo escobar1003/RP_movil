@@ -1,7 +1,6 @@
 // lib/screens/welcome_screen.dart
 
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
 import 'login_screen.dart';
 import 'register_screen.dart';
 
@@ -11,7 +10,7 @@ class WelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1E3A0F), // verde muy oscuro del fondo
+      backgroundColor: const Color(0xFF1E3A0F),
       body: SafeArea(
         child: Column(
           children: [
@@ -23,7 +22,7 @@ class WelcomeScreen extends StatelessWidget {
                 alignment: Alignment.center,
                 children: [
 
-                  // Círculo verde medio de fondo
+                  // Círculo verde de fondo
                   Positioned(
                     top: 30,
                     child: Container(
@@ -36,32 +35,27 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                   ),
 
-                  // Hojas decorativas arriba izquierda
+                  // Hojas decorativas
                   Positioned(
                     top: 10,
                     left: 40,
                     child: _buildLeaf(size: 50, angle: -0.5),
                   ),
-
-                  // Hojas decorativas arriba derecha
                   Positioned(
                     top: 20,
                     right: 35,
                     child: _buildLeaf(size: 40, angle: 0.4),
                   ),
-
-                  // Hojas pequeñas abajo
                   Positioned(
                     bottom: 60,
                     left: 55,
                     child: _buildLeaf(size: 30, angle: 0.8),
                   ),
 
-                  // Ícono principal: cubo de reciclaje
+                  // Ícono principal
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Cubo (simulado con ícono grande)
                       Container(
                         width: 110,
                         height: 110,
@@ -76,7 +70,6 @@ class WelcomeScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      // Símbolo de reciclaje debajo del cubo
                       const Icon(
                         Icons.recycling,
                         size: 36,
@@ -90,25 +83,23 @@ class WelcomeScreen extends StatelessWidget {
             ),
 
             // ── PARTE INFERIOR: textos y botones ────────────
+            // ← BoxDecoration NO tiene child, el child va en Container
             Expanded(
               flex: 4,
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.fromLTRB(32, 32, 32, 32),
                 decoration: const BoxDecoration(
-                  // Panel inferior ligeramente más oscuro
                   color: Color(0xFF162D0A),
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(36),
                     topRight: Radius.circular(36),
                   ),
-                  child: const Text('Comenzar'),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
 
-                    // Título
                     const Text(
                       '¡Hola!',
                       style: TextStyle(
@@ -120,7 +111,6 @@ class WelcomeScreen extends StatelessWidget {
 
                     const SizedBox(height: 8),
 
-                    // Subtítulo
                     const Text(
                       'Bienvenido reciclador',
                       style: TextStyle(
@@ -132,17 +122,17 @@ class WelcomeScreen extends StatelessWidget {
 
                     const SizedBox(height: 4),
 
-                    Text(
-                      'recicla y gana.',
+                    const Text(
+                      'Por un planeta más limpio.',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.55),
+                        color: Colors.white54,
                         fontSize: 14,
                       ),
                     ),
 
                     const Spacer(),
 
-                    // ── BOTÓN COMENZAR ──────────────────────
+                    // Botón Comenzar
                     SizedBox(
                       width: double.infinity,
                       height: 52,
@@ -173,7 +163,7 @@ class WelcomeScreen extends StatelessWidget {
 
                     const SizedBox(height: 14),
 
-                    // ── BOTÓN INICIAR SESIÓN ────────────────
+                    // Botón Iniciar sesión
                     SizedBox(
                       width: double.infinity,
                       height: 52,
@@ -186,8 +176,8 @@ class WelcomeScreen extends StatelessWidget {
                         ),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.white,
-                          side: BorderSide(
-                            color: Colors.white.withOpacity(0.4),
+                          side: const BorderSide(
+                            color: Colors.white38,
                             width: 1.5,
                           ),
                           shape: RoundedRectangleBorder(
@@ -214,8 +204,6 @@ class WelcomeScreen extends StatelessWidget {
     );
   }
 
-  // ── Hoja decorativa ──────────────────────────────────────
-  // Usamos un Transform.rotate para darle ángulo a cada hoja
   Widget _buildLeaf({required double size, required double angle}) {
     return Transform.rotate(
       angle: angle,
