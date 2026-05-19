@@ -1,7 +1,8 @@
 // lib/screens/perfil_screen.dart
 
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
+import 'historial_entregas_screen.dart';
+import 'mis_canjes_screen.dart';
 
 class PerfilScreen extends StatelessWidget {
   const PerfilScreen({super.key});
@@ -9,182 +10,380 @@ class PerfilScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Mi perfil')),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // ── Header con foto y nombre ──────────────────
-            Container(
-              width: double.infinity,
-              color: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
-              child: Column(
-                children: [
-                  Stack(
-                    children: [
-                      CircleAvatar(
-                        radius: 42,
-                        backgroundColor: AppColors.green100,
-                        child: const Icon(Icons.person, size: 46, color: AppColors.primary),
-                      ),
-                      Positioned(
-                        bottom: 0, right: 0,
-                        child: Container(
-                          width: 28, height: 28,
-                          decoration: BoxDecoration(
-                            color: AppColors.primary,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 2),
-                          ),
-                          child: const Icon(Icons.edit, size: 14, color: Colors.white),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  const Text('Ana Martínez',
-                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: AppColors.textDark)),
-                  const SizedBox(height: 4),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.green100,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Text('Nivel Verde',
-                        style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700, fontSize: 12)),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            // ── Stats ─────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  Expanded(child: _StatCard(valor: '45.8 kg', label: 'Total reciclado', icon: Icons.eco)),
-                  const SizedBox(width: 12),
-                  Expanded(child: _StatCard(valor: '23', label: 'Total entregas', icon: Icons.local_shipping_outlined)),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            // ── Progreso ──────────────────────────────────
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 20),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Tu progreso',
-                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: AppColors.textDark)),
-                  const SizedBox(height: 12),
-                  _ProgresoFila(label: 'Nivel Verde', porcentaje: 0.9),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            // ── Menú opciones ─────────────────────────────
-            Container(
-              color: Colors.white,
-              child: Column(
-                children: [
-                  _MenuItem(icon: Icons.info_outline,        label: 'Mi información'),
-                  _MenuItem(icon: Icons.emoji_events_outlined, label: 'Mis logros'),
-                  _MenuItem(icon: Icons.history,             label: 'Historial'),
-                  _MenuItem(icon: Icons.settings_outlined,   label: 'Ajustes y soporte'),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-          ],
+      backgroundColor: const Color(0xFFF4F6EF),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              _buildHeader(context),
+              _buildStats(),
+              const SizedBox(height: 20),
+              _buildProgreso(),
+              const SizedBox(height: 20),
+              _buildMenu(context),
+              const SizedBox(height: 32),
+            ],
+          ),
         ),
       ),
     );
   }
-}
 
-class _StatCard extends StatelessWidget {
-  final String valor, label;
-  final IconData icon;
-  const _StatCard({required this.valor, required this.label, required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildHeader(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(20, 28, 20, 28),
+      decoration: const BoxDecoration(
+        color: Color(0xFF2D5A1B),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(32),
+          bottomRight: Radius.circular(32),
+        ),
+      ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: AppColors.primary, size: 22),
-          const SizedBox(height: 8),
-          Text(valor, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 20, color: AppColors.textDark)),
-          Text(label, style: const TextStyle(color: AppColors.textMid, fontSize: 12)),
+          Stack(
+            children: [
+              Container(
+                width: 90,
+                height: 90,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF7BC043),
+                  borderRadius: BorderRadius.circular(45),
+                  border: Border.all(color: Colors.white, width: 3),
+                ),
+                child: const Icon(Icons.person, color: Colors.white, size: 52),
+              ),
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Icon(Icons.camera_alt_outlined,
+                      size: 16, color: Color(0xFF2D5A1B)),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          const Text(
+            'Ana Martínez',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+            decoration: BoxDecoration(
+              color: const Color(0xFF7BC043),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.eco, size: 14, color: Colors.white),
+                SizedBox(width: 5),
+                Text(
+                  'Flor Verde',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
-}
 
-class _ProgresoFila extends StatelessWidget {
-  final String label;
-  final double porcentaje;
-  const _ProgresoFila({required this.label, required this.porcentaje});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: AppColors.textDark)),
-            Text('${(porcentaje * 100).toInt()}%',
-                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: AppColors.primary)),
-          ],
-        ),
-        const SizedBox(height: 6),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: LinearProgressIndicator(
-            value: porcentaje,
-            backgroundColor: AppColors.green100,
-            valueColor: const AlwaysStoppedAnimation(AppColors.primary),
-            minHeight: 8,
+  Widget _buildStats() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      child: Row(
+        children: [
+          Expanded(
+            child: _buildStatCard(
+              icon: Icons.recycling,
+              iconColor: const Color(0xFF2D5A1B),
+              iconBg: const Color(0xFFEAF3DE),
+              value: '23',
+              label: 'Reciclajes',
+            ),
           ),
-        ),
-      ],
+          const SizedBox(width: 10),
+          Expanded(
+            child: _buildStatCard(
+              icon: Icons.stars_rounded,
+              iconColor: const Color(0xFF854F0B),
+              iconBg: const Color(0xFFFAEEDA),
+              value: '2,560',
+              label: 'Puntos',
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: _buildStatCard(
+              icon: Icons.emoji_events_outlined,
+              iconColor: const Color(0xFF185FA5),
+              iconBg: const Color(0xFFE6F1FB),
+              value: '4',
+              label: 'Canjes',
+            ),
+          ),
+        ],
+      ),
     );
   }
-}
 
-class _MenuItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  const _MenuItem({required this.icon, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: Container(
-        width: 36, height: 36,
-        decoration: BoxDecoration(color: AppColors.green100, borderRadius: BorderRadius.circular(10)),
-        child: Icon(icon, color: AppColors.primary, size: 18),
+  Widget _buildStatCard({
+    required IconData icon,
+    required Color iconColor,
+    required Color iconBg,
+    required String value,
+    required String label,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      title: Text(label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: AppColors.textDark)),
-      trailing: const Icon(Icons.chevron_right, color: AppColors.textLight),
-      onTap: () {},
+      child: Column(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: iconBg,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: iconColor, size: 20),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1E3A0F),
+            ),
+          ),
+          Text(
+            label,
+            style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProgreso() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Tu progreso',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1E3A0F),
+                ),
+              ),
+              Text(
+                '2,560 / 3,000 pts',
+                style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: const LinearProgressIndicator(
+              value: 0.85,
+              minHeight: 9,
+              backgroundColor: Color(0xFFEAF3DE),
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF7BC043)),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Te faltan 440 puntos para alcanzar el nivel Árbol',
+            style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMenu(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+
+          _buildMenuRow(
+            icon: Icons.person_outline,
+            label: 'Editar perfil',
+            color: const Color(0xFF2D5A1B),
+            bg: const Color(0xFFEAF3DE),
+            onTap: () {},
+          ),
+          Divider(height: 1, color: Colors.grey.withOpacity(0.1), indent: 60),
+
+          _buildMenuRow(
+            icon: Icons.history,
+            label: 'Mis entregas',
+            color: const Color(0xFF185FA5),
+            bg: const Color(0xFFE6F1FB),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const HistorialEntregasScreen(),
+              ),
+            ),
+          ),
+          Divider(height: 1, color: Colors.grey.withOpacity(0.1), indent: 60),
+
+          _buildMenuRow(
+            icon: Icons.card_giftcard_outlined,
+            label: 'Mis canjes',
+            color: const Color(0xFF854F0B),
+            bg: const Color(0xFFFAEEDA),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const MisCanjesScreen(),
+              ),
+            ),
+          ),
+          Divider(height: 1, color: Colors.grey.withOpacity(0.1), indent: 60),
+
+          _buildMenuRow(
+            icon: Icons.notifications_outlined,
+            label: 'Notificaciones',
+            color: const Color(0xFF0F6E56),
+            bg: const Color(0xFFE1F5EE),
+            onTap: () {},
+          ),
+          Divider(height: 1, color: Colors.grey.withOpacity(0.1), indent: 60),
+
+          _buildMenuRow(
+            icon: Icons.settings_outlined,
+            label: 'Configuración',
+            color: const Color(0xFF5F5E5A),
+            bg: const Color(0xFFF1EFE8),
+            onTap: () {},
+          ),
+          Divider(height: 1, color: Colors.grey.withOpacity(0.1), indent: 60),
+
+          _buildMenuRow(
+            icon: Icons.help_outline,
+            label: 'Ayuda',
+            color: const Color(0xFF5F5E5A),
+            bg: const Color(0xFFF1EFE8),
+            onTap: () {},
+          ),
+
+          Divider(height: 1, color: Colors.grey.withOpacity(0.15)),
+
+          _buildMenuRow(
+            icon: Icons.logout,
+            label: 'Cerrar sesión',
+            color: const Color(0xFFA32D2D),
+            bg: const Color(0xFFFCEBEB),
+            onTap: () {},
+          ),
+
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMenuRow({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required Color bg,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: bg,
+                borderRadius: BorderRadius.circular(11),
+              ),
+              child: Icon(icon, color: color, size: 20),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF1E3A0F),
+                ),
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios_rounded,
+                size: 14, color: Colors.grey[400]),
+          ],
+        ),
+      ),
     );
   }
 }

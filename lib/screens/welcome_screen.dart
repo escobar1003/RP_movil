@@ -92,7 +92,7 @@ class WelcomeScreen extends StatelessWidget {
                   const SizedBox(height: 24),
 
                   // ── Título ──
-                  const Text(
+                  Text(
                     '¡Hola! 👋\nBienvenido reciclador',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -105,7 +105,7 @@ class WelcomeScreen extends StatelessWidget {
 
                   const SizedBox(height: 12),
 
-                  const Text(
+                  Text(
                     'Cada acción cuenta para\nun planeta más limpio.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -142,7 +142,7 @@ class WelcomeScreen extends StatelessWidget {
                         builder: (_) => const LoginScreen(),
                       ),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Iniciar sesión',
                       style: TextStyle(
                         color: AppColors.primary,
@@ -158,6 +158,17 @@ class WelcomeScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLeaf({required double size, required double angle}) {
+    return Transform.rotate(
+      angle: angle,
+      child: Icon(
+        Icons.eco,
+        size: size,
+        color: const Color(0xFF7BC043).withOpacity(0.85),
       ),
     );
   }

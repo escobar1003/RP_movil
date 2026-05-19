@@ -1,6 +1,10 @@
 // lib/screens/reciclar_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:camera/camera.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:io';
 import '../theme/app_theme.dart';
 
 class ReciclarScreen extends StatefulWidget {
@@ -12,21 +16,155 @@ class ReciclarScreen extends StatefulWidget {
 
 class _ReciclarScreenState extends State<ReciclarScreen> {
   bool _mostrarResultado = false;
+  bool _estaCargando = false;
 
-  // ✅ FIX: variables tipadas en lugar de Map<String, dynamic>
-  final String _nombre      = 'Botella de plástico';
-  final String _tipo        = 'Plástico (PET)';
-  final String _estado      = 'Aprovechable';
-  final int    _confianza   = 98;
-  final String _caneco      = 'Caneco Blanco';
-  final String _deposito    = 'Aprovechable';
-  final String _descripcion = 'Vidrio, vidrio, metal,\npapel y cartón.';
+  // Controlador para manejar la cámara
+  CameraController? _cameraController;
+  List<CameraDescription>? _cameras;
+  bool _camaraInicializada = false;
+  String? _rutaImagenLocal;
 
-  void _escanear() {
-    setState(() => _mostrarResultado = false);
-    Future.delayed(const Duration(milliseconds: 700), () {
-      if (mounted) setState(() => _mostrarResultado = true);
+  // Variables dinámicas que se actualizarán con la respuesta de YOLOv11
+  String _nombre = 'Detectando...';
+  String _tipo = '';
+  String _estado = 'Aprovechable';
+  int _confianza = 0;
+  String _caneco = 'Caneco Blanco';
+  String _deposito = 'Aprovechable';
+  String _descripcion = 'Vidrio, plástico, metal,\npapel y cartón.';
+
+  @override
+  void initState() {
+    super.initState();
+    _inicializarCamara();
+  }
+
+  // 1. Inicializa los sensores de la cámara trasera de forma nativa
+  Future<void> _inicializarCamara() async {
+    try {
+      _cameras = await availableCameras();
+      if (_cameras != null && _cameras!.isNotEmpty) {
+        _cameraController = CameraController(
+          _cameras![0], // Selecciona la cámara trasera principal
+          ResolutionPreset.medium,
+          enableAudio: false,
+        );
+        await _cameraController!.initialize();
+        if (mounted) {
+          setState(() {
+            _camaraInicializada = true;
+          });
+        }
+      }
+    } catch (e) {
+      print("Error al abrir los sensores de la cámara: $e");
+    }
+  }
+
+  // 2. Toma la foto y la envía vía HTTP Post a tu backend en AdonisJS
+  Future<void> _escanear() async {
+    if (_cameraController == null || !_cameraController!.value.isInitialized)
+      return;
+
+    setState(() {
+      _estaCargando = true;
+      _mostrarResultado = false;
     });
+
+    try {
+      // Captura el archivo temporal de imagen en el almacenamiento del celular
+      final XFile foto = await _cameraController!.takePicture();
+
+      setState(() {
+        _rutaImagenLocal = foto.path;
+      });
+
+      // 🚨 IMPORTANTE: Reemplaza esta IP por la IP local exacta de tu computador en tu red WiFi.
+      // Puedes ver tu IP en Windows abriendo una consola y escribiendo 'ipconfig'.
+      final String ipServidor = "192.168.100.8";
+      final url = Uri.parse('http://$ipServidor:3333/api/detectar-material');
+
+      // Crea el paquete Multipart form-data
+      final request = http.MultipartRequest('POST', url);
+      request.files.add(await http.MultipartFile.fromPath('image', foto.path));
+
+      print("Disparando foto hacia AdonisJS...");
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+
+        if (data['detectado'] == true) {
+          final resultado = data['resultado'];
+          final String claseDetectada = resultado['objeto'];
+          final double valorConfianza = resultado['confianza'] * 100;
+
+          // Asignación inteligente basándose en la etiqueta que arrojó YOLOv11
+          setState(() {
+            _confianza = valorConfianza.round();
+            _mostrarResultado = true;
+
+            if (claseDetectada.toLowerCase().contains('botella') ||
+                claseDetectada.toLowerCase().contains('plastic')) {
+              _nombre = 'Botella de plástico';
+              _tipo = 'Plástico (PET)';
+              _estado = 'Aprovechable';
+              _caneco = 'Caneco Blanco';
+              _deposito = 'Aprovechable';
+              _descripcion = 'Plásticos, vidrio, metal,\npapel y cartón.';
+            } else if (claseDetectada.toLowerCase().contains('lata') ||
+                claseDetectada.toLowerCase().contains('can')) {
+              _nombre = 'Lata de Aluminio';
+              _tipo = 'Metal';
+              _estado = 'Aprovechable';
+              _caneco = 'Caneco Blanco';
+              _deposito = 'Aprovechable';
+              _descripcion = 'Metales, plástico, vidrio,\npapel y cartón.';
+            } else {
+              _nombre = claseDetectada;
+              _tipo = 'Residuo Identificado';
+              _estado = 'Aprovechable';
+              _caneco = 'Caneco Blanco';
+              _deposito = 'Revisar Clasificación';
+              _descripcion =
+                  'Depositar en el contenedor limpio correspondiente.';
+            }
+          });
+        } else {
+          // Si la IA responde correctamente pero no encontró objetos conocidos
+          setState(() {
+            _nombre = 'No identificado';
+            _tipo = 'Objeto desconocido';
+            _estado = 'No clasificado';
+            _confianza = 0;
+            _caneco = 'Caneco Negro';
+            _deposito = 'No aprovechables';
+            _descripcion =
+                'Papel higiénico, servilletas,\ncartones contaminados.';
+            _mostrarResultado = true;
+          });
+        }
+      } else {
+        print(
+          "Error devuelto por el servidor de Adonis: ${response.statusCode}",
+        );
+      }
+    } catch (e) {
+      print("Error de red intentando conectar con AdonisJS: $e");
+    } finally {
+      if (mounted) {
+        setState(() {
+          _estaCargando = false;
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _cameraController?.dispose(); // Apaga la cámara al salir de la pantalla
+    super.dispose();
   }
 
   @override
@@ -41,11 +179,13 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
           children: [
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 10),
-              child: Text('Toma una foto del residuo',
-                  style: TextStyle(color: AppColors.textMid, fontSize: 13)),
+              child: Text(
+                'Toma una foto del residuo',
+                style: TextStyle(color: AppColors.textMid, fontSize: 13),
+              ),
             ),
 
-            // ── Visor ──────────────────────────────────────
+            // ── Visor Dinámico (Muestra cámara, imagen tomada o cargando) ──
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 24),
               height: 260,
@@ -56,19 +196,33 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  if (_mostrarResultado)
+                  if (_estaCargando)
+                    const CircularProgressIndicator(color: AppColors.primary)
+                  else if (_mostrarResultado && _rutaImagenLocal != null)
                     ClipRRect(
                       borderRadius: BorderRadius.circular(20),
-                      child: Image.network(
-                        'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/PET_bottle_01_Pengo.jpg/400px-PET_bottle_01_Pengo.jpg',
-                        fit: BoxFit.contain,
-                        height: 220,
-                        errorBuilder: (_, __, ___) =>
-                            const Icon(Icons.local_drink, size: 80, color: Colors.teal),
+                      child: Image.file(
+                        File(_rutaImagenLocal!),
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                      ),
+                    )
+                  else if (_camaraInicializada && _cameraController != null)
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: AspectRatio(
+                        aspectRatio: _cameraController!.value.aspectRatio,
+                        child: CameraPreview(_cameraController!),
                       ),
                     )
                   else
-                    const Icon(Icons.camera_alt_outlined, size: 56, color: Colors.black26),
+                    const Icon(
+                      Icons.camera_alt_outlined,
+                      size: 56,
+                      color: Colors.black26,
+                    ),
+
                   const _ScannerFrame(),
                 ],
               ),
@@ -83,7 +237,8 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
                 child: Row(
                   children: [
                     Container(
-                      width: 48, height: 48,
+                      width: 48,
+                      height: 48,
                       decoration: BoxDecoration(
                         color: Colors.teal.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
@@ -95,28 +250,60 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(_nombre,
-                              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: AppColors.textDark)),
-                          Text(_tipo,
-                              style: const TextStyle(color: AppColors.textLight, fontSize: 13)),
+                          Text(
+                            _nombre,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                              color: AppColors.textDark,
+                            ),
+                          ),
+                          Text(
+                            _tipo,
+                            style: const TextStyle(
+                              color: AppColors.textLight,
+                              fontSize: 13,
+                            ),
+                          ),
                           const SizedBox(height: 4),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 3,
+                            ),
                             decoration: BoxDecoration(
                               color: AppColors.green100,
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: Text(_estado,
-                                style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700, fontSize: 12)),
+                            child: Text(
+                              _estado,
+                              style: const TextStyle(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 12,
+                              ),
+                            ),
                           ),
                         ],
                       ),
                     ),
                     Column(
                       children: [
-                        Text('$_confianza%',
-                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.primary)),
-                        const Text('Confianza', style: TextStyle(fontSize: 11, color: AppColors.textLight)),
+                        Text(
+                          '$_confianza%',
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                        const Text(
+                          'Confianza',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textLight,
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -131,30 +318,58 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Depositar en:',
-                        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: AppColors.textMid)),
+                    const Text(
+                      'Depositar en:',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                        color: AppColors.textMid,
+                      ),
+                    ),
                     const SizedBox(height: 12),
                     Row(
                       children: [
                         Container(
-                          width: 44, height: 44,
+                          width: 44,
+                          height: 44,
                           decoration: BoxDecoration(
                             color: AppColors.yellow100,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(Icons.delete_outline, color: Colors.orange),
+                          child: const Icon(
+                            Icons.delete_outline,
+                            color: Colors.orange,
+                          ),
                         ),
                         const SizedBox(width: 14),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(_caneco,
-                                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: AppColors.textDark)),
-                            Text(_deposito,
-                                style: const TextStyle(color: AppColors.textLight, fontSize: 13)),
-                            Text(_descripcion,
-                                style: const TextStyle(color: AppColors.textLight, fontSize: 12)),
-                          ],
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _caneco,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 15,
+                                  color: AppColors.textDark,
+                                ),
+                              ),
+                              Text(
+                                _deposito,
+                                style: const TextStyle(
+                                  color: AppColors.textLight,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              Text(
+                                _descripcion,
+                                style: const TextStyle(
+                                  color: AppColors.textLight,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -165,15 +380,20 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
               const SizedBox(height: 16),
             ],
 
-            // ── Botón ─────────────────────────────────────
+            // ── Botón de Acción Integrado ──
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
               child: SizedBox(
-                width: double.infinity, height: 52,
+                width: double.infinity,
+                height: 52,
                 child: ElevatedButton.icon(
-                  onPressed: _escanear,
+                  onPressed: _estaCargando ? null : _escanear,
                   icon: const Icon(Icons.qr_code_scanner, size: 20),
-                  label: Text(_mostrarResultado ? 'Escanear otro' : 'Escanear'),
+                  label: Text(
+                    _estaCargando
+                        ? 'Analizando...'
+                        : (_mostrarResultado ? 'Escanear otro' : 'Escanear'),
+                  ),
                 ),
               ),
             ),
@@ -191,14 +411,20 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 3))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: child,
     );
   }
 }
 
-// ── Frame del escáner ────────────────────────────────────────
+// El resto de tus widgets personalizados (_ScannerFrame, _Esquina, _EsquinaPainter) permanecen exactamente iguales abajo...
 class _ScannerFrame extends StatelessWidget {
   const _ScannerFrame();
 
@@ -207,12 +433,26 @@ class _ScannerFrame extends StatelessWidget {
     return Positioned.fill(
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: Stack(children: [
-          Positioned(top: 0, left: 0,   child: _Esquina(top: true,  left: true)),
-          Positioned(top: 0, right: 0,  child: _Esquina(top: true,  left: false)),
-          Positioned(bottom: 0, left: 0,  child: _Esquina(top: false, left: true)),
-          Positioned(bottom: 0, right: 0, child: _Esquina(top: false, left: false)),
-        ]),
+        child: Stack(
+          children: [
+            Positioned(top: 0, left: 0, child: _Esquina(top: true, left: true)),
+            Positioned(
+              top: 0,
+              right: 0,
+              child: _Esquina(top: true, left: false),
+            ),
+            Positioned(
+              bottom: 0,
+              left: 0,
+              child: _Esquina(top: false, left: true),
+            ),
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: _Esquina(top: false, left: false),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -244,21 +484,30 @@ class _EsquinaPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     final path = Path();
-    final w = size.width; final h = size.height;
+    final w = size.width;
+    final h = size.height;
     const r = 6.0;
 
     if (top && left) {
-      path.moveTo(0, h); path.lineTo(0, r);
-      path.quadraticBezierTo(0, 0, r, 0); path.lineTo(w, 0);
+      path.moveTo(0, h);
+      path.lineTo(0, r);
+      path.quadraticBezierTo(0, 0, r, 0);
+      path.lineTo(w, 0);
     } else if (top && !left) {
-      path.moveTo(0, 0); path.lineTo(w - r, 0);
-      path.quadraticBezierTo(w, 0, w, r); path.lineTo(w, h);
+      path.moveTo(0, 0);
+      path.lineTo(w - r, 0);
+      path.quadraticBezierTo(w, 0, w, r);
+      path.lineTo(w, h);
     } else if (!top && left) {
-      path.moveTo(0, 0); path.lineTo(0, h - r);
-      path.quadraticBezierTo(0, h, r, h); path.lineTo(w, h);
+      path.moveTo(0, 0);
+      path.lineTo(0, h - r);
+      path.quadraticBezierTo(0, h, r, h);
+      path.lineTo(w, h);
     } else {
-      path.moveTo(0, h); path.lineTo(w - r, h);
-      path.quadraticBezierTo(w, h, w, h - r); path.lineTo(w, 0);
+      path.moveTo(0, h);
+      path.lineTo(w - r, h);
+      path.quadraticBezierTo(w, h, w, h - r);
+      path.lineTo(w, 0);
     }
     canvas.drawPath(path, paint);
   }

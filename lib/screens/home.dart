@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:bootstrap_icons/bootstrap_icons.dart';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
+import 'aliados_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -28,15 +29,15 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFF4F6EF),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
 
-              // ───────────── HEADER ─────────────
+              // ------------------ HEADER ------------------
               Row(
                 children: [
                   const CircleAvatar(
@@ -54,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _nombre.isEmpty ? 'Hola 👋' : 'Hola, $_nombre 👋',
+                          _nombre.isEmpty ? 'Hola ðŸ‘‹' : 'Hola, $_nombre ðŸ‘‹',
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w800,
@@ -63,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(height: 2),
                         const Text(
-                          '¡Gracias por cuidar el planeta!',
+                          'Â¡Gracias por cuidar el planeta!',
                           style: TextStyle(
                             fontSize: 13,
                             color: AppColors.textMid,
@@ -96,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 24),
 
-              // ───────────── CARD PUNTOS ─────────────
+              // ------------------ CARD PUNTOS ------------------
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(22),
@@ -153,7 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           const SizedBox(height: 10),
                           const Text(
-                            'Sigue así, cada acción suma un cambio.',
+                            'Sigue asÃ­, cada acciÃ³n suma un cambio.',
                             style: TextStyle(color: Colors.white, fontSize: 14),
                           ),
                         ],
@@ -166,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 24),
 
-              // ───────────── RESUMEN IMPACTO ─────────────
+              // ------------------------- RESUMEN IMPACTO -------------------------
               const Text(
                 'Resumen de impacto',
                 style: TextStyle(
@@ -197,7 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: _ImpactoItem(
                             icon: BootstrapIcons.recycle,
                             value: '12.5 kg',
-                            label: 'Plástico reciclado',
+                            label: 'PlÃ¡stico reciclado',
                             color: AppColors.primary,
                           ),
                         ),
@@ -219,7 +220,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: _ImpactoItem(
                             icon: BootstrapIcons.leaf,
                             value: '8.4 kg',
-                            label: 'CO₂ evitado',
+                            label: 'COâ‚‚ evitado',
                             color: Colors.lightGreen,
                           ),
                         ),
@@ -240,7 +241,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 24),
 
-              // ───────────── PROGRESO ─────────────
+              // ------------------------- PROGRESO -------------------------
               const Text(
                 'Tu progreso',
                 style: TextStyle(
@@ -293,7 +294,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 12),
                     const Text(
-                      '¡Genial! Aún puedes ganar más puntos y subir de nivel.',
+                      'Â¡Genial! AÃºn puedes ganar mÃ¡s puntos y subir de nivel.',
                       style: TextStyle(color: AppColors.textMid, fontSize: 13),
                     ),
                   ],
@@ -302,9 +303,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 24),
 
-              // ───────────── ACCIONES ─────────────
+              // ------------------------- ACCIONES -------------------------
               const Text(
-                'Acciones rápidas',
+                'Acciones rÃ¡pidas',
                 style: TextStyle(
                   fontWeight: FontWeight.w800,
                   fontSize: 17,
@@ -342,8 +343,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
-
-              const SizedBox(height: 30),
             ],
           ),
         ),
@@ -352,7 +351,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// ───────────── IMPACTO ITEM ─────────────
+// ------------------------- IMPACTO ITEM -------------------------
 
 class _ImpactoItem extends StatelessWidget {
   final IconData icon;
@@ -369,42 +368,57 @@ class _ImpactoItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.12),
-            borderRadius: BorderRadius.circular(12),
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
-          child: Icon(icon, color: color, size: 20),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                value,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 15,
-                  color: AppColors.textDark,
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color, size: 18),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 15,
+                    color: AppColors.textDark,
+                  ),
                 ),
-              ),
-              Text(
-                label,
-                style: const TextStyle(fontSize: 12, color: AppColors.textMid),
-              ),
-            ],
+                const SizedBox(height: 4),
+                Text(
+                  label,
+                  style: const TextStyle(fontSize: 12, color: AppColors.textMid),
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
 
-// ───────────── ACCION CARD ─────────────
+// ------------------------- ACCION CARD -------------------------
 
 class _AccionCard extends StatelessWidget {
   final IconData icon;
@@ -444,3 +458,5 @@ class _AccionCard extends StatelessWidget {
     );
   }
 }
+
+
