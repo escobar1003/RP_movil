@@ -1,11 +1,148 @@
 // lib/screens/perfil_screen.dart
 
+import 'dart:typed_data'; // ← para manejar bytes de imagen en web
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'historial_entregas_screen.dart';
 import 'mis_canjes_screen.dart';
 
-class PerfilScreen extends StatelessWidget {
+class PerfilScreen extends StatefulWidget {
   const PerfilScreen({super.key});
+
+  @override
+  State<PerfilScreen> createState() => _PerfilScreenState();
+}
+
+class _PerfilScreenState extends State<PerfilScreen> {
+
+  // ── En web usamos bytes en lugar de File ─────────────────
+  Uint8List? _fotoBytes;
+
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _elegirFoto() async {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+
+              Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              const Text(
+                'Foto de perfil',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1E3A0F),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              ListTile(
+                leading: Container(
+                  width: 42, height: 42,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEAF3DE),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.photo_library_outlined,
+                      color: Color(0xFF2D5A1B)),
+                ),
+                title: const Text('Elegir de la galería'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await _tomarFoto(ImageSource.gallery);
+                },
+              ),
+
+              ListTile(
+                leading: Container(
+                  width: 42, height: 42,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE6F1FB),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.camera_alt_outlined,
+                      color: Color(0xFF185FA5)),
+                ),
+                title: const Text('Tomar una foto'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await _tomarFoto(ImageSource.camera);
+                },
+              ),
+
+              if (_fotoBytes != null)
+                ListTile(
+                  leading: Container(
+                    width: 42, height: 42,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFCEBEB),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.delete_outline,
+                        color: Color(0xFFA32D2D)),
+                  ),
+                  title: const Text(
+                    'Eliminar foto',
+                    style: TextStyle(color: Color(0xFFA32D2D)),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    setState(() => _fotoBytes = null);
+                  },
+                ),
+
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _tomarFoto(ImageSource source) async {
+    try {
+      final XFile? imagen = await _picker.pickImage(
+        source: source,
+        imageQuality: 80,
+        maxWidth: 512,
+      );
+
+      if (imagen == null) return;
+
+      // ── En web leemos los bytes directamente ─────────────
+      final bytes = await imagen.readAsBytes();
+
+      setState(() {
+        _fotoBytes = bytes;
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No se pudo acceder a las fotos'),
+            backgroundColor: Color(0xFFA32D2D),
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,35 +179,66 @@ class PerfilScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Stack(
-            children: [
-              Container(
-                width: 90,
-                height: 90,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF7BC043),
-                  borderRadius: BorderRadius.circular(45),
-                  border: Border.all(color: Colors.white, width: 3),
-                ),
-                child: const Icon(Icons.person, color: Colors.white, size: 52),
-              ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  width: 28,
-                  height: 28,
+
+          GestureDetector(
+            onTap: _elegirFoto,
+            child: Stack(
+              children: [
+
+                Container(
+                  width: 90,
+                  height: 90,
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(14),
+                    color: const Color(0xFF7BC043),
+                    borderRadius: BorderRadius.circular(45),
+                    border: Border.all(color: Colors.white, width: 3),
                   ),
-                  child: const Icon(Icons.camera_alt_outlined,
-                      size: 16, color: Color(0xFF2D5A1B)),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(45),
+                    child: _fotoBytes != null
+                        // ── Web: usa Image.memory con los bytes ──
+                        ? Image.memory(
+                            _fotoBytes!,
+                            fit: BoxFit.cover,
+                            width: 90,
+                            height: 90,
+                          )
+                        : const Icon(
+                            Icons.person,
+                            color: Colors.white,
+                            size: 52,
+                          ),
+                  ),
                 ),
-              ),
-            ],
+
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: const Color(0xFF2D5A1B),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.camera_alt_outlined,
+                      size: 15,
+                      color: Color(0xFF2D5A1B),
+                    ),
+                  ),
+                ),
+
+              ],
+            ),
           ),
+
           const SizedBox(height: 14),
+
           const Text(
             'Ana Martínez',
             style: TextStyle(
@@ -79,7 +247,9 @@ class PerfilScreen extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
+
           const SizedBox(height: 6),
+
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
             decoration: BoxDecoration(
@@ -102,6 +272,7 @@ class PerfilScreen extends StatelessWidget {
               ],
             ),
           ),
+
         ],
       ),
     );
@@ -281,12 +452,8 @@ class PerfilScreen extends StatelessWidget {
             label: 'Mis entregas',
             color: const Color(0xFF185FA5),
             bg: const Color(0xFFE6F1FB),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const HistorialEntregasScreen(),
-              ),
-            ),
+            onTap: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const HistorialEntregasScreen())),
           ),
           Divider(height: 1, color: Colors.grey.withOpacity(0.1), indent: 60),
 
@@ -295,12 +462,8 @@ class PerfilScreen extends StatelessWidget {
             label: 'Mis canjes',
             color: const Color(0xFF854F0B),
             bg: const Color(0xFFFAEEDA),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const MisCanjesScreen(),
-              ),
-            ),
+            onTap: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const MisCanjesScreen())),
           ),
           Divider(height: 1, color: Colors.grey.withOpacity(0.1), indent: 60),
 

@@ -1,6 +1,95 @@
-// lib/screens/mis_canjes_screen.dart
-
 import 'package:flutter/material.dart';
+
+// ─────────────────────────────────────────────
+// MODELO LOCAL
+// ─────────────────────────────────────────────
+
+enum EstadoCanje { valido, usado, vencido }
+
+class _Canje {
+  final String id;
+  final String codigo;
+  final String titulo;
+  final String tienda;
+  final Color colorTienda;
+  final String tipoBadge; // 'pct' | 'cash' | 'producto'
+  final String valorBadge; // '10%' | '$5.000' | ícono
+  final EstadoCanje estado;
+  final int puntosUsados;
+  final String fecha;
+
+  const _Canje({
+    required this.id,
+    required this.codigo,
+    required this.titulo,
+    required this.tienda,
+    required this.colorTienda,
+    required this.tipoBadge,
+    required this.valorBadge,
+    required this.estado,
+    required this.puntosUsados,
+    required this.fecha,
+  });
+}
+
+// ─────────────────────────────────────────────
+// DATOS DE PRUEBA
+// ─────────────────────────────────────────────
+
+const List<_Canje> _canjesData = [
+  _Canje(
+    id: '1',
+    codigo: 'SUVR-8763',
+    titulo: '10% de descuento en toda la tienda',
+    tienda: 'SuperVerde',
+    colorTienda: Color(0xFF2D5A1B),
+    tipoBadge: 'pct',
+    valorBadge: '10%',
+    estado: EstadoCanje.usado,
+    puntosUsados: 1000,
+    fecha: 'Mayo 8, 2024',
+  ),
+  _Canje(
+    id: '2',
+    codigo: 'DESC-4567',
+    titulo: 'Descuento en compras mayores a \$25.000',
+    tienda: 'Éxito Centro',
+    colorTienda: Color(0xFF185FA5),
+    tipoBadge: 'cash',
+    valorBadge: '\$5.000',
+    estado: EstadoCanje.valido,
+    puntosUsados: 1500,
+    fecha: 'Mayo 3, 2024',
+  ),
+  _Canje(
+    id: '3',
+    codigo: 'BONO-2345-ABC',
+    titulo: 'Bono \$10.000 para realizar en SuperMercar',
+    tienda: 'SuperMercar',
+    colorTienda: Color(0xFF854F0B),
+    tipoBadge: 'cash',
+    valorBadge: '\$10K',
+    estado: EstadoCanje.valido,
+    puntosUsados: 2000,
+    fecha: 'Vence: Feb 15, 2025',
+  ),
+  _Canje(
+    id: '4',
+    codigo: 'GRATIS-789-XY35',
+    titulo: 'Producto gratis — Botella 500ml',
+    tienda: 'Jumbo Norte',
+    colorTienda: Color(0xFF0F6E56),
+    tipoBadge: 'producto',
+    valorBadge: 'gratis',
+    estado: EstadoCanje.vencido,
+    puntosUsados: 900,
+    fecha: 'Venció: Feb 15, 2024',
+  ),
+];
+
+// ─────────────────────────────────────────────
+// PANTALLA PRINCIPAL
+// ─────────────────────────────────────────────
 
 class MisCanjesScreen extends StatefulWidget {
   const MisCanjesScreen({super.key});
@@ -10,324 +99,606 @@ class MisCanjesScreen extends StatefulWidget {
 }
 
 class _MisCanjesScreenState extends State<MisCanjesScreen> {
+  // null = todos
+  EstadoCanje? _filtroActivo;
 
-  String _filtro = 'todos';
-
-  final List<Map<String, dynamic>> _canjes = [
-    {
-      'tienda': 'SuperNorte',
-      'descripcion': '10% de descuento en toda la tienda',
-      'descuento': '10%',
-      'puntos': 100,
-      'fecha': '12 May 2026',
-      'estado': 'activo',
-      'vence': '31 Dic 2026',
-    },
-    {
-      'tienda': 'Éxito',
-      'descripcion': '5% en frutas y verduras',
-      'descuento': '5%',
-      'puntos': 50,
-      'fecha': '05 May 2026',
-      'estado': 'usado',
-      'vence': '28 Feb 2026',
-    },
-    {
-      'tienda': 'Jumbo',
-      'descripcion': '15% en productos de aseo',
-      'descuento': '15%',
-      'puntos': 200,
-      'fecha': '01 Abr 2026',
-      'estado': 'vencido',
-      'vence': '15 Ene 2026',
-    },
-  ];
-
-  List<Map<String, dynamic>> get _filtrados {
-    if (_filtro == 'todos') return _canjes;
-    return _canjes.where((c) => c['estado'] == _filtro).toList();
+  List<_Canje> get _canjesFiltrados {
+    if (_filtroActivo == null) return _canjesData;
+    return _canjesData.where((c) => c.estado == _filtroActivo).toList();
   }
 
-  // Color del badge según estado
-  Color _badgeColor(String estado) {
-    switch (estado) {
-      case 'activo': return const Color(0xFF3B6D11);
-      case 'usado':  return const Color(0xFF5F5E5A);
-      default:       return const Color(0xFFA32D2D);
-    }
-  }
-
-  Color _badgeBg(String estado) {
-    switch (estado) {
-      case 'activo': return const Color(0xFFEAF3DE);
-      case 'usado':  return const Color(0xFFF1EFE8);
-      default:       return const Color(0xFFFCEBEB);
-    }
-  }
-
-  String _badgeLabel(String estado) {
-    switch (estado) {
-      case 'activo': return 'Activo';
-      case 'usado':  return 'Usado';
-      default:       return 'Vencido';
-    }
-  }
+  int get _puntosUsadosFiltrados =>
+      _canjesFiltrados.fold(0, (sum, c) => sum + c.puntosUsados);
 
   @override
   Widget build(BuildContext context) {
+    final canjes = _canjesFiltrados;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6EF),
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(context),
-            _buildFiltros(),
-            const SizedBox(height: 8),
-            Expanded(child: _buildLista()),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-      decoration: const BoxDecoration(
-        color: Color(0xFF2D5A1B),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(28),
-          bottomRight: Radius.circular(28),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      body: Column(
         children: [
-          Row(
-            children: [
-              GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: const Icon(Icons.arrow_back_ios_rounded,
-                    color: Colors.white, size: 20),
-              ),
-              const SizedBox(width: 12),
-              const Text(
-                'Mis canjes',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
+          // ── Header blanco con filtros ──
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.stars_rounded,
-                    color: Color(0xFF7BC043), size: 20),
-                const SizedBox(width: 10),
-                const Text(
-                  'Puntos usados en canjes:',
-                  style: TextStyle(color: Colors.white70, fontSize: 13),
-                ),
-                const Spacer(),
-                const Text(
-                  '350 pts',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+            color: Colors.white,
+            child: SafeArea(
+              bottom: false,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Fila título
+                  Padding(
+                    padding:
+                        const EdgeInsets.fromLTRB(20, 12, 20, 16),
+                    child: Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () => Navigator.of(context).pop(),
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF4F6EF),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(
+                              Icons.arrow_back_ios_new_rounded,
+                              size: 16,
+                              color: Color(0xFF2D5A1B),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Text(
+                          'Mis canjes',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF1A1A1A),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                  // Chips de filtro
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
+                    child: Row(
+                      children: [
+                        _FiltroChip(
+                          label: 'Todos',
+                          activo: _filtroActivo == null,
+                          onTap: () =>
+                              setState(() => _filtroActivo = null),
+                        ),
+                        const SizedBox(width: 8),
+                        _FiltroChip(
+                          label: 'Activos',
+                          activo: _filtroActivo == EstadoCanje.valido,
+                          onTap: () => setState(
+                              () => _filtroActivo = EstadoCanje.valido),
+                        ),
+                        const SizedBox(width: 8),
+                        _FiltroChip(
+                          label: 'Usados',
+                          activo: _filtroActivo == EstadoCanje.usado,
+                          onTap: () => setState(
+                              () => _filtroActivo = EstadoCanje.usado),
+                        ),
+                        const SizedBox(width: 8),
+                        _FiltroChip(
+                          label: 'Vencidos',
+                          activo: _filtroActivo == EstadoCanje.vencido,
+                          onTap: () => setState(
+                              () => _filtroActivo = EstadoCanje.vencido),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
+          ),
+
+          // ── Contenido scrollable ──
+          Expanded(
+            child: canjes.isEmpty
+                ? _EstadoVacio(filtro: _filtroActivo)
+                : ListView(
+                    padding: const EdgeInsets.all(16),
+                    children: [
+                      // Tarjetas resumen
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _TarjetaResumen(
+                              label: 'Puntos usados',
+                              valor: _formatPuntos(
+                                  _puntosUsadosFiltrados),
+                              sub: 'en canjes',
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: _TarjetaResumen(
+                              label: 'Total canjes',
+                              valor: '${canjes.length}',
+                              sub: 'histórico',
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      // Lista de canjes
+                      ...canjes.map((c) => Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: _TarjetaCanje(canje: c),
+                          )),
+                    ],
+                  ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildFiltros() {
-    final filtros = [
-      {'key': 'todos',   'label': 'Todos'},
-      {'key': 'activo',  'label': 'Activos'},
-      {'key': 'usado',   'label': 'Usados'},
-      {'key': 'vencido', 'label': 'Vencidos'},
-    ];
+  String _formatPuntos(int pts) {
+    if (pts >= 1000) {
+      return '${(pts / 1000).toStringAsFixed(pts % 1000 == 0 ? 0 : 1)}K';
+    }
+    return '$pts';
+  }
+}
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: filtros.map((f) {
-            final bool activo = _filtro == f['key'];
-            return GestureDetector(
-              onTap: () => setState(() => _filtro = f['key']!),
-              child: Container(
-                margin: const EdgeInsets.only(right: 8),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: activo ? const Color(0xFF2D5A1B) : Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
-                      blurRadius: 6,
-                    ),
-                  ],
-                ),
-                child: Text(
-                  f['label']!,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: activo ? Colors.white : Colors.grey[600],
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
+// ─────────────────────────────────────────────
+// CHIP DE FILTRO
+// ─────────────────────────────────────────────
+
+class _FiltroChip extends StatelessWidget {
+  final String label;
+  final bool activo;
+  final VoidCallback onTap;
+
+  const _FiltroChip({
+    required this.label,
+    required this.activo,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: activo ? const Color(0xFF2D5A1B) : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color:
+                activo ? Colors.white : const Color(0xFF5F5E5A),
+          ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildLista() {
-    if (_filtrados.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.card_giftcard_outlined,
-                size: 64, color: Colors.grey[300]),
-            const SizedBox(height: 12),
-            Text(
-              'No tienes canjes aquí',
-              style: TextStyle(color: Colors.grey[400], fontSize: 15),
-            ),
-          ],
-        ),
-      );
-    }
+// ─────────────────────────────────────────────
+// TARJETA RESUMEN (puntos / total)
+// ─────────────────────────────────────────────
 
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-      itemCount: _filtrados.length,
-      itemBuilder: (context, i) => _buildCard(_filtrados[i]),
-    );
-  }
+class _TarjetaResumen extends StatelessWidget {
+  final String label;
+  final String valor;
+  final String sub;
 
-  Widget _buildCard(Map<String, dynamic> c) {
-    final String estado = c['estado'] as String;
+  const _TarjetaResumen({
+    required this.label,
+    required this.valor,
+    required this.sub,
+  });
 
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE8EDE2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11,
+              color: Color(0xFF888888),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            valor,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF2D5A1B),
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            sub,
+            style: const TextStyle(
+              fontSize: 11,
+              color: Color(0xFF888888),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────
+// TARJETA DE CANJE
+// ─────────────────────────────────────────────
+
+class _TarjetaCanje extends StatelessWidget {
+  final _Canje canje;
+
+  const _TarjetaCanje({required this.canje});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFEEEEEE)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
         ],
       ),
-      child: Row(
+      child: Column(
         children: [
-
-          // Descuento grande
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              color: const Color(0xFFEAF3DE),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Center(
-              child: Text(
-                c['descuento'] as String,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF2D5A1B),
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(width: 14),
-
-          // Info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          // Fila principal
+          Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        c['tienda'] as String,
+                // Badge del tipo de descuento
+                _BadgeDescuento(canje: canje),
+                const SizedBox(width: 12),
+                // Información
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        canje.titulo,
                         style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1E3A0F),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1A1A1A),
+                          height: 1.3,
                         ),
                       ),
-                    ),
-                    // Badge estado
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: _badgeBg(estado),
-                        borderRadius: BorderRadius.circular(10),
+                      const SizedBox(height: 5),
+                      // Tienda con mini logo
+                      Row(
+                        children: [
+                          Container(
+                            width: 20,
+                            height: 20,
+                            decoration: BoxDecoration(
+                              color: canje.colorTienda,
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: Center(
+                              child: Text(
+                                canje.tienda[0],
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            canje.tienda,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF888888),
+                            ),
+                          ),
+                        ],
                       ),
-                      child: Text(
-                        _badgeLabel(estado),
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: _badgeColor(estado),
-                        ),
-                      ),
-                    ),
-                  ],
+                      const SizedBox(height: 7),
+                      // Pill de estado
+                      _PillEstado(estado: canje.estado),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  c['descripcion'] as String,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Icon(Icons.stars_rounded,
-                        size: 13, color: Colors.grey[400]),
-                    const SizedBox(width: 3),
-                    Text(
-                      '${c['puntos']} pts · Vence ${c['vence']}',
-                      style: TextStyle(
-                          fontSize: 11, color: Colors.grey[400]),
-                    ),
-                  ],
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: canje.estado == EstadoCanje.vencido
+                      ? const Color(0xFFDDDDDD)
+                      : const Color(0xFFCCCCCC),
+                  size: 20,
                 ),
               ],
             ),
           ),
-
+          // Footer con código y fecha
+          Container(
+            padding: const EdgeInsets.symmetric(
+                horizontal: 14, vertical: 9),
+            decoration: const BoxDecoration(
+              border: Border(
+                top: BorderSide(color: Color(0xFFF0F0F0)),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  canje.codigo,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Color(0xFFAAAAAA),
+                    fontFamily: 'monospace',
+                  ),
+                ),
+                Text(
+                  canje.fecha,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Color(0xFFBBBBBB),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────
+// BADGE DE TIPO DE DESCUENTO
+// ─────────────────────────────────────────────
+
+class _BadgeDescuento extends StatelessWidget {
+  final _Canje canje;
+
+  const _BadgeDescuento({required this.canje});
+
+  @override
+  Widget build(BuildContext context) {
+    Color fondo;
+    Color texto;
+    Widget contenido;
+
+    switch (canje.tipoBadge) {
+      case 'pct':
+        fondo = const Color(0xFFFAEEDA);
+        texto = const Color(0xFF854F0B);
+        contenido = Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              canje.valorBadge,
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w800,
+                color: texto,
+                height: 1,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              'descuento',
+              style: TextStyle(
+                fontSize: 8,
+                fontWeight: FontWeight.w600,
+                color: texto,
+              ),
+            ),
+          ],
+        );
+        break;
+
+      case 'cash':
+        fondo = const Color(0xFFE1F5EE);
+        texto = const Color(0xFF0F6E56);
+        contenido = Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              canje.valorBadge,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+                color: texto,
+                height: 1,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              'bono',
+              style: TextStyle(
+                fontSize: 8,
+                fontWeight: FontWeight.w600,
+                color: texto,
+              ),
+            ),
+          ],
+        );
+        break;
+
+      case 'producto':
+      default:
+        fondo = const Color(0xFFFCEBEB);
+        texto = const Color(0xFFA32D2D);
+        contenido = Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.card_giftcard_rounded, color: texto, size: 22),
+            const SizedBox(height: 2),
+            Text(
+              'gratis',
+              style: TextStyle(
+                fontSize: 8,
+                fontWeight: FontWeight.w600,
+                color: texto,
+              ),
+            ),
+          ],
+        );
+    }
+
+    return Container(
+      width: 56,
+      height: 56,
+      decoration: BoxDecoration(
+        color: fondo,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: contenido,
+    );
+  }
+}
+
+// ─────────────────────────────────────────────
+// PILL DE ESTADO
+// ─────────────────────────────────────────────
+
+class _PillEstado extends StatelessWidget {
+  final EstadoCanje estado;
+
+  const _PillEstado({required this.estado});
+
+  @override
+  Widget build(BuildContext context) {
+    Color fondo;
+    Color texto;
+    String label;
+
+    switch (estado) {
+      case EstadoCanje.valido:
+        fondo = const Color(0xFFE1F5EE);
+        texto = const Color(0xFF0F6E56);
+        label = 'Válido';
+        break;
+      case EstadoCanje.usado:
+        fondo = const Color(0xFFF1EFE8);
+        texto = const Color(0xFF5F5E5A);
+        label = 'Usado';
+        break;
+      case EstadoCanje.vencido:
+        fondo = const Color(0xFFFCEBEB);
+        texto = const Color(0xFFA32D2D);
+        label = 'Vencido';
+        break;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+      decoration: BoxDecoration(
+        color: fondo,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          color: texto,
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────
+// ESTADO VACÍO (sin resultados para el filtro)
+// ─────────────────────────────────────────────
+
+class _EstadoVacio extends StatelessWidget {
+  final EstadoCanje? filtro;
+
+  const _EstadoVacio({this.filtro});
+
+  @override
+  Widget build(BuildContext context) {
+    String mensaje;
+    IconData icono;
+
+    switch (filtro) {
+      case EstadoCanje.valido:
+        mensaje = 'No tienes canjes activos';
+        icono = Icons.confirmation_number_outlined;
+        break;
+      case EstadoCanje.usado:
+        mensaje = 'Aún no has usado ningún canje';
+        icono = Icons.history_rounded;
+        break;
+      case EstadoCanje.vencido:
+        mensaje = 'No tienes canjes vencidos';
+        icono = Icons.timer_off_outlined;
+        break;
+      default:
+        mensaje = 'Aún no tienes canjes';
+        icono = Icons.confirmation_number_outlined;
+    }
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE8F5E0),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Icon(icono, color: const Color(0xFF2D5A1B), size: 36),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              mensaje,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF888888),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
