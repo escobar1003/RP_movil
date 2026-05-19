@@ -30,6 +30,8 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <key>NSLocationWhenInUseUsageDescription</key>
+        <string>Necesitamos tu ubicación para mostrarte los puntos de reciclaje más cercanos</string>    
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
