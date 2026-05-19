@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import 'mapa_puntos_screen.dart';
 
 class ReciclarScreen extends StatefulWidget {
   const ReciclarScreen({super.key});
@@ -34,7 +35,8 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: const BackButton(),
-        title: const Text('Clasificar con IA'),
+        title: const Text('Clasificar con IA'), 
+      
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -178,6 +180,48 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
               ),
             ),
             const SizedBox(height: 24),
+            if (_mostrarResultado)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+
+                child: SizedBox(
+                 width: double.infinity,
+                  height: 52,
+
+                  child: ElevatedButton(
+
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2D5A1B),
+                      shape: RoundedRectangleBorder(
+                       borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+
+                    onPressed: () {
+
+                      Navigator.push(
+
+                        context,
+
+                        MaterialPageRoute(
+                         builder: (_) => const MapaPuntosScreen(),
+                        ),
+                      );
+                    },
+
+                    child: const Text(
+                      'Reciclar ahora',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            const SizedBox(height: 30),
+
           ],
         ),
       ),

@@ -1,190 +1,253 @@
 import 'package:flutter/material.dart';
-
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
-class MapaPuntosScreen extends StatelessWidget {
+class MapaPuntosScreen extends StatefulWidget {
   const MapaPuntosScreen({super.key});
+
+  @override
+  State<MapaPuntosScreen> createState() => _MapaPuntosScreenState();
+}
+class _MapaPuntosScreenState extends State<MapaPuntosScreen> {  
+
+ // 📍 Coordenadas de Popayán
+  final LatLng popayan = LatLng(2.4448, -76.6147);
+
+  // 🏪 Lista de supermercados simulados
+  final List<Map<String, dynamic>> supermercados = [
+
+    {
+      'nombre': 'Éxito Panamericana',
+      'direccion': 'Cra 9 #25N-08',
+      'materiales': ['Plástico', 'Cartón', 'Vidrio'],
+      'ubicacion': LatLng(2.4570, -76.6000),
+    },
+
+    {
+      'nombre': 'Carulla Campanario',
+      'direccion': 'Centro Comercial Campanario',
+      'materiales': ['Metal', 'Papel', 'Plástico'],
+      'ubicacion': LatLng(2.4700, -76.5920),
+    },
+
+    {
+      'nombre': 'Ara Centro',
+      'direccion': 'Centro de Popayán',
+      'materiales': ['Vidrio', 'Cartón'],
+      'ubicacion': LatLng(2.4420, -76.6060),
+    },
+
+  ];
+
+  // 🟢 Supermercado seleccionado
+  Map<String, dynamic>? supermercadoSeleccionado;
 
   @override
   Widget build(BuildContext context) {
 
     return Scaffold(
+
       backgroundColor: const Color(0xFFF4F6EF),
 
-      body: Column(
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF2D5A1B),
+        foregroundColor: Colors.white,
+        title: const Text('Puntos de reciclaje'),
+      ),
+
+      body: Stack(
+
         children: [
 
-          // HEADER VERDE
-          Container(
-            width: double.infinity,
+          // ───────── MAPA ─────────
+          FlutterMap(
 
-            padding: const EdgeInsets.only(
-              top: 60,
-              left: 20,
-              right: 20,
-              bottom: 25,
+            options: MapOptions(
+              initialCenter: popayan,
+              initialZoom: 13,
             ),
 
-            decoration: const BoxDecoration(
-              color: Color(0xFF2D5A1B),
+            children: [
 
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(30),
-                bottomRight: Radius.circular(30),
+              // 🌎 MAPA OPENSTREETMAP
+              TileLayer(
+                urlTemplate:
+                    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                userAgentPackageName: 'com.example.recycling_points',
               ),
-            ),
 
-            child: const Text(
-              'Puntos de reciclaje',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
+              // 📍 MARCADORES
+              MarkerLayer(
 
-          // MAPA
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
+                markers: supermercados.map((supermercado) {
 
-              child: ClipRRect(
-                borderRadius:
-                    BorderRadius.circular(25),
+                  return Marker(
 
-                child: FlutterMap(
+                    point: supermercado['ubicacion'],
 
-                  options: MapOptions(
+                    width: 80,
+                    height: 80,
 
-                    initialCenter: LatLng(
-                      2.4448,
-                      -76.6147,
+                    child: GestureDetector(
+
+                      onTap: () {
+
+                        setState(() {
+
+                          supermercadoSeleccionado = supermercado;
+
+                        });
+
+                      },
+
+                      child: const Icon(
+                        Icons.location_on,
+                        color: Color(0xFF2D5A1B),
+                        size: 42,
+                      ),
                     ),
+                  );
 
-                    initialZoom: 14,
-                  ),
+                }).toList(),
+              ),
+            ],
+          ),
+           // ───────── CARD INFERIOR ─────────
+          if (supermercadoSeleccionado != null)
+
+            Align(
+
+              alignment: Alignment.bottomCenter,
+
+              child: Container(
+
+                margin: const EdgeInsets.all(16),
+
+                padding: const EdgeInsets.all(18),
+
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 10,
+                    ),
+                  ],
+                ),
+
+                child: Column(
+
+                  mainAxisSize: MainAxisSize.min,
+
+                  crossAxisAlignment: CrossAxisAlignment.start,
 
                   children: [
 
-                    // MAPA BASE
-                    TileLayer(
-
-                      urlTemplate:
-                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-
-                      userAgentPackageName:
-                          'com.example.app',
+                    Text(
+                      supermercadoSeleccionado!['nombre'],
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1E3A0F),
+                      ),
                     ),
 
-                    // MARCADORES
-                    MarkerLayer(
+                    const SizedBox(height: 6),
 
-                      markers: [
+                    Text(
+                      supermercadoSeleccionado!['direccion'],
+                      style: const TextStyle(
+                        color: Colors.grey,
+                      ),
+                    ),
 
-                        // EXITO
-                        Marker(
-                          point: LatLng(
-                            2.4448,
-                            -76.6147,
-                          ),
+                    const SizedBox(height: 14),
 
-                          width: 80,
-                          height: 80,
+                    const Text(
+                      'Materiales aceptados',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
 
-                          child: Column(
-                            children: [
+                    const SizedBox(height: 8),
 
-                              const Icon(
-                                Icons.location_on,
-                                color: Colors.red,
-                                size: 40,
-                              ),
+                    Wrap(
 
-                              Container(
-                                padding:
-                                    const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
+                      spacing: 8,
 
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
+                      children:
+                          (supermercadoSeleccionado!['materiales']
+                                  as List<String>)
+                              .map(
+                                (material) => Container(
 
-                                  borderRadius:
-                                      BorderRadius.circular(
-                                    12,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFEAF3DE),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+
+                                  child: Text(
+                                    material,
+                                    style: const TextStyle(
+                                      color: Color(0xFF2D5A1B),
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
+                              )
+                              .toList(),
+                    ),
 
-                                child: const Text(
-                                  'Éxito',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight:
-                                        FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                    const SizedBox(height: 18),
 
-                        // OLIMPICA
-                        Marker(
-                          point: LatLng(
-                            2.4465,
-                            -76.6120,
-                          ),
+                    SizedBox(
 
-                          width: 80,
-                          height: 80,
+                      width: double.infinity,
 
-                          child: Column(
-                            children: [
+                      height: 50,
 
-                              const Icon(
-                                Icons.location_on,
-                                color: Colors.green,
-                                size: 40,
-                              ),
+                      child: ElevatedButton(
 
-                              Container(
-                                padding:
-                                    const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-
-                                  borderRadius:
-                                      BorderRadius.circular(
-                                    12,
-                                  ),
-                                ),
-
-                                child: const Text(
-                                  'Olímpica',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight:
-                                        FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2D5A1B),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
                           ),
                         ),
-                      ],
+
+                        onPressed: () {
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+
+                            SnackBar(
+                              content: Text(
+                                'Reciclaje en ${supermercadoSeleccionado!['nombre']}',
+                              ),
+                            ),
+                          );
+                        },
+
+                        child: const Text(
+                          'Reciclar aquí',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
-          ),
         ],
       ),
     );
