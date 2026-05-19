@@ -9,6 +9,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  camera: ^0.10.5+5      # Para abrir la cámara nativa del celular
+  http: ^1.1.0           # Para enviar la foto mediante POST a AdonisJS
+  path: ^1.8.3           # Para manejar las rutas de los archivos de imagen
 
 dev_dependencies:
   flutter_test:
