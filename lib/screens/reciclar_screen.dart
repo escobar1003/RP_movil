@@ -179,7 +179,65 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
+
+            if (_mostrarResultado)
+
+              Padding(
+
+                padding:
+                    const EdgeInsets.symmetric(
+                        horizontal: 24),
+
+                child: SizedBox(
+
+                  width: double.infinity,
+                  height: 55,
+
+                  child: ElevatedButton(
+
+                    style:
+                        ElevatedButton.styleFrom(
+
+                      backgroundColor:
+                          const Color(0xFF2D5A1B),
+
+                      shape:
+                          RoundedRectangleBorder(
+
+                        borderRadius:
+                            BorderRadius.circular(16),
+                      ),
+                    ),
+
+                    onPressed: () {
+
+                      Navigator.push(
+
+                        context,
+
+                        MaterialPageRoute(
+
+                          builder: (_) =>
+                              const MapaPuntosScreen(),
+                        ),
+                      );
+                    },
+
+        child: const Text(
+
+          'Reciclar ahora',
+
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight:
+                FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
+      ),
+    ),
+  ),
             if (_mostrarResultado)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
