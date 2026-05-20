@@ -55,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _nombre.isEmpty ? 'Hola ðŸ‘‹' : 'Hola, $_nombre ðŸ‘‹',
+                          _nombre.isEmpty ? 'Hola ' : 'Hola, $_nombre ',
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w800,
@@ -64,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(height: 2),
                         const Text(
-                          'Â¡Gracias por cuidar el planeta!',
+                          '¡Gracias por cuidar el planeta!',
                           style: TextStyle(
                             fontSize: 13,
                             color: AppColors.textMid,

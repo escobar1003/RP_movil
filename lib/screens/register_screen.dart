@@ -1,11 +1,10 @@
 // lib/screens/register_screen.dart
 
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
-import 'main_navigation.dart';
+import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -38,21 +37,14 @@ class _RegisterScreenState
       // REGISTER EXITOSO
       if (response['token'] != null) {
 
-        final prefs =
-            await SharedPreferences.getInstance();
-
-        await prefs.setString(
-          'token',
-          response['token'],
-        );
-
         if (!mounted) return;
 
+        // IR AL LOGIN
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
             builder: (_) =>
-                const MainNavigation(),
+                const LoginScreen(),
           ),
           (_) => false,
         );
