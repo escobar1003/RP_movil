@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
 import '../theme/app_theme.dart';
+import 'package:recycling_points/screens/mapa_puntos_screen.dart';
 
 class ReciclarScreen extends StatefulWidget {
   const ReciclarScreen({super.key});
@@ -397,6 +398,32 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
                 ),
               ),
             ),
+            const SizedBox(height: 16),
+
+            // ── Botón Reciclar Ahora ──
+            
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.map),
+                    label: const Text('Reciclar ahora'),
+
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              const MapaPuntosScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+
             const SizedBox(height: 24),
           ],
         ),
