@@ -3,12 +3,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:bootstrap_icons/bootstrap_icons.dart';
-
-import '../models/aliado_model.dart';
 import '../services/auth_service.dart';
 
 class ReservasScreen extends StatefulWidget {
-  final AliadoModel aliado;
+  final Map<String, dynamic> aliado;
 
   const ReservasScreen({
     super.key,
@@ -100,7 +98,7 @@ class _ReservasScreenState
       }
 
       final body = {
-        "idPunto": widget.aliado.id,
+        "idPunto": widget.aliado['id'],
         "observacion": observacionesController.text,
         "detalles": detalles
       };
@@ -282,7 +280,7 @@ class _ReservasScreenState
                         .start,
                 children: [
                   Text(
-                    widget.aliado.nombre,
+                    widget.aliado['nombre'],
                     style:
                         const TextStyle(
                       fontSize: 22,
@@ -310,8 +308,7 @@ class _ReservasScreenState
 
                       Expanded(
                         child: Text(
-                          widget.aliado
-                              .direccion,
+                          widget.aliado['direccion'],
                         ),
                       ),
                     ],
