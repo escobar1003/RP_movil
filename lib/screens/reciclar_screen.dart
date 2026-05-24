@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
 import '../theme/app_theme.dart';
-import 'package:recycling_points/screens/mapa_puntos_screen.dart';
+import 'mapa_puntos_screen.dart';
 
 class ReciclarScreen extends StatefulWidget {
   const ReciclarScreen({super.key});
@@ -19,13 +19,11 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
   bool _mostrarResultado = false;
   bool _estaCargando = false;
 
-  // Controlador para manejar la cámara
   CameraController? _cameraController;
   List<CameraDescription>? _cameras;
   bool _camaraInicializada = false;
   String? _rutaImagenLocal;
 
-  // Variables dinámicas que se actualizarán con la respuesta de YOLOv11
   String _nombre = 'Detectando...';
   String _tipo = '';
   String _estado = 'Aprovechable';
@@ -40,32 +38,26 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
     _inicializarCamara();
   }
 
-  // 1. Inicializa los sensores de la cámara trasera de forma nativa
   Future<void> _inicializarCamara() async {
     try {
       _cameras = await availableCameras();
       if (_cameras != null && _cameras!.isNotEmpty) {
         _cameraController = CameraController(
-          _cameras![0], // Selecciona la cámara trasera principal
+          _cameras![0],
           ResolutionPreset.medium,
           enableAudio: false,
         );
         await _cameraController!.initialize();
-        if (mounted) {
-          setState(() {
-            _camaraInicializada = true;
-          });
-        }
+        if (mounted) setState(() => _camaraInicializada = true);
       }
     } catch (e) {
-      print("Error al abrir los sensores de la cámara: $e");
+      debugPrint('Error cámara: $e');
     }
   }
 
-  // 2. Toma la foto y la envía vía HTTP Post a tu backend en AdonisJS
   Future<void> _escanear() async {
-    if (_cameraController == null || !_cameraController!.value.isInitialized)
-      return;
+    if (_cameraController == null ||
+        !_cameraController!.value.isInitialized) return;
 
     setState(() {
       _estaCargando = true;
@@ -73,23 +65,16 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
     });
 
     try {
-      // Captura el archivo temporal de imagen en el almacenamiento del celular
       final XFile foto = await _cameraController!.takePicture();
+      setState(() => _rutaImagenLocal = foto.path);
 
-      setState(() {
-        _rutaImagenLocal = foto.path;
-      });
-
-      // 🚨 IMPORTANTE: Reemplaza esta IP por la IP local exacta de tu computador en tu red WiFi.
-      // Puedes ver tu IP en Windows abriendo una consola y escribiendo 'ipconfig'.
-      final String ipServidor = "192.168.100.8";
+      final String ipServidor = '192.168.100.8';
       final url = Uri.parse('http://$ipServidor:3333/api/detectar-material');
 
-      // Crea el paquete Multipart form-data
       final request = http.MultipartRequest('POST', url);
-      request.files.add(await http.MultipartFile.fromPath('image', foto.path));
+      request.files.add(
+          await http.MultipartFile.fromPath('image', foto.path));
 
-      print("Disparando foto hacia AdonisJS...");
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
 
@@ -98,24 +83,23 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
 
         if (data['detectado'] == true) {
           final resultado = data['resultado'];
-          final String claseDetectada = resultado['objeto'];
-          final double valorConfianza = resultado['confianza'] * 100;
+          final String clase = resultado['objeto'];
+          final double confianza = resultado['confianza'] * 100;
 
-          // Asignación inteligente basándose en la etiqueta que arrojó YOLOv11
           setState(() {
-            _confianza = valorConfianza.round();
+            _confianza = confianza.round();
             _mostrarResultado = true;
 
-            if (claseDetectada.toLowerCase().contains('botella') ||
-                claseDetectada.toLowerCase().contains('plastic')) {
+            if (clase.toLowerCase().contains('botella') ||
+                clase.toLowerCase().contains('plastic')) {
               _nombre = 'Botella de plástico';
               _tipo = 'Plástico (PET)';
               _estado = 'Aprovechable';
               _caneco = 'Caneco Blanco';
               _deposito = 'Aprovechable';
               _descripcion = 'Plásticos, vidrio, metal,\npapel y cartón.';
-            } else if (claseDetectada.toLowerCase().contains('lata') ||
-                claseDetectada.toLowerCase().contains('can')) {
+            } else if (clase.toLowerCase().contains('lata') ||
+                clase.toLowerCase().contains('can')) {
               _nombre = 'Lata de Aluminio';
               _tipo = 'Metal';
               _estado = 'Aprovechable';
@@ -123,7 +107,7 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
               _deposito = 'Aprovechable';
               _descripcion = 'Metales, plástico, vidrio,\npapel y cartón.';
             } else {
-              _nombre = claseDetectada;
+              _nombre = clase;
               _tipo = 'Residuo Identificado';
               _estado = 'Aprovechable';
               _caneco = 'Caneco Blanco';
@@ -133,7 +117,6 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
             }
           });
         } else {
-          // Si la IA responde correctamente pero no encontró objetos conocidos
           setState(() {
             _nombre = 'No identificado';
             _tipo = 'Objeto desconocido';
@@ -146,38 +129,31 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
             _mostrarResultado = true;
           });
         }
-      } else {
-        print(
-          "Error devuelto por el servidor de Adonis: ${response.statusCode}",
-        );
       }
     } catch (e) {
-      print("Error de red intentando conectar con AdonisJS: $e");
+      debugPrint('Error red: $e');
     } finally {
-      if (mounted) {
-        setState(() {
-          _estaCargando = false;
-        });
-      }
+      if (mounted) setState(() => _estaCargando = false);
     }
   }
 
   @override
   void dispose() {
-    _cameraController?.dispose(); // Apaga la cámara al salir de la pantalla
+    _cameraController?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        leading: const BackButton(),
         title: const Text('Clasificar con IA'),
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
+
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 10),
               child: Text(
@@ -186,7 +162,7 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
               ),
             ),
 
-            // ── Visor Dinámico (Muestra cámara, imagen tomada o cargando) ──
+            // ── Visor cámara ──────────────────────────────
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 24),
               height: 260,
@@ -198,7 +174,8 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
                 alignment: Alignment.center,
                 children: [
                   if (_estaCargando)
-                    const CircularProgressIndicator(color: AppColors.primary)
+                    const CircularProgressIndicator(
+                        color: AppColors.primary)
                   else if (_mostrarResultado && _rutaImagenLocal != null)
                     ClipRRect(
                       borderRadius: BorderRadius.circular(20),
@@ -218,11 +195,8 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
                       ),
                     )
                   else
-                    const Icon(
-                      Icons.camera_alt_outlined,
-                      size: 56,
-                      color: Colors.black26,
-                    ),
+                    const Icon(Icons.camera_alt_outlined,
+                        size: 56, color: Colors.black26),
 
                   const _ScannerFrame(),
                 ],
@@ -231,80 +205,69 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
 
             const SizedBox(height: 16),
 
+            // ── Resultado ─────────────────────────────────
             if (_mostrarResultado) ...[
-              // Tarjeta resultado
+
               _buildCard(
                 margin: const EdgeInsets.symmetric(horizontal: 24),
                 child: Row(
                   children: [
                     Container(
-                      width: 48,
-                      height: 48,
+                      width: 48, height: 48,
                       decoration: BoxDecoration(
                         color: Colors.teal.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(Icons.local_drink, color: Colors.teal),
+                      child: const Icon(Icons.local_drink,
+                          color: Colors.teal),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            _nombre,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 15,
-                              color: AppColors.textDark,
-                            ),
-                          ),
-                          Text(
-                            _tipo,
-                            style: const TextStyle(
-                              color: AppColors.textLight,
-                              fontSize: 13,
-                            ),
-                          ),
+                          Text(_nombre,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 15,
+                                color: AppColors.textDark,
+                              )),
+                          Text(_tipo,
+                              style: const TextStyle(
+                                color: AppColors.textLight,
+                                fontSize: 13,
+                              )),
                           const SizedBox(height: 4),
                           Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 3,
-                            ),
+                                horizontal: 10, vertical: 3),
                             decoration: BoxDecoration(
                               color: AppColors.green100,
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: Text(
-                              _estado,
-                              style: const TextStyle(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 12,
-                              ),
-                            ),
+                            child: Text(_estado,
+                                style: const TextStyle(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 12,
+                                )),
                           ),
                         ],
                       ),
                     ),
                     Column(
                       children: [
-                        Text(
-                          '$_confianza%',
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w900,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                        const Text(
-                          'Confianza',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: AppColors.textLight,
-                          ),
-                        ),
+                        Text('$_confianza%',
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.primary,
+                            )),
+                        const Text('Confianza',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: AppColors.textLight,
+                            )),
                       ],
                     ),
                   ],
@@ -313,62 +276,50 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
 
               const SizedBox(height: 12),
 
-              // Tarjeta depósito
               _buildCard(
                 margin: const EdgeInsets.symmetric(horizontal: 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Depositar en:',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
-                        color: AppColors.textMid,
-                      ),
-                    ),
+                    const Text('Depositar en:',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                          color: AppColors.textMid,
+                        )),
                     const SizedBox(height: 12),
                     Row(
                       children: [
                         Container(
-                          width: 44,
-                          height: 44,
+                          width: 44, height: 44,
                           decoration: BoxDecoration(
                             color: AppColors.yellow100,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(
-                            Icons.delete_outline,
-                            color: Colors.orange,
-                          ),
+                          child: const Icon(Icons.delete_outline,
+                              color: Colors.orange),
                         ),
                         const SizedBox(width: 14),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                _caneco,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 15,
-                                  color: AppColors.textDark,
-                                ),
-                              ),
-                              Text(
-                                _deposito,
-                                style: const TextStyle(
-                                  color: AppColors.textLight,
-                                  fontSize: 13,
-                                ),
-                              ),
-                              Text(
-                                _descripcion,
-                                style: const TextStyle(
-                                  color: AppColors.textLight,
-                                  fontSize: 12,
-                                ),
-                              ),
+                              Text(_caneco,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 15,
+                                    color: AppColors.textDark,
+                                  )),
+                              Text(_deposito,
+                                  style: const TextStyle(
+                                    color: AppColors.textLight,
+                                    fontSize: 13,
+                                  )),
+                              Text(_descripcion,
+                                  style: const TextStyle(
+                                    color: AppColors.textLight,
+                                    fontSize: 12,
+                                  )),
                             ],
                           ),
                         ),
@@ -381,9 +332,10 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
               const SizedBox(height: 16),
             ],
 
-            // ── Botón de Acción Integrado ──
+            // ── Botón escanear ────────────────────────────
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 24, vertical: 8),
               child: SizedBox(
                 width: double.infinity,
                 height: 52,
@@ -393,36 +345,36 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
                   label: Text(
                     _estaCargando
                         ? 'Analizando...'
-                        : (_mostrarResultado ? 'Escanear otro' : 'Escanear'),
+                        : (_mostrarResultado
+                            ? 'Escanear otro'
+                            : 'Escanear'),
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: 16),
 
-            // ── Botón Reciclar Ahora ──
-            
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.map),
-                    label: const Text('Reciclar ahora'),
-
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              const MapaPuntosScreen(),
-                        ),
-                      );
-                    },
+            // ── Botón Reciclar ahora ──────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.map, size: 20),
+                  label: const Text('Reciclar ahora'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const MapaPuntosScreen(),
+                    ),
                   ),
                 ),
               ),
+            ),
 
             const SizedBox(height: 24),
           ],
@@ -451,7 +403,6 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
   }
 }
 
-// El resto de tus widgets personalizados (_ScannerFrame, _Esquina, _EsquinaPainter) permanecen exactamente iguales abajo...
 class _ScannerFrame extends StatelessWidget {
   const _ScannerFrame();
 
@@ -462,22 +413,14 @@ class _ScannerFrame extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         child: Stack(
           children: [
-            Positioned(top: 0, left: 0, child: _Esquina(top: true, left: true)),
-            Positioned(
-              top: 0,
-              right: 0,
-              child: _Esquina(top: true, left: false),
-            ),
-            Positioned(
-              bottom: 0,
-              left: 0,
-              child: _Esquina(top: false, left: true),
-            ),
-            Positioned(
-              bottom: 0,
-              right: 0,
-              child: _Esquina(top: false, left: false),
-            ),
+            Positioned(top: 0, left: 0,
+                child: _Esquina(top: true, left: true)),
+            Positioned(top: 0, right: 0,
+                child: _Esquina(top: true, left: false)),
+            Positioned(bottom: 0, left: 0,
+                child: _Esquina(top: false, left: true)),
+            Positioned(bottom: 0, right: 0,
+                child: _Esquina(top: false, left: false)),
           ],
         ),
       ),
