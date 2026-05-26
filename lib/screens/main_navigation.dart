@@ -1,5 +1,6 @@
 // lib/screens/main_navigation.dart
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/app_theme.dart';
 import 'home.dart';
 import 'reciclar_screen.dart';
@@ -16,6 +17,7 @@ class MainNavigation extends StatefulWidget {
 
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
+  bool _cargado = false;
 
   final List<Widget> _screens = const [
     HomeScreen(),
@@ -25,7 +27,29 @@ class _MainNavigationState extends State<MainNavigation> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _cargarTab();
+  }
+
+  Future<void> _cargarTab() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getInt('tab_index') ?? 0;
+    if (mounted) setState(() { _currentIndex = saved; _cargado = true; });
+  }
+
+  Future<void> _guardarTab(int index) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('tab_index', index);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (!_cargado) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+      );
+    }
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
@@ -98,7 +122,10 @@ class _MainNavigationState extends State<MainNavigation> {
     );
   }
 
-  void _setTab(int i) => setState(() => _currentIndex = i);
+  void _setTab(int i) {
+    _guardarTab(i);
+    setState(() => _currentIndex = i);
+  }
 }
 
 class _NavItem extends StatelessWidget {

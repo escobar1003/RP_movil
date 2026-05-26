@@ -1,73 +1,19 @@
-// lib/screens/welcome_screen.dart
-
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/app_theme.dart';
 import 'login_screen.dart';
 import 'register_screen.dart';
-import 'main_navigation.dart';
 
-class WelcomeScreen extends StatefulWidget {
+class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
   @override
-  State<WelcomeScreen> createState() => _WelcomeScreenState();
-}
-
-class _WelcomeScreenState extends State<WelcomeScreen> {
-  bool _revisandoSesion = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _revisarSesion();
-  }
-
-  Future<void> _revisarSesion() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-
-    if (token != null && token.isNotEmpty) {
-      if (!mounted) return;
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const MainNavigation()),
-        (_) => false,
-      );
-    } else {
-      if (!mounted) return;
-      setState(() => _revisandoSesion = false);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (_revisandoSesion) {
-      return Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Image.asset(
-                'assets/images/imagen_de_fondo.png',
-                height: 200,
-                fit: BoxFit.contain,
-              ),
-              const SizedBox(height: 24),
-              const CircularProgressIndicator(color: AppColors.primary),
-            ],
-          ),
-        ),
-      );
-    }
-
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
       body: Stack(
         children: [
 
-          // ───────────── FONDO DEGRADADO SUAVE ─────────────
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -82,7 +28,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             ),
           ),
 
-          // ───────────── CÍRCULOS DECORATIVOS ─────────────
           Positioned(
             top: -80,
             right: -80,
@@ -122,7 +67,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             ),
           ),
 
-          // ───────────── CONTENIDO PRINCIPAL ─────────────
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 28),
@@ -131,7 +75,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
                   const Spacer(),
 
-                  // ── Ilustración con la imagen PNG transparente ──
                   SizedBox(
                     height: size.height * 0.55,
                     child: Image.asset(
@@ -142,7 +85,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
                   const SizedBox(height: 24),
 
-                  // ── Título ──
                   Text(
                     '¡Hola! 👋\nBienvenido reciclador',
                     textAlign: TextAlign.center,
@@ -168,7 +110,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
                   const Spacer(),
 
-                  // ── Botón Comenzar ──
                   SizedBox(
                     width: double.infinity,
                     height: 52,
@@ -185,7 +126,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
                   const SizedBox(height: 14),
 
-                  // ── Iniciar sesión ──
                   TextButton(
                     onPressed: () => Navigator.push(
                       context,
@@ -209,17 +149,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildLeaf({required double size, required double angle}) {
-    return Transform.rotate(
-      angle: angle,
-      child: Icon(
-        Icons.eco,
-        size: size,
-        color: const Color(0xFF7BC043).withOpacity(0.85),
       ),
     );
   }
