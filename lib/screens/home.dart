@@ -1,11 +1,13 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:bootstrap_icons/bootstrap_icons.dart';
+
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
-import 'aliados_screen.dart';
+
 import 'mapa_puntos_screen.dart';
 import 'reciclar_screen.dart';
 import 'mis_canjes_screen.dart';
+import 'configuracion_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,7 +17,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
   String _nombre = '';
 
   @override
@@ -52,20 +53,26 @@ class _HomeScreenState extends State<HomeScreen> {
                       size: 26,
                     ),
                   ),
+
                   const SizedBox(width: 12),
+
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _nombre.isEmpty ? 'Hola ' : 'Hola, $_nombre ',
+                          _nombre.isEmpty
+                              ? 'Hola'
+                              : 'Hola, $_nombre',
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w800,
                             color: AppColors.textDark,
                           ),
                         ),
+
                         const SizedBox(height: 2),
+
                         const Text(
                           '¡Gracias por cuidar el planeta!',
                           style: TextStyle(
@@ -76,23 +83,35 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
+
+                  // BOTON CONFIGURACION
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ConfiguracionScreen(),
                         ),
-                      ],
-                    ),
-                    child: const Icon(
-                      BootstrapIcons.gear,
-                      size: 20,
-                      color: AppColors.textDark,
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        BootstrapIcons.gear,
+                        size: 20,
+                        color: AppColors.textDark,
+                      ),
                     ),
                   ),
                 ],
@@ -106,7 +125,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.all(22),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFF2E9E6F), Color(0xFF57C58A)],
+                    colors: [
+                      Color(0xFF2E9E6F),
+                      Color(0xFF57C58A),
+                    ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -123,13 +145,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Expanded(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment:
+                            CrossAxisAlignment.start,
                         children: [
                           const Text(
                             'Puntos disponibles',
-                            style: TextStyle(color: Colors.white70, fontSize: 14),
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                            ),
                           ),
+
                           const SizedBox(height: 10),
+
                           Row(
                             children: [
                               const Text(
@@ -140,12 +168,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                   fontWeight: FontWeight.w900,
                                 ),
                               ),
+
                               const SizedBox(width: 8),
+
                               Container(
-                                padding: const EdgeInsets.all(6),
+                                padding:
+                                    const EdgeInsets.all(6),
                                 decoration: BoxDecoration(
                                   color: Colors.amber,
-                                  borderRadius: BorderRadius.circular(50),
+                                  borderRadius:
+                                      BorderRadius.circular(50),
                                 ),
                                 child: const Icon(
                                   BootstrapIcons.coin,
@@ -155,22 +187,32 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ],
                           ),
+
                           const SizedBox(height: 10),
+
                           const Text(
-                            'Sigue asÃ­, cada acciÃ³n suma un cambio.',
-                            style: TextStyle(color: Colors.white, fontSize: 14),
+                            'Sigue así, cada acción suma un cambio.',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                            ),
                           ),
                         ],
                       ),
                     ),
-                    const Icon(BootstrapIcons.recycle, color: Colors.white, size: 70),
+
+                    const Icon(
+                      BootstrapIcons.recycle,
+                      color: Colors.white,
+                      size: 70,
+                    ),
                   ],
                 ),
               ),
 
               const SizedBox(height: 24),
 
-              // ------------------------- RESUMEN IMPACTO -------------------------
+              // ------------------ RESUMEN IMPACTO ------------------
               const Text(
                 'Resumen de impacto',
                 style: TextStyle(
@@ -179,7 +221,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: AppColors.textDark,
                 ),
               ),
+
               const SizedBox(height: 14),
+
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
@@ -201,11 +245,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: _ImpactoItem(
                             icon: BootstrapIcons.recycle,
                             value: '12.5 kg',
-                            label: 'PlÃ¡stico reciclado',
+                            label: 'Plástico reciclado',
                             color: AppColors.primary,
                           ),
                         ),
+
                         const SizedBox(width: 14),
+
                         Expanded(
                           child: _ImpactoItem(
                             icon: BootstrapIcons.truck,
@@ -216,18 +262,22 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ],
                     ),
+
                     const SizedBox(height: 14),
+
                     Row(
                       children: [
                         Expanded(
                           child: _ImpactoItem(
                             icon: BootstrapIcons.leaf,
                             value: '8.4 kg',
-                            label: 'COâ‚‚ evitado',
+                            label: 'CO₂ evitado',
                             color: Colors.lightGreen,
                           ),
                         ),
+
                         const SizedBox(width: 14),
+
                         Expanded(
                           child: _ImpactoItem(
                             icon: BootstrapIcons.star_fill,
@@ -244,7 +294,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 24),
 
-              // ------------------------- PROGRESO -------------------------
+              // ------------------ PROGRESO ------------------
               const Text(
                 'Tu progreso',
                 style: TextStyle(
@@ -253,7 +303,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: AppColors.textDark,
                 ),
               ),
+
               const SizedBox(height: 14),
+
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
@@ -270,12 +322,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment:
+                          MainAxisAlignment.spaceBetween,
                       children: const [
                         Text(
                           'Nivel: Verde',
-                          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
                         ),
+
                         Text(
                           '80%',
                           style: TextStyle(
@@ -285,20 +342,31 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ],
                     ),
+
                     const SizedBox(height: 10),
+
                     ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: const LinearProgressIndicator(
                         value: 0.8,
                         minHeight: 10,
-                        backgroundColor: AppColors.green100,
-                        valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                        backgroundColor:
+                            AppColors.green100,
+                        valueColor:
+                            AlwaysStoppedAnimation(
+                          AppColors.primary,
+                        ),
                       ),
                     ),
+
                     const SizedBox(height: 12),
+
                     const Text(
-                      'Â¡Genial! AÃºn puedes ganar mÃ¡s puntos y subir de nivel.',
-                      style: TextStyle(color: AppColors.textMid, fontSize: 13),
+                      '¡Genial! Aún puedes ganar más puntos y subir de nivel.',
+                      style: TextStyle(
+                        color: AppColors.textMid,
+                        fontSize: 13,
+                      ),
                     ),
                   ],
                 ),
@@ -306,16 +374,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 24),
 
-              // ------------------------- ACCIONES -------------------------
+              // ------------------ ACCIONES RAPIDAS ------------------
               const Text(
-                'Acciones rÃ¡pidas',
+                'Acciones rápidas',
                 style: TextStyle(
                   fontWeight: FontWeight.w800,
                   fontSize: 17,
                   color: AppColors.textDark,
                 ),
               ),
+
               const SizedBox(height: 14),
+
               Row(
                 children: [
                   Expanded(
@@ -324,42 +394,57 @@ class _HomeScreenState extends State<HomeScreen> {
                       label: 'Clasificar',
                       color: AppColors.green100,
                       iconColor: AppColors.primary,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const ReciclarScreen(),
-                        ),
-                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const ReciclarScreen(),
+                          ),
+                        );
+                      },
                     ),
                   ),
+
                   const SizedBox(width: 12),
+
                   Expanded(
                     child: _AccionCard(
                       icon: BootstrapIcons.gift,
                       label: 'Canjear',
                       color: AppColors.yellow100,
                       iconColor: Colors.orange,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const MisCanjesScreen(),
-                        ),
-                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const MisCanjesScreen(),
+                          ),
+                        );
+                      },
                     ),
                   ),
+
                   const SizedBox(width: 12),
+
                   Expanded(
                     child: _AccionCard(
                       icon: BootstrapIcons.geo_alt,
                       label: 'Mapa',
                       color: const Color(0xFFE3F2FD),
                       iconColor: Colors.blue,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const MapaPuntosScreen(soloMapa: true),
-                        ),
-                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const MapaPuntosScreen(
+                              soloMapa: true,
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ],
@@ -372,7 +457,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// ------------------------- IMPACTO ITEM -------------------------
+// ------------------ IMPACTO ITEM ------------------
 
 class _ImpactoItem extends StatelessWidget {
   final IconData icon;
@@ -410,12 +495,19 @@ class _ImpactoItem extends StatelessWidget {
               color: color.withOpacity(0.12),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: color, size: 18),
+            child: Icon(
+              icon,
+              color: color,
+              size: 18,
+            ),
           ),
+
           const SizedBox(width: 12),
+
           Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
               children: [
                 Text(
                   value,
@@ -425,10 +517,15 @@ class _ImpactoItem extends StatelessWidget {
                     color: AppColors.textDark,
                   ),
                 ),
+
                 const SizedBox(height: 4),
+
                 Text(
                   label,
-                  style: const TextStyle(fontSize: 12, color: AppColors.textMid),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textMid,
+                  ),
                 ),
               ],
             ),
@@ -439,7 +536,7 @@ class _ImpactoItem extends StatelessWidget {
   }
 }
 
-// ------------------------- ACCION CARD -------------------------
+// ------------------ ACCION CARD ------------------
 
 class _AccionCard extends StatelessWidget {
   final IconData icon;
@@ -461,15 +558,22 @@ class _AccionCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 18),
+        padding:
+            const EdgeInsets.symmetric(vertical: 18),
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(18),
         ),
         child: Column(
           children: [
-            Icon(icon, color: iconColor, size: 28),
+            Icon(
+              icon,
+              color: iconColor,
+              size: 28,
+            ),
+
             const SizedBox(height: 8),
+
             Text(
               label,
               style: TextStyle(
@@ -484,5 +588,3 @@ class _AccionCard extends StatelessWidget {
     );
   }
 }
-
-
