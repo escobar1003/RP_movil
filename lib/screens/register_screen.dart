@@ -25,6 +25,28 @@ class _RegisterScreenState
 
   Future<void> _register() async {
 
+    if (_nombre.text.trim().isEmpty ||
+        _email.text.trim().isEmpty ||
+        _password.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor completa todos los campos'),
+          backgroundColor: Color(0xFFA32D2D),
+        ),
+      );
+      return;
+    }
+
+    if (_password.text.trim().length < 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('La contraseña debe tener mínimo 10 caracteres'),
+          backgroundColor: Color(0xFFA32D2D),
+        ),
+      );
+      return;
+    }
+
     try {
 
       final response =
