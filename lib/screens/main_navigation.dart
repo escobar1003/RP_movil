@@ -17,10 +17,11 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
 
+  // Solo 4 tabs reales (sin el "+" del centro)
   final List<Widget> _screens = const [
     HomeScreen(),
-    ReciclarScreen(),
-    RecompensasScreen(),
+    RecompensasScreen(), // antes era index 2, ahora index 1
+    RecompensasScreen(), // placeholder — reemplaza por Retos si tienes esa screen
     PerfilScreen(),
   ];
 
@@ -31,24 +32,62 @@ class _MainNavigationState extends State<MainNavigation> {
         index: _currentIndex,
         children: _screens,
       ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.07), blurRadius: 16, offset: const Offset(0, -4))],
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            child: Row(
+      // ── FAB central ──────────────────────────────────────────────
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primary,
+        elevation: 4,
+        shape: const CircleBorder(),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const ReciclarScreen()),
+          );
+        },
+        child: const Icon(Icons.add, color: Colors.white, size: 30),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+
+      // ── Bottom nav ───────────────────────────────────────────────
+      bottomNavigationBar: BottomAppBar(
+        color: Colors.white,
+        elevation: 8,
+        height: 70,
+        notchMargin: 8,
+        shape: const CircularNotchedRectangle(),
+        child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _NavItem(icon: Icons.home_rounded,     label: 'Inicio',      index: 0, current: _currentIndex, onTap: _setTab),
-                _NavItem(icon: Icons.recycling,        label: 'Reciclar',    index: 1, current: _currentIndex, onTap: _setTab),
-                _NavItem(icon: Icons.card_giftcard,    label: 'Recompensas', index: 2, current: _currentIndex, onTap: _setTab),
-                _NavItem(icon: Icons.person_rounded,   label: 'Perfil',      index: 3, current: _currentIndex, onTap: _setTab),
+                _NavItem(
+                  icon: Icons.home_rounded,
+                  label: 'Inicio',
+                  index: 0,
+                  current: _currentIndex,
+                  onTap: _setTab,
+                ),
+                _NavItem(
+                  icon: Icons.receipt_long_outlined,
+                  label: 'Registros',
+                  index: 1,
+                  current: _currentIndex,
+                  onTap: _setTab,
+                ),
+                // Espacio vacío para el FAB
+                const SizedBox(width: 56),
+                _NavItem(
+                  icon: Icons.emoji_events_outlined,
+                  label: 'Retos',
+                  index: 2,
+                  current: _currentIndex,
+                  onTap: _setTab,
+                ),
+                _NavItem(
+                  icon: Icons.person_rounded,
+                  label: 'Perfil',
+                  index: 3,
+                  current: _currentIndex,
+                  onTap: _setTab,
+                ),
               ],
-            ),
-          ),
         ),
       ),
     );
@@ -77,18 +116,24 @@ class _NavItem extends StatelessWidget {
     return GestureDetector(
       onTap: () => onTap(index),
       behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: SizedBox(
+        width: 64,
+        height: 56,
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Icon(icon, color: active ? AppColors.primary : AppColors.textLight, size: 26),
+            Icon(
+              icon,
+              color: active ? AppColors.primary : AppColors.textLight,
+              size: 22,
+            ),
             const SizedBox(height: 2),
             Text(
               label,
               style: TextStyle(
                 color: active ? AppColors.primary : AppColors.textLight,
-                fontSize: 11,
+                fontSize: 10,
                 fontWeight: active ? FontWeight.w700 : FontWeight.w500,
               ),
             ),
