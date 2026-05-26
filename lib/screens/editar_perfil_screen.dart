@@ -27,7 +27,7 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
       final perfil = await UsuarioService.getPerfil();
       if (perfil['usuario'] != null) {
         _nombreController.text = perfil['usuario']['nombre'] ?? '';
-        _telefonoController.text = perfil['usuario']['telefono'] ?? '';
+        _telefonoController.text = perfil['usuario']['telefono'] ?? '';///
         return;
       }
     } catch (_) {}
