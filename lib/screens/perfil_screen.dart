@@ -1,11 +1,49 @@
-// lib/screens/perfil_screen.dart
-
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart';
 import 'historial_entregas_screen.dart';
 import 'mis_canjes_screen.dart';
+import 'welcome_screen.dart';
 
-class PerfilScreen extends StatelessWidget {
+class PerfilScreen extends StatefulWidget {
   const PerfilScreen({super.key});
+
+  @override
+  State<PerfilScreen> createState() => _PerfilScreenState();
+}
+
+class _PerfilScreenState extends State<PerfilScreen> {
+  String _nombre = '';
+  String _correo = '';
+  String _rol = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarDatos();
+  }
+
+  Future<void> _cargarDatos() async {
+    final nombre = await AuthService.getNombre();
+    final correo = await AuthService.getCorreo();
+    final rol = await AuthService.getRol();
+    if (mounted) {
+      setState(() {
+        _nombre = nombre;
+        _correo = correo;
+        _rol = rol;
+      });
+    }
+  }
+
+  Future<void> _cerrarSesion() async {
+    await AuthService.logout();
+    if (!mounted) return;
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+      (_) => false,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,14 +109,24 @@ class PerfilScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 14),
-          const Text(
-            'Ana Martínez',
-            style: TextStyle(
+          Text(
+            _nombre,
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 22,
               fontWeight: FontWeight.bold,
             ),
           ),
+          if (_correo.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              _correo,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.65),
+                fontSize: 13,
+              ),
+            ),
+          ],
           const SizedBox(height: 6),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
@@ -86,14 +134,14 @@ class PerfilScreen extends StatelessWidget {
               color: const Color(0xFF7BC043),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.eco, size: 14, color: Colors.white),
-                SizedBox(width: 5),
+                const Icon(Icons.eco, size: 14, color: Colors.white),
+                const SizedBox(width: 5),
                 Text(
-                  'Flor Verde',
-                  style: TextStyle(
+                  _rol == 'admin' ? 'Administrador' : 'Flor Verde',
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -117,7 +165,7 @@ class PerfilScreen extends StatelessWidget {
               icon: Icons.recycling,
               iconColor: const Color(0xFF2D5A1B),
               iconBg: const Color(0xFFEAF3DE),
-              value: '23',
+              value: '0',
               label: 'Reciclajes',
             ),
           ),
@@ -127,7 +175,7 @@ class PerfilScreen extends StatelessWidget {
               icon: Icons.stars_rounded,
               iconColor: const Color(0xFF854F0B),
               iconBg: const Color(0xFFFAEEDA),
-              value: '2,560',
+              value: '0',
               label: 'Puntos',
             ),
           ),
@@ -137,7 +185,7 @@ class PerfilScreen extends StatelessWidget {
               icon: Icons.emoji_events_outlined,
               iconColor: const Color(0xFF185FA5),
               iconBg: const Color(0xFFE6F1FB),
-              value: '4',
+              value: '0',
               label: 'Canjes',
             ),
           ),
@@ -225,7 +273,7 @@ class PerfilScreen extends StatelessWidget {
                 ),
               ),
               Text(
-                '2,560 / 3,000 pts',
+                '0 / 3,000 pts',
                 style: TextStyle(fontSize: 12, color: Colors.grey[500]),
               ),
             ],
@@ -234,7 +282,7 @@ class PerfilScreen extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: const LinearProgressIndicator(
-              value: 0.85,
+              value: 0,
               minHeight: 9,
               backgroundColor: Color(0xFFEAF3DE),
               valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF7BC043)),
@@ -242,7 +290,7 @@ class PerfilScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Te faltan 440 puntos para alcanzar el nivel Árbol',
+            'Comienza a reciclar para ganar puntos y subir de nivel',
             style: TextStyle(fontSize: 11, color: Colors.grey[500]),
           ),
         ],
@@ -337,7 +385,7 @@ class PerfilScreen extends StatelessWidget {
             label: 'Cerrar sesión',
             color: const Color(0xFFA32D2D),
             bg: const Color(0xFFFCEBEB),
-            onTap: () {},
+            onTap: _cerrarSesion,
           ),
 
         ],

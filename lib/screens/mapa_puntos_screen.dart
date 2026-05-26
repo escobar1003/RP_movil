@@ -4,37 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import '../theme/app_theme.dart';
+import '../data/puntos_reciclaje_data.dart';
 import 'reservas.dart';
 
 class MapaPuntosScreen extends StatefulWidget {
-  const MapaPuntosScreen({super.key});
+  final bool soloMapa;
+
+  const MapaPuntosScreen({super.key, this.soloMapa = false});
 
   @override
   State<MapaPuntosScreen> createState() => _MapaPuntosScreenState();
 }
 
 class _MapaPuntosScreenState extends State<MapaPuntosScreen> {
-
-  final List<Map<String, dynamic>> puntosReciclaje = [
-    {
-      'nombre': 'Éxito Panamericana',
-      'direccion': 'Cra 9 #18N-230',
-      'materiales': 'Plástico, cartón y vidrio',
-      'ubicacion': LatLng(2.4570, -76.6009),
-    },
-    {
-      'nombre': 'Carulla Campanario',
-      'direccion': 'Centro Comercial Campanario',
-      'materiales': 'Papel y plástico',
-      'ubicacion': LatLng(2.4790, -76.5620),
-    },
-    {
-      'nombre': 'Olímpica Popayán',
-      'direccion': 'Calle 5',
-      'materiales': 'Vidrio y cartón',
-      'ubicacion': LatLng(2.4448, -76.6147),
-    },
-  ];
 
   Map<String, dynamic>? puntoSeleccionado;
   final MapController _mapController = MapController();
@@ -263,25 +245,26 @@ class _MapaPuntosScreenState extends State<MapaPuntosScreen> {
 
                     const SizedBox(height: 16),
 
-                    // Botón agendar
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton.icon(
-                        icon: const Icon(Icons.calendar_month, size: 20),
-                        label: const Text('Agendar cita'),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => ReservasScreen(
-                                aliado: puntoSeleccionado!,
+                    // Botón agendar (solo si no es modo soloMapa)
+                    if (!widget.soloMapa)
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: ElevatedButton.icon(
+                          icon: const Icon(Icons.calendar_month, size: 20),
+                          label: const Text('Agendar cita'),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ReservasScreen(
+                                  aliado: puntoSeleccionado!,
+                                ),
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
-                    ),
                    
                   ],
                 ),

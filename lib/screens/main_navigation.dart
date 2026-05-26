@@ -1,11 +1,11 @@
 // lib/screens/main_navigation.dart
 import 'package:flutter/material.dart';
-import 'package:recycling_points/screens/chat_ia_screen.dart';
 import '../theme/app_theme.dart';
 import 'home.dart';
 import 'reciclar_screen.dart';
 import 'recompensas_screen.dart';
 import 'perfil_screen.dart';
+import 'historial_entregas_screen.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -17,11 +17,10 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
 
-  // Solo 4 tabs reales (sin el "+" del centro)
   final List<Widget> _screens = const [
     HomeScreen(),
-    RecompensasScreen(), // antes era index 2, ahora index 1
-    RecompensasScreen(), // placeholder — reemplaza por Retos si tienes esa screen
+    HistorialEntregasScreen(),
+    RecompensasScreen(),
     PerfilScreen(),
   ];
 
@@ -54,41 +53,47 @@ class _MainNavigationState extends State<MainNavigation> {
         height: 70,
         notchMargin: 8,
         shape: const CircularNotchedRectangle(),
-        child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _NavItem(
-                  icon: Icons.home_rounded,
-                  label: 'Inicio',
-                  index: 0,
-                  current: _currentIndex,
-                  onTap: _setTab,
-                ),
-                _NavItem(
-                  icon: Icons.receipt_long_outlined,
-                  label: 'Registros',
-                  index: 1,
-                  current: _currentIndex,
-                  onTap: _setTab,
-                ),
-                // Espacio vacío para el FAB
-                const SizedBox(width: 56),
-                _NavItem(
-                  icon: Icons.emoji_events_outlined,
-                  label: 'Retos',
-                  index: 2,
-                  current: _currentIndex,
-                  onTap: _setTab,
-                ),
-                _NavItem(
-                  icon: Icons.person_rounded,
-                  label: 'Perfil',
-                  index: 3,
-                  current: _currentIndex,
-                  onTap: _setTab,
-                ),
-              ],
-        ),
+          child: Row(
+                children: [
+                  Expanded(
+                    child: _NavItem(
+                      icon: Icons.home_rounded,
+                      label: 'Inicio',
+                      index: 0,
+                      current: _currentIndex,
+                      onTap: _setTab,
+                    ),
+                  ),
+                  Expanded(
+                    child: _NavItem(
+                      icon: Icons.receipt_long_outlined,
+                      label: 'Registros',
+                      index: 1,
+                      current: _currentIndex,
+                      onTap: _setTab,
+                    ),
+                  ),
+                  const SizedBox(width: 56),
+                  Expanded(
+                    child: _NavItem(
+                      icon: Icons.emoji_events_outlined,
+                      label: 'Recompensas',
+                      index: 2,
+                      current: _currentIndex,
+                      onTap: _setTab,
+                    ),
+                  ),
+                  Expanded(
+                    child: _NavItem(
+                      icon: Icons.person_rounded,
+                      label: 'Perfil',
+                      index: 3,
+                      current: _currentIndex,
+                      onTap: _setTab,
+                    ),
+                  ),
+                ],
+          ),
       ),
     );
   }
@@ -116,30 +121,30 @@ class _NavItem extends StatelessWidget {
     return GestureDetector(
       onTap: () => onTap(index),
       behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        width: 64,
-        height: 56,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              color: active ? AppColors.primary : AppColors.textLight,
-              size: 22,
-            ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style: TextStyle(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
                 color: active ? AppColors.primary : AppColors.textLight,
-                fontSize: 10,
-                fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+                size: 18,
               ),
-            ),
-          ],
+              const SizedBox(height: 1),
+              Text(
+                label,
+                style: TextStyle(
+                  color: active ? AppColors.primary : AppColors.textLight,
+                  fontSize: 9,
+                  fontWeight: active ? FontWeight.w600 : FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
     );
   }
 }

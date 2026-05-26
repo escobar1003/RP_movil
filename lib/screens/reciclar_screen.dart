@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 import '../theme/app_theme.dart';
 import 'mapa_puntos_screen.dart';
+import 'chat_ia_screen.dart';
 
 class ReciclarScreen extends StatefulWidget {
   const ReciclarScreen({super.key});
@@ -147,6 +148,19 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: AppColors.primary,
+        elevation: 6,
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ChatIaScreen()),
+        ),
+        icon: const Icon(Icons.chat_bubble_outline_rounded,
+            color: Colors.white, size: 22),
+        label: const Text('Chat IA',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
       appBar: AppBar(
         title: const Text('Clasificar con IA'),
       ),

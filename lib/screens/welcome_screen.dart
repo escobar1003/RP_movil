@@ -1,15 +1,66 @@
 // lib/screens/welcome_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/app_theme.dart';
 import 'login_screen.dart';
 import 'register_screen.dart';
+import 'main_navigation.dart';
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
 
   @override
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  bool _revisandoSesion = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _revisarSesion();
+  }
+
+  Future<void> _revisarSesion() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token != null && token.isNotEmpty) {
+      if (!mounted) return;
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const MainNavigation()),
+        (_) => false,
+      );
+    } else {
+      if (!mounted) return;
+      setState(() => _revisandoSesion = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_revisandoSesion) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                'assets/images/imagen_de_fondo.png',
+                height: 200,
+                fit: BoxFit.contain,
+              ),
+              const SizedBox(height: 24),
+              const CircularProgressIndicator(color: AppColors.primary),
+            ],
+          ),
+        ),
+      );
+    }
+
     final size = MediaQuery.of(context).size;
 
     return Scaffold(

@@ -3,6 +3,9 @@ import 'package:bootstrap_icons/bootstrap_icons.dart';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
 import 'aliados_screen.dart';
+import 'mapa_puntos_screen.dart';
+import 'reciclar_screen.dart';
+import 'mis_canjes_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -321,6 +324,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       label: 'Clasificar',
                       color: AppColors.green100,
                       iconColor: AppColors.primary,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ReciclarScreen(),
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -330,6 +339,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       label: 'Canjear',
                       color: AppColors.yellow100,
                       iconColor: Colors.orange,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const MisCanjesScreen(),
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -339,6 +354,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       label: 'Mapa',
                       color: const Color(0xFFE3F2FD),
                       iconColor: Colors.blue,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const MapaPuntosScreen(soloMapa: true),
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -425,35 +446,40 @@ class _AccionCard extends StatelessWidget {
   final String label;
   final Color color;
   final Color iconColor;
+  final VoidCallback? onTap;
 
   const _AccionCard({
     required this.icon,
     required this.label,
     required this.color,
     required this.iconColor,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 18),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: iconColor, size: 28),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: TextStyle(
-              color: iconColor,
-              fontWeight: FontWeight.w700,
-              fontSize: 13,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 18),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: iconColor, size: 28),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: TextStyle(
+                color: iconColor,
+                fontWeight: FontWeight.w700,
+                fontSize: 13,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
