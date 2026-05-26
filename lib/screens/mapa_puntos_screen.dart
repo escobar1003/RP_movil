@@ -9,8 +9,9 @@ import 'reservas.dart';
 
 class MapaPuntosScreen extends StatefulWidget {
   final bool soloMapa;
+  final Map<String, dynamic>? datosIA;
 
-  const MapaPuntosScreen({super.key, this.soloMapa = false});
+  const MapaPuntosScreen({super.key, this.soloMapa = false, this.datosIA});
 
   @override
   State<MapaPuntosScreen> createState() => _MapaPuntosScreenState();
@@ -259,6 +260,7 @@ class _MapaPuntosScreenState extends State<MapaPuntosScreen> {
                               MaterialPageRoute(
                                 builder: (_) => ReservasScreen(
                                   aliado: puntoSeleccionado!,
+                                  datosIA: widget.datosIA,
                                 ),
                               ),
                             );

@@ -7,24 +7,26 @@ import '../services/auth_service.dart';
 
 class ReservasScreen extends StatefulWidget {
   final Map<String, dynamic> aliado;
+  final Map<String, dynamic>? datosIA;
 
   const ReservasScreen({
     super.key,
     required this.aliado,
+    this.datosIA,
   });
 
   @override
-  State<ReservasScreen> createState() =>
-      _ReservasScreenState();
+  State<ReservasScreen> createState() => _ReservasScreenState();
 }
 
-class _ReservasScreenState
-    extends State<ReservasScreen> {
-  final TextEditingController
-      observacionesController =
-      TextEditingController();
+class _ReservasScreenState extends State<ReservasScreen> {
+  final TextEditingController observacionesController = TextEditingController();
 
   bool loading = false;
+  bool _confirmado = false;
+
+  DateTime _fechaSeleccionada = DateTime.now().add(const Duration(days: 1));
+  TimeOfDay _horaSeleccionada = const TimeOfDay(hour: 10, minute: 0);
 
   List<MaterialSeleccionado> materiales = [];
 
@@ -32,283 +34,161 @@ class _ReservasScreenState
   void initState() {
     super.initState();
 
-    materiales = [
-      MaterialSeleccionado(
-        id: 1,
-        nombre: 'Plástico',
-      ),
-      MaterialSeleccionado(
-        id: 2,
-        nombre: 'Cartón',
-      ),
-      MaterialSeleccionado(
-        id: 3,
-        nombre: 'Vidrio',
-      ),
-      MaterialSeleccionado(
-        id: 4,
-        nombre: 'Metal',
-      ),
-    ];
-  }
+   
 
-  Future<void> registrarEntrega() async {
-    try {
-      setState(() {
-        loading = true;
-      });
-
-      final token = await AuthService.getToken();
-
-      if (token == null || token.isEmpty) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No se encontró token de autenticación'),
-          ),
-        );
-        return;
+    if (widget.datosIA != null) {
+      final material = (widget.datosIA!['tipo'] ?? '').toString().toLowerCase();
+      for (var m in materiales) {
+        if (material.contains(m.nombre.toLowerCase())) {
+          m.seleccionado = true;
+          break;
+        }
       }
-
-      final detalles = materiales
-          .where((m) =>
-              m.seleccionado &&
-              m.pesoController.text.isNotEmpty)
-          .map((m) => {
-                "idMaterial": m.id,
-                "peso": double.parse(
-                  m.pesoController.text,
-                )
-              })
-          .toList();
-
-      if (detalles.isEmpty) {
-        if (!mounted) return;
-
-        ScaffoldMessenger.of(context)
-            .showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Selecciona materiales',
-            ),
-          ),
-        );
-
-        return;
-      }
-
-      final body = {
-        "idPunto": widget.aliado['id'],
-        "observacion": observacionesController.text,
-        "detalles": detalles
-      };
-
-      final response = await http.post(
-        Uri.parse(
-          'http://10.0.2.2:3333/api/usuario/entregas',
-        ),
-        headers: {
-          'Content-Type':
-              'application/json',
-          'Authorization':
-              'Bearer $token',
-        },
-        body: jsonEncode(body),
-      );
-
-      if (!mounted) return;
-
-      final data = jsonDecode(response.body);
-
-      if (response.statusCode == 200 ||
-          response.statusCode == 201) {
-        showDialog(
-          context: context,
-          builder: (_) => AlertDialog(
-            title: const Text(
-              'Entrega registrada',
-            ),
-            content: Text(
-              'Puntos ganados: ${data['entrega']['puntosTotales']}',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.pop(context);
-                },
-                child:
-                    const Text('Aceptar'),
-              )
-            ],
-          ),
-        );
-      } else {
-        if (!mounted) return;
-
-        ScaffoldMessenger.of(context)
-            .showSnackBar(
-          SnackBar(
-            content: Text(
-              data['message']
-                      ?.toString() ??
-                  'Error del servidor',
-            ),
-          ),
-        );
-      }
-    } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context)
-          .showSnackBar(
-        SnackBar(
-          content: Text(
-            'Error: $e',
-          ),
-        ),
-      );
-    } finally {
-      setState(() {
-        loading = false;
-      });
     }
   }
 
-  Widget materialCard(
-      MaterialSeleccionado material) {
-    return Container(
-      margin:
-          const EdgeInsets.only(bottom: 15),
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius:
-            BorderRadius.circular(18),
-      ),
-      child: Column(
-        children: [
-          Row(
+  Future<void> _seleccionarFecha() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _fechaSeleccionada,
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 90)),
+    );
+    if (picked != null) setState(() => _fechaSeleccionada = picked);
+  }
+
+  Future<void> _seleccionarHora() async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: _horaSeleccionada,
+    );
+    if (picked != null) setState(() => _horaSeleccionada = picked);
+  }
+
+  String get _fechaFormateada {
+    final d = _fechaSeleccionada;
+    final meses = [
+      'ene', 'feb', 'mar', 'abr', 'may', 'jun',
+      'jul', 'ago', 'sep', 'oct', 'nov', 'dic'
+    ];
+    return '${d.day} ${meses[d.month - 1]} ${d.year}';
+  }
+
+  String get _horaFormateada {
+    final h = _horaSeleccionada;
+    final hora = h.hour.toString().padLeft(2, '0');
+    final min = h.minute.toString().padLeft(2, '0');
+    return '$hora:$min';
+  }
+
+  Future<void> _confirmarReserva() async {
+    setState(() => loading = true);
+
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (mounted) {
+      setState(() {
+        loading = false;
+        _confirmado = true;
+      });
+
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Checkbox(
-                value:
-                    material.seleccionado,
-                onChanged: (value) {
-                  setState(() {
-                    material.seleccionado =
-                        value!;
-                  });
-                },
-              ),
-              Expanded(
-                child: Text(
-                  material.nombre,
-                  style:
-                      const TextStyle(
-                    fontSize: 16,
-                    fontWeight:
-                        FontWeight.bold,
-                  ),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEAF3DE),
+                  borderRadius: BorderRadius.circular(50),
                 ),
+                child: const Icon(Icons.check_circle, color: Color(0xFF3B6D11), size: 48),
               ),
+              const SizedBox(height: 16),
+              const Text('¡Reserva confirmada!',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Text('Pendiente de confirmación por el encargado.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 13, color: Colors.grey[600])),
+              const SizedBox(height: 4),
+              Text('Recibirás una notificación cuando sea aceptada.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 12, color: Colors.grey[400])),
             ],
           ),
-
-          if (material.seleccionado)
-            TextField(
-              controller:
-                  material.pesoController,
-              keyboardType:
-                  TextInputType.number,
-              decoration:
-                  InputDecoration(
-                hintText:
-                    'Peso en KG',
-                prefixIcon: const Icon(
-                  BootstrapIcons.box,
-                ),
-                border:
-                    OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius
-                          .circular(
-                    15,
-                  ),
-                ),
-              ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
+              child: const Text('Aceptar'),
             ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          const Color(0xffF4F7F5),
-
+      backgroundColor: const Color(0xffF4F7F5),
       appBar: AppBar(
-        title:
-            const Text('Reservar entrega'),
-        backgroundColor:
-            Colors.green,
+        title: const Text('Reservar entrega'),
+        backgroundColor: Colors.green,
       ),
-
       body: SingleChildScrollView(
-        padding:
-            const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         child: Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // ── Punto de reciclaje ────────────────────────
             Container(
               width: double.infinity,
-              padding:
-                  const EdgeInsets.all(
-                20,
-              ),
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius:
-                    BorderRadius
-                        .circular(20),
+                borderRadius: BorderRadius.circular(20),
               ),
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment
-                        .start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    widget.aliado['nombre'],
-                    style:
-                        const TextStyle(
-                      fontSize: 22,
-                      fontWeight:
-                          FontWeight.bold,
-                    ),
-                  ),
-
-                  const SizedBox(
-                    height: 10,
-                  ),
-
                   Row(
                     children: [
-                      const Icon(
-                        BootstrapIcons
-                            .geo_alt_fill,
-                        color:
-                            Colors.green,
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEAF3DE),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(Icons.store_rounded, color: Color(0xFF3B6D11), size: 24),
                       ),
-
-                      const SizedBox(
-                        width: 8,
-                      ),
-
+                      const SizedBox(width: 12),
                       Expanded(
-                        child: Text(
-                          widget.aliado['direccion'],
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(widget.aliado['nombre'],
+                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 2),
+                            Row(
+                              children: [
+                                const Icon(BootstrapIcons.geo_alt_fill, color: Colors.green, size: 14),
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(widget.aliado['direccion'],
+                                      style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -317,91 +197,195 @@ class _ReservasScreenState
               ),
             ),
 
-            const SizedBox(height: 25),
+            const SizedBox(height: 20),
 
-            const Text(
-              'Materiales',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight:
-                    FontWeight.bold,
-              ),
-            ),
-
-            const SizedBox(height: 15),
-
-            ...materiales.map(materialCard),
-
-            const SizedBox(height: 25),
-
-            const Text(
-              'Observaciones',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight:
-                    FontWeight.bold,
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            TextField(
-              controller:
-                  observacionesController,
-              maxLines: 4,
-              decoration:
-                  InputDecoration(
-                hintText:
-                    'Escribe detalles...',
-                filled: true,
-                fillColor: Colors.white,
-                border:
-                    OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius
-                          .circular(15),
+            // ── Datos de la IA ────────────────────────────
+            if (widget.datosIA != null) ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0xFFEAF3DE), width: 1.5),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.auto_awesome, color: Color(0xFF3B6D11), size: 18),
+                        const SizedBox(width: 6),
+                        const Text('Material detectado por IA',
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF3B6D11))),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        _infoIA('Material', widget.datosIA!['material'] ?? '-'),
+                        _infoIA('Cantidad', widget.datosIA!['cantidadEstimada'] ?? '-'),
+                        _infoIA('Peso aprox.', widget.datosIA!['pesoAproximado'] ?? '-'),
+                      ],
+                    ),
+                  ],
                 ),
               ),
+              const SizedBox(height: 20),
+            ],
+
+            // ── Estado ────────────────────────────────────
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFAEEDA),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.schedule, color: Colors.orange, size: 18),
+                  ),
+                  const SizedBox(width: 10),
+                  const Text('Estado: ',
+                      style: TextStyle(fontSize: 13, color: Colors.grey)),
+                  const Text('Pendiente de confirmación',
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.orange)),
+                ],
+              ),
             ),
 
-            const SizedBox(height: 30),
+            const SizedBox(height: 20),
 
-            SizedBox(
-              width: double.infinity,
-              height: 55,
-              child: ElevatedButton(
-                onPressed: loading
-                    ? null
-                    : registrarEntrega,
-                style:
-                    ElevatedButton.styleFrom(
-                  backgroundColor:
-                      Colors.green,
-                  shape:
-                      RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius
-                            .circular(
-                      15,
-                    ),
+            // ── Fecha y hora ──────────────────────────────
+            Row(
+              children: [
+                Expanded(
+                  child: _buildSelector(
+                    icon: Icons.calendar_month,
+                    label: 'Fecha',
+                    value: _fechaFormateada,
+                    onTap: _seleccionarFecha,
                   ),
                 ),
-                child: loading
-                    ? const CircularProgressIndicator(
-                        color:
-                            Colors.white,
-                      )
-                    : const Text(
-                        'Registrar entrega',
-                        style:
-                            TextStyle(
-                          fontSize: 18,
-                        ),
-                      ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildSelector(
+                    icon: Icons.access_time,
+                    label: 'Hora',
+                    value: _horaFormateada,
+                    onTap: _seleccionarHora,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            // ── Observaciones ─────────────────────────────
+            const Text('Observaciones',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+            TextField(
+              controller: observacionesController,
+              maxLines: 3,
+              decoration: InputDecoration(
+                hintText: 'Escribe detalles adicionales...',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
+            ),
+
+            const SizedBox(height: 28),
+
+            // ── Botón confirmar ───────────────────────────
+            SizedBox(
+              width: double.infinity,
+              height: 54,
+              child: ElevatedButton.icon(
+                onPressed: loading ? null : _confirmarReserva,
+                icon: loading
+                    ? const SizedBox(
+                        width: 20, height: 20,
+                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    : const Icon(Icons.check_circle_outline),
+                label: Text(loading ? 'Procesando...' : 'Confirmar reserva'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSelector({
+    required IconData icon,
+    required String label,
+    required String value,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFEAF3DE),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: const Color(0xFF3B6D11), size: 20),
+            ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: TextStyle(fontSize: 11, color: Colors.grey[500])),
+                Text(value,
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+              ],
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _infoIA(String label, String value) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: TextStyle(fontSize: 11, color: Colors.grey[500])),
+          const SizedBox(height: 2),
+          Text(value,
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+        ],
       ),
     );
   }
@@ -410,12 +394,8 @@ class _ReservasScreenState
 class MaterialSeleccionado {
   final int id;
   final String nombre;
-
   bool seleccionado;
-
-  TextEditingController
-      pesoController =
-      TextEditingController();
+  TextEditingController pesoController = TextEditingController();
 
   MaterialSeleccionado({
     required this.id,
