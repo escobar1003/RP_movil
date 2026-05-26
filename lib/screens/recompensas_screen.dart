@@ -1,37 +1,9 @@
-// lib/screens/recompensas_screen.dart
-
 import 'package:flutter/material.dart';
-import '../data/recompensas_data.dart';
-import '../models/recompensa_model.dart';
-import 'recompensa_detalle_screen.dart';
+import '../data/puntos_reciclaje_data.dart';
+import '../theme/app_theme.dart';
 
-class RecompensasScreen extends StatefulWidget {
+class RecompensasScreen extends StatelessWidget {
   const RecompensasScreen({super.key});
-
-  @override
-  State<RecompensasScreen> createState() => _RecompensasScreenState();
-}
-
-class _RecompensasScreenState extends State<RecompensasScreen>
-    with SingleTickerProviderStateMixin {
-
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  List<RecompensaModel> _filtradas(String categoria) {
-    return recompensasEjemplo.where((r) => r.categoria == categoria).toList();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,15 +13,12 @@ class _RecompensasScreenState extends State<RecompensasScreen>
         child: Column(
           children: [
             _buildHeader(),
-            _buildTabs(),
             Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildLista(_filtradas('descuento')),
-                  _buildLista(_filtradas('producto')),
-                  _buildLista(_filtradas('premio')),
-                ],
+              child: ListView.builder(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                itemCount: puntosReciclaje.length,
+                itemBuilder: (context, index) =>
+                    _buildCard(context, puntosReciclaje[index]),
               ),
             ),
           ],
@@ -82,7 +51,7 @@ class _RecompensasScreenState extends State<RecompensasScreen>
           ),
           const SizedBox(height: 4),
           Text(
-            'Canjea tus puntos por grandes beneficios',
+            'Puntos de reciclaje cercanos',
             style: TextStyle(color: Colors.white.withOpacity(0.65), fontSize: 13),
           ),
           const SizedBox(height: 20),
@@ -129,198 +98,84 @@ class _RecompensasScreenState extends State<RecompensasScreen>
     );
   }
 
-  Widget _buildTabs() {
+  Widget _buildCard(BuildContext context, Map<String, dynamic> punto) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+      margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
-      child: TabBar(
-        controller: _tabController,
-        indicator: BoxDecoration(
-          color: const Color(0xFF2D5A1B),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        indicatorSize: TabBarIndicatorSize.tab,
-        labelColor: Colors.white,
-        unselectedLabelColor: Colors.grey[600],
-        labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-        unselectedLabelStyle: const TextStyle(fontSize: 13),
-        dividerColor: Colors.transparent,
-        tabs: const [
-          Tab(text: 'Descuentos'),
-          Tab(text: 'Productos'),
-          Tab(text: 'Premios'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLista(List<RecompensaModel> lista) {
-    if (lista.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
           children: [
-            Icon(Icons.inbox_outlined, size: 60, color: Colors.grey[300]),
-            const SizedBox(height: 12),
-            Text(
-              'No hay recompensas\nen esta categoría',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey[400], fontSize: 14),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-      itemCount: lista.length,
-      itemBuilder: (context, index) => _buildCard(context, lista[index]),
-    );
-  }
-
-  Widget _buildCard(BuildContext context, RecompensaModel r) {
-    final bool esProducto = r.descuentoPorcentaje == 0;
-
-    return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => RecompensaDetalleScreen(recompensa: r),
-        ),
-      ),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          // ← solo BoxShadow aquí, sin íconos
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-
-              // Descuento / ícono producto
-              Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEAF3DE),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Center(
-                  child: esProducto
-                      ? const Icon(Icons.card_giftcard_outlined,
-                          color: Color(0xFF3B6D11), size: 32)
-                      : Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '${r.descuentoPorcentaje}%',
-                              style: const TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF2D5A1B),
-                              ),
-                            ),
-                            Text(
-                              'dscto',
-                              style: TextStyle(fontSize: 10, color: Colors.grey[500]),
-                            ),
-                          ],
-                        ),
-                ),
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: AppColors.green100,
+                borderRadius: BorderRadius.circular(16),
               ),
-
-              const SizedBox(width: 14),
-
-              // Info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      r.tienda,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF1E3A0F),
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      r.descripcion,
-                      style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        const Icon(Icons.stars_rounded,
-                            size: 14, color: Color(0xFF7BC043)),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${r.puntosRequeridos} puntos',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Color(0xFF3B6D11),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(width: 8),
-
-              // Botón canjear
-              Column(
+              child: const Icon(Icons.store_rounded,
+                  color: AppColors.primary, size: 30),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF2D5A1B),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Text(
-                      'Canjear',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  Text(
+                    punto['nombre'],
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1E3A0F),
                     ),
                   ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(Icons.location_on_outlined,
+                          size: 13, color: AppColors.textLight),
+                      const SizedBox(width: 3),
+                      Expanded(
+                        child: Text(
+                          punto['direccion'],
+                          style: const TextStyle(fontSize: 12, color: AppColors.textLight),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 6),
-                  Text(
-                    '${r.disponibles} disp.',
-                    style: TextStyle(fontSize: 10, color: Colors.grey[400]),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEAF3DE),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      punto['materiales'],
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFF3B6D11),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ],
               ),
-
-            ],
-          ),
+            ),
+            const Icon(Icons.chevron_right, color: AppColors.textLight),
+          ],
         ),
       ),
     );

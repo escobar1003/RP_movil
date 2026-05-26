@@ -1,7 +1,6 @@
 // lib/screens/login_screen.dart
 
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
@@ -32,15 +31,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
       // LOGIN EXITOSO
       if (response['token'] != null) {
-
-        final prefs =
-            await SharedPreferences.getInstance();
-
-        await prefs.setString(
-          'token',
-          response['token'],
-        );
-
         if (!mounted) return;
 
         Navigator.pushAndRemoveUntil(
