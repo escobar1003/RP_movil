@@ -3,6 +3,7 @@ import '../services/auth_service.dart';
 import 'historial_entregas_screen.dart';
 import 'mis_canjes_screen.dart';
 import 'welcome_screen.dart';
+import 'editar_perfil_screen.dart';
 
 class PerfilScreen extends StatefulWidget {
   const PerfilScreen({super.key});
@@ -320,7 +321,10 @@ class _PerfilScreenState extends State<PerfilScreen> {
             label: 'Editar perfil',
             color: const Color(0xFF2D5A1B),
             bg: const Color(0xFFEAF3DE),
-            onTap: () {},
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const EditarPerfilScreen()),
+            ),
           ),
           Divider(height: 1, color: Colors.grey.withOpacity(0.1), indent: 60),
 

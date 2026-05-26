@@ -1,9 +1,5 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:bootstrap_icons/bootstrap_icons.dart';
-import '../services/auth_service.dart';
 
 class ReservasScreen extends StatefulWidget {
   final Map<String, dynamic> aliado;
@@ -23,7 +19,6 @@ class _ReservasScreenState extends State<ReservasScreen> {
   final TextEditingController observacionesController = TextEditingController();
 
   bool loading = false;
-  bool _confirmado = false;
 
   DateTime _fechaSeleccionada = DateTime.now().add(const Duration(days: 1));
   TimeOfDay _horaSeleccionada = const TimeOfDay(hour: 10, minute: 0);
@@ -89,7 +84,6 @@ class _ReservasScreenState extends State<ReservasScreen> {
     if (mounted) {
       setState(() {
         loading = false;
-        _confirmado = true;
       });
 
       showDialog(
