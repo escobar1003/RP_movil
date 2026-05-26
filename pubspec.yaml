@@ -1,0 +1,28 @@
+name: recycling_points
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.11.4
+
+dependencies:
+  bootstrap_icons: ^1.13.1+1
+  flutter:
+    sdk: flutter
+  camera: ^0.10.5+5      # Para abrir la cámara nativa del celular
+  http: ^1.1.0           # Para enviar la foto mediante POST a AdonisJS
+  path: ^1.8.3           # Para manejar las rutas de los archivos de imagen
+  shared_preferences: ^2.5.5
+  flutter_map: ^8.3.0
+  latlong2: ^0.9.1
+  
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/imagen_de_fondo.png
