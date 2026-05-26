@@ -1,6 +1,6 @@
 // lib/screens/main_navigation.dart
-
 import 'package:flutter/material.dart';
+import 'package:recycling_points/screens/chat_ia_screen.dart';
 import '../theme/app_theme.dart';
 import 'home.dart';
 import 'reciclar_screen.dart';
