@@ -1,6 +1,6 @@
 // lib/screens/main_navigation.dart
-
 import 'package:flutter/material.dart';
+import 'package:recycling_points/screens/chat_ia_screen.dart';
 import '../theme/app_theme.dart';
 import 'home.dart';
 import 'reciclar_screen.dart';
@@ -20,21 +20,25 @@ class _MainNavigationState extends State<MainNavigation> {
   final List<Widget> _screens = const [
     HomeScreen(),
     ReciclarScreen(),
-    RecompensasScreen(),
-    PerfilScreen(),
+    ChatIaScreen(), // Posición 2
+    RecompensasScreen(), // Posición 3
+    PerfilScreen(), // Posición 4
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
+      body: IndexedStack(index: _currentIndex, children: _screens),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.07), blurRadius: 16, offset: const Offset(0, -4))],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.07),
+              blurRadius: 16,
+              offset: const Offset(0, -4),
+            ),
+          ],
         ),
         child: SafeArea(
           child: Padding(
@@ -42,10 +46,42 @@ class _MainNavigationState extends State<MainNavigation> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _NavItem(icon: Icons.home_rounded,     label: 'Inicio',      index: 0, current: _currentIndex, onTap: _setTab),
-                _NavItem(icon: Icons.recycling,        label: 'Reciclar',    index: 1, current: _currentIndex, onTap: _setTab),
-                _NavItem(icon: Icons.card_giftcard,    label: 'Recompensas', index: 2, current: _currentIndex, onTap: _setTab),
-                _NavItem(icon: Icons.person_rounded,   label: 'Perfil',      index: 3, current: _currentIndex, onTap: _setTab),
+                _NavItem(
+                  icon: Icons.home_rounded,
+                  label: 'Inicio',
+                  index: 0,
+                  current: _currentIndex,
+                  onTap: _setTab,
+                ),
+                _NavItem(
+                  icon: Icons.recycling,
+                  label: 'Reciclar',
+                  index: 1,
+                  current: _currentIndex,
+                  onTap: _setTab,
+                ),
+                // 🔥 NUEVA PESTAÑA: Chat IA agregada dinámicamente en el medio
+                _NavItem(
+                  icon: Icons.chat_bubble_rounded,
+                  label: 'Chat IA',
+                  index: 2,
+                  current: _currentIndex,
+                  onTap: _setTab,
+                ),
+                _NavItem(
+                  icon: Icons.card_giftcard,
+                  label: 'Recompensas',
+                  index: 3, // Se mueve al índice 3
+                  current: _currentIndex,
+                  onTap: _setTab,
+                ),
+                _NavItem(
+                  icon: Icons.person_rounded,
+                  label: 'Perfil',
+                  index: 4, // Se mueve al índice 4
+                  current: _currentIndex,
+                  onTap: _setTab,
+                ),
               ],
             ),
           ),
@@ -82,7 +118,11 @@ class _NavItem extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: active ? AppColors.primary : AppColors.textLight, size: 26),
+            Icon(
+              icon,
+              color: active ? AppColors.primary : AppColors.textLight,
+              size: 26,
+            ),
             const SizedBox(height: 2),
             Text(
               label,
