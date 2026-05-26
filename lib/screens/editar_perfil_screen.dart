@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/auth_service.dart';
+import '../services/usuario_service.dart';
 
 class EditarPerfilScreen extends StatefulWidget {
   const EditarPerfilScreen({super.key});
@@ -21,20 +23,29 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
   }
 
   Future<void> _cargarDatos() async {
-    final nombre = await AuthService.getNombre();
-    final telefono = await AuthService.getTelefono();
-    _nombreController.text = nombre;
-    _telefonoController.text = telefono;
+    try {
+      final perfil = await UsuarioService.getPerfil();
+      if (perfil['usuario'] != null) {
+        _nombreController.text = perfil['usuario']['nombre'] ?? '';
+        _telefonoController.text = perfil['usuario']['telefono'] ?? '';
+        return;
+      }
+    } catch (_) {}
+    _nombreController.text = await AuthService.getNombre();
+    _telefonoController.text = await AuthService.getTelefono();
   }
 
   Future<void> _guardar() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _guardando = true);
     try {
-      await AuthService.updatePerfil(
+      await UsuarioService.updatePerfil(
         nombre: _nombreController.text,
         telefono: _telefonoController.text,
       );
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('nombre_usuario', _nombreController.text);
+      await prefs.setString('usuario_telefono', _telefonoController.text);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Perfil actualizado'), backgroundColor: Color(0xFF2D5A1B)),

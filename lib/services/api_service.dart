@@ -50,6 +50,20 @@ class ApiService {
     return jsonDecode(response.body);
   }
 
+  static Future<Map<String, dynamic>> detectarMaterial(Map<String, dynamic> body) async {
+    return post('/detectar-material', body: body, auth: false);
+  }
+
+  static Future<Map<String, dynamic>> asignarPuntos(Map<String, dynamic> body) async {
+    const puntosBase = 'https://backend-rp-arreglado-n8p8.onrender.com/puntos';
+    final response = await http.post(
+      Uri.parse('$puntosBase/asignar'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(body),
+    );
+    return jsonDecode(response.body);
+  }
+
   static Future<Map<String, dynamic>> uploadImage(String path, String field, String filePath, {bool auth = true}) async {
     final request = http.MultipartRequest(
       'POST',

@@ -37,6 +37,9 @@ class AuthService {
         if (data['usuario']['rol'] != null) {
           await prefs.setString('usuario_rol', data['usuario']['rol']);
         }
+        if (data['usuario']['telefono'] != null) {
+          await prefs.setString('usuario_telefono', data['usuario']['telefono']);
+        }
       }
     }
 
@@ -85,19 +88,57 @@ class AuthService {
     return prefs.getString('usuario_rol') ?? 'usuario';
   }
 
-  static Future<bool> estaLogueado() async {
+  static Future<String> getTelefono() async {
     final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-    return token != null && token.isNotEmpty;
+    return prefs.getString('usuario_telefono') ?? '';
   }
 
-  // CERRAR SESIÓN
+  // RECUPERAR CONTRASEÑA
+  static Future<Map<String, dynamic>> recuperarPasswordSolicitar(String correo) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/recuperar-password/solicitar'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'correo': correo}),
+    );
+    return jsonDecode(response.body);
+  }
+
+  static Future<Map<String, dynamic>> recuperarPasswordRestablecer({
+    required String correo,
+    required String codigo,
+    required String password,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/recuperar-password/restablecer'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'correo': correo, 'codigo': codigo, 'password': password}),
+    );
+    return jsonDecode(response.body);
+  }
+
+  // CERRAR SESIÓN (API + local)
   static Future<void> logout() async {
+    try {
+      final token = await getToken();
+      if (token != null) {
+        await http.delete(
+          Uri.parse('$baseUrl/cerrar-sesion'),
+          headers: {'Authorization': 'Bearer $token'},
+        );
+      }
+    } catch (_) {}
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('nombre_usuario');
     await prefs.remove('token');
     await prefs.remove('usuario_id');
     await prefs.remove('usuario_correo');
     await prefs.remove('usuario_rol');
+    await prefs.remove('usuario_telefono');
+  }
+
+  static Future<bool> estaLogueado() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    return token != null && token.isNotEmpty;
   }
 }
