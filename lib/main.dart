@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'theme/app_theme.dart';
-import 'screens/welcome_screen.dart';
-import 'screens/main_navigation.dart';
+import 'styles/colors.dart';
+import 'styles/theme.dart';
+import 'welcome/welcome_screen.dart';
+import 'main_navigation/main_navigation.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
