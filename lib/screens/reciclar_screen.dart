@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:camera/camera.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:io';
 import '../theme/app_theme.dart';
 import 'mapa_puntos_screen.dart';
 import 'chat_ia_screen.dart';
@@ -14,42 +18,161 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
   bool _mostrarResultado = false;
   bool _estaCargando = false;
 
+  CameraController? _cameraController;
+  List<CameraDescription>? _cameras;
+  bool _camaraInicializada = false;
+  String? _rutaImagenLocal;
+
   String _nombre = 'Detectando...';
   String _tipo = '';
   String _estado = 'Aprovechable';
   int _confianza = 0;
   String _caneco = 'Caneco Blanco';
   String _deposito = 'Aprovechable';
-  String _descripcion = 'Vidrio, plástico, metal,\npapel y cartón.';
-  String _cantidadEstimada = '1 unidad';
-  String _pesoAproximado = '0.5 kg';
-  String _nivelReciclabilidad = 'Alto';
-  String _recomendacionIA = 'Enjuaga y aplasta antes de depositar.';
+  String _descripcion = 'Vidrio, plástico, metal, papel y cartón.';
+  String _cantidadEstimada = '';
+  String _pesoAproximado = '';
+  String _nivelReciclabilidad = '';
+  String _recomendacionIA = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _inicializarCamara();
+  }
+
+  bool _errorCamara = false;
+  String _mensajeErrorCamara = '';
+
+  Future<void> _inicializarCamara() async {
+    try {
+      _errorCamara = false;
+      _mensajeErrorCamara = '';
+      _cameras = await availableCameras();
+      if (_cameras != null && _cameras!.isNotEmpty) {
+        _cameraController = CameraController(
+          _cameras![0],
+          ResolutionPreset.medium,
+          enableAudio: false,
+        );
+        await _cameraController!.initialize();
+        if (mounted) setState(() => _camaraInicializada = true);
+      } else {
+        if (mounted) setState(() {
+          _errorCamara = true;
+          _mensajeErrorCamara = 'No se encontró ninguna cámara en el dispositivo.';
+        });
+      }
+    } catch (e) {
+      debugPrint('Error cámara: $e');
+      if (mounted) setState(() {
+        _errorCamara = true;
+        _mensajeErrorCamara = 'Error al iniciar la cámara.\nAsegúrate de haber otorgado permisos de cámara en Ajustes > Aplicaciones > recycling_points > Permisos.\n\nError: $e';
+      });
+    }
+  }
 
   Future<void> _escanear() async {
+    if (_cameraController == null || !_cameraController!.value.isInitialized) return;
+
     setState(() {
       _estaCargando = true;
       _mostrarResultado = false;
     });
 
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      final XFile foto = await _cameraController!.takePicture();
+      setState(() => _rutaImagenLocal = foto.path);
 
-    if (mounted) {
-      setState(() {
-        _confianza = 92;
-        _mostrarResultado = true;
-        _estaCargando = false;
-        _nombre = 'Botella de plástico';
-        _tipo = 'Plástico (PET)';
-        _estado = 'Aprovechable';
-        _caneco = 'Caneco Blanco';
-        _deposito = 'Aprovechable';
-        _descripcion = 'Plásticos, vidrio, metal, papel y cartón.';
-        _cantidadEstimada = '1 unidad';
-        _pesoAproximado = '0.5 kg';
-        _nivelReciclabilidad = 'Alto';
-        _recomendacionIA = 'Enjuaga y aplasta antes de depositar.';
-      });
+      const ipServidor = 'localhost';
+      final url = Uri.parse('http://$ipServidor:3333/api/detectar-material');
+
+      final request = http.MultipartRequest('POST', url);
+      request.files.add(await http.MultipartFile.fromPath('image', foto.path));
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+
+        if (data['detectado'] == true) {
+          final resultado = data['resultado'];
+          final String clase = resultado['objeto'];
+          final double confianza = resultado['confianza'] * 100;
+
+          setState(() {
+            _confianza = confianza.round();
+            _mostrarResultado = true;
+
+            if (clase.toLowerCase().contains('botella') ||
+                clase.toLowerCase().contains('plastic')) {
+              _nombre = 'Botella de plástico';
+              _tipo = 'Plástico (PET)';
+              _cantidadEstimada = '1 unidad';
+              _pesoAproximado = '0.5 kg';
+              _nivelReciclabilidad = 'Alto';
+              _recomendacionIA = 'Enjuaga y aplasta antes de depositar.';
+            } else if (clase.toLowerCase().contains('lata') ||
+                clase.toLowerCase().contains('can') ||
+                clase.toLowerCase().contains('metal')) {
+              _nombre = 'Lata de Aluminio';
+              _tipo = 'Metal';
+              _cantidadEstimada = '1 unidad';
+              _pesoAproximado = '0.3 kg';
+              _nivelReciclabilidad = 'Alto';
+              _recomendacionIA = 'Aplasta la lata para ahorrar espacio.';
+            } else if (clase.toLowerCase().contains('vidrio') ||
+                clase.toLowerCase().contains('glass')) {
+              _nombre = 'Botella de Vidrio';
+              _tipo = 'Vidrio';
+              _cantidadEstimada = '1 unidad';
+              _pesoAproximado = '0.8 kg';
+              _nivelReciclabilidad = 'Alto';
+              _recomendacionIA = 'Envuelve en papel antes de depositar.';
+            } else if (clase.toLowerCase().contains('carton') ||
+                clase.toLowerCase().contains('papel')) {
+              _nombre = 'Caja de Cartón';
+              _tipo = 'Cartón';
+              _cantidadEstimada = '1 unidad';
+              _pesoAproximado = '0.4 kg';
+              _nivelReciclabilidad = 'Alto';
+              _recomendacionIA = 'Dóblala para que ocupe menos espacio.';
+            } else {
+              _nombre = clase;
+              _tipo = 'Residuo Identificado';
+              _cantidadEstimada = '1 unidad';
+              _pesoAproximado = '0.5 kg';
+              _nivelReciclabilidad = 'Medio';
+              _recomendacionIA = 'Depositar en el contenedor correspondiente.';
+            }
+            _estado = 'Aprovechable';
+            _caneco = 'Caneco Blanco';
+            _deposito = 'Aprovechable';
+            _descripcion = 'Plásticos, vidrio, metal, papel y cartón.';
+          });
+        } else {
+          setState(() {
+            _nombre = 'No identificado';
+            _tipo = 'Objeto desconocido';
+            _estado = 'No clasificado';
+            _confianza = 0;
+            _caneco = 'Caneco Negro';
+            _deposito = 'No aprovechables';
+            _descripcion = 'Papel higiénico, servilletas, cartones contaminados.';
+            _mostrarResultado = true;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error de conexión con el servidor: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _estaCargando = false);
     }
   }
 
@@ -69,32 +192,25 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
 
   @override
   void dispose() {
+    _cameraController?.dispose();
     super.dispose();
   }
 
   Color _nivelColor(String nivel) {
     switch (nivel) {
-      case 'Alto':
-        return const Color(0xFF3B6D11);
-      case 'Medio':
-        return Colors.orange;
-      case 'Bajo':
-        return Colors.red;
-      default:
-        return Colors.grey;
+      case 'Alto': return const Color(0xFF3B6D11);
+      case 'Medio': return Colors.orange;
+      case 'Bajo': return Colors.red;
+      default: return Colors.grey;
     }
   }
 
   Color _nivelBg(String nivel) {
     switch (nivel) {
-      case 'Alto':
-        return const Color(0xFFEAF3DE);
-      case 'Medio':
-        return const Color(0xFFFAEEDA);
-      case 'Bajo':
-        return const Color(0xFFFCEBEB);
-      default:
-        return Colors.grey[100]!;
+      case 'Alto': return const Color(0xFFEAF3DE);
+      case 'Medio': return const Color(0xFFFAEEDA);
+      case 'Bajo': return const Color(0xFFFCEBEB);
+      default: return Colors.grey[100]!;
     }
   }
 
@@ -129,10 +245,10 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
               ),
             ),
 
-            // ── Visor ──────────────────────────────────────
+            // ── Visor cámara ──────────────────────────────
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 24),
-              height: 200,
+              height: 260,
               decoration: BoxDecoration(
                 color: const Color(0xFFE8E8E8),
                 borderRadius: BorderRadius.circular(20),
@@ -140,35 +256,55 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  if (_estaCargando)
-                    const CircularProgressIndicator(color: AppColors.primary)
-                  else if (_mostrarResultado)
-                    Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFEAF3DE),
-                        borderRadius: BorderRadius.circular(20),
+                  if (_errorCamara)
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.error_outline,
+                              size: 48, color: Colors.red),
+                          const SizedBox(height: 8),
+                          Text(_mensajeErrorCamara,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                  color: Colors.red, fontSize: 12)),
+                          const SizedBox(height: 12),
+                          TextButton.icon(
+                            onPressed: () {
+                              setState(() => _camaraInicializada = false);
+                              _inicializarCamara();
+                            },
+                            icon: const Icon(Icons.refresh, size: 18),
+                            label: const Text('Reintentar'),
+                          ),
+                        ],
                       ),
-                      child: const Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.check_circle_outline,
-                                size: 48, color: AppColors.primary),
-                            SizedBox(height: 6),
-                            Text('¡Material detectado!',
-                                style: TextStyle(
-                                  color: AppColors.primary,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                )),
-                          ],
-                        ),
+                    )
+                  else if (_estaCargando)
+                    const CircularProgressIndicator(color: AppColors.primary)
+                  else if (_mostrarResultado && _rutaImagenLocal != null)
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Image.file(
+                        File(_rutaImagenLocal!),
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                      ),
+                    )
+                  else if (_camaraInicializada && _cameraController != null)
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: AspectRatio(
+                        aspectRatio: _cameraController!.value.aspectRatio,
+                        child: CameraPreview(_cameraController!),
                       ),
                     )
                   else
                     const Icon(Icons.camera_alt_outlined,
                         size: 56, color: Colors.black26),
-                  const _ScannerFrame(),
+                  if (!_errorCamara) const _ScannerFrame(),
                 ],
               ),
             ),
@@ -178,7 +314,6 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
             // ── Resultado IA ───────────────────────────────
             if (_mostrarResultado) ...[
 
-              // Material identificado + confianza
               _buildCard(
                 margin: const EdgeInsets.symmetric(horizontal: 24),
                 child: Row(
@@ -200,8 +335,7 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
                               style: TextStyle(fontSize: 11, color: AppColors.textLight)),
                           const SizedBox(height: 2),
                           Text(_nombre,
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.w700, fontSize: 16, color: AppColors.textDark)),
+                              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: AppColors.textDark)),
                           Text(_tipo,
                               style: const TextStyle(fontSize: 12, color: AppColors.textLight)),
                         ],
@@ -210,8 +344,7 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
                     Column(
                       children: [
                         Text('$_confianza%',
-                            style: const TextStyle(
-                                fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.primary)),
+                            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.primary)),
                         const Text('Confianza',
                             style: TextStyle(fontSize: 10, color: AppColors.textLight)),
                       ],
@@ -222,7 +355,6 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
 
               const SizedBox(height: 10),
 
-              // Cantidad, peso, reciclabilidad
               _buildCard(
                 margin: const EdgeInsets.symmetric(horizontal: 24),
                 child: Row(
@@ -239,7 +371,6 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
 
               const SizedBox(height: 10),
 
-              // Recomendación IA
               _buildCard(
                 margin: const EdgeInsets.symmetric(horizontal: 24),
                 child: Row(
@@ -272,7 +403,6 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
 
               const SizedBox(height: 10),
 
-              // Depósito
               _buildCard(
                 margin: const EdgeInsets.symmetric(horizontal: 24),
                 child: Row(
@@ -370,8 +500,7 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
           Icon(icon, size: 20, color: AppColors.primary),
           const SizedBox(height: 4),
           Text(value,
-              style: TextStyle(
-                  fontSize: 14, fontWeight: FontWeight.w700, color: valueColor ?? AppColors.textDark)),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: valueColor ?? AppColors.textDark)),
           Text(label, style: const TextStyle(fontSize: 10, color: AppColors.textLight)),
         ],
       ),

@@ -33,7 +33,7 @@ class _ChatIaScreenState extends State<ChatIaScreen> {
 
     try {
       // IP local configurada para tu entorno
-      final url = Uri.parse('http://192.168.100.8:3333/api/chat');
+      final url = Uri.parse('http://localhost:3333/api/chat');
 
       final response = await http.post(
         url,
