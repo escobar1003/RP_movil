@@ -33,7 +33,9 @@ class _ChatIaScreenState extends State<ChatIaScreen> {
 
     try {
       // IP local configurada para tu entorno
-      final url = Uri.parse('http://192.168.100.8:3333/api/chat');
+      final url = Uri.parse(
+        'https://backend-rp-arreglado-q254.onrender.com/api/chat',
+      );
 
       final response = await http.post(
         url,

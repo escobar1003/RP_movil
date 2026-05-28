@@ -1,7 +1,6 @@
 // lib/screens/register_screen.dart
 
 import 'package:flutter/material.dart';
-
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
 import 'login_screen.dart';
@@ -10,13 +9,10 @@ class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
   @override
-  State<RegisterScreen> createState() =>
-      _RegisterScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _RegisterScreenState
-    extends State<RegisterScreen> {
-
+class _RegisterScreenState extends State<RegisterScreen> {
   final _nombre = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
@@ -24,6 +20,8 @@ class _RegisterScreenState
   bool _obscure = true;
 
   Future<void> _register() async {
+    // Control para verificar en terminal que el botón funciona
+    print("====== INTENTO DE REGISTRO INICIADO ======");
 
     if (_nombre.text.trim().isEmpty ||
         _email.text.trim().isEmpty ||
@@ -37,10 +35,11 @@ class _RegisterScreenState
       return;
     }
 
-    if (_password.text.trim().length < 10) {
+    // MODIFICACIÓN SOLICITADA: Ajuste de validación de caracteres
+    if (_password.text.trim().length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('La contraseña debe tener mínimo 10 caracteres'),
+          content: Text('La contraseña debe tener mínimo 6 caracteres'),
           backgroundColor: Color(0xFFA32D2D),
         ),
       );
@@ -48,48 +47,43 @@ class _RegisterScreenState
     }
 
     try {
+      print("Conectando con el servidor: ${_email.text.trim()}");
 
-      final response =
-          await AuthService.register(
-        nombre: _nombre.text,
-        correo: _email.text,
-        password: _password.text,
+      final response = await AuthService.register(
+        nombre: _nombre.text.trim(),
+        correo: _email.text.trim(),
+        password: _password.text.trim(),
       );
+
+      print("====== RESPUESTA RECIBIDA ======");
+      print(response);
 
       // REGISTER EXITOSO
       if (response['token'] != null) {
-
         if (!mounted) return;
 
         // IR AL LOGIN
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(
-            builder: (_) =>
-                const LoginScreen(),
-          ),
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
           (_) => false,
         );
-
       } else {
-
-        ScaffoldMessenger.of(context)
-            .showSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              response['mensaje'] ??
-              'Error al registrarse',
-            ),
+            content: Text(response['mensaje'] ?? 'Error al registrarse'),
+            backgroundColor: const Color(0xFFA32D2D),
           ),
         );
       }
-
     } catch (e) {
+      print("====== ERROR EN LA PETICIÓN ======");
+      print(e.toString());
 
-      ScaffoldMessenger.of(context)
-          .showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: $e'),
+          backgroundColor: const Color(0xFFA32D2D),
         ),
       );
     }
@@ -97,23 +91,14 @@ class _RegisterScreenState
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Crear cuenta'),
-      ),
-
+      appBar: AppBar(title: const Text('Crear cuenta')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(28),
-
         child: Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
-
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             const SizedBox(height: 20),
-
             const Text(
               'Únete a EcoRecicla 🌱',
               style: TextStyle(
@@ -122,85 +107,58 @@ class _RegisterScreenState
                 color: AppColors.textDark,
               ),
             ),
-
             const SizedBox(height: 6),
-
             const Text(
               'Crea tu cuenta y empieza a reciclar',
-              style: TextStyle(
-                color: AppColors.textMid,
-                fontSize: 14,
-              ),
+              style: TextStyle(color: AppColors.textMid, fontSize: 14),
             ),
-
             const SizedBox(height: 36),
-
             // NOMBRE
             _label('Nombre completo'),
-
             const SizedBox(height: 6),
-
             _field(
               controller: _nombre,
               hint: 'Ana Martínez',
               icon: Icons.person_outline,
             ),
-
             const SizedBox(height: 18),
-
             // EMAIL
             _label('Correo electrónico'),
-
             const SizedBox(height: 6),
-
             _field(
               controller: _email,
               hint: 'tu@correo.com',
               icon: Icons.email_outlined,
             ),
-
             const SizedBox(height: 18),
-
             // PASSWORD
             _label('Contraseña'),
-
             const SizedBox(height: 6),
-
             _field(
               controller: _password,
               hint: '••••••••',
               icon: Icons.lock_outline,
               obscure: _obscure,
-
               suffix: IconButton(
                 icon: Icon(
-                  _obscure
-                      ? Icons.visibility_off
-                      : Icons.visibility,
-
+                  _obscure ? Icons.visibility_off : Icons.visibility,
                   color: AppColors.textLight,
                   size: 20,
                 ),
-
                 onPressed: () {
-
                   setState(() {
                     _obscure = !_obscure;
                   });
                 },
               ),
             ),
-
             const SizedBox(height: 36),
-
             SizedBox(
               width: double.infinity,
               height: 52,
-
               child: ElevatedButton(
                 onPressed: _register,
-                child:
-                    const Text('Crear cuenta'),
+                child: const Text('Crear cuenta'),
               ),
             ),
           ],
@@ -211,10 +169,8 @@ class _RegisterScreenState
 
   // LABEL
   Widget _label(String text) {
-
     return Text(
       text,
-
       style: const TextStyle(
         fontWeight: FontWeight.w700,
         fontSize: 13,
@@ -231,39 +187,22 @@ class _RegisterScreenState
     bool obscure = false,
     Widget? suffix,
   }) {
-
     return TextField(
       controller: controller,
       obscureText: obscure,
-
       decoration: InputDecoration(
         hintText: hint,
-
-        hintStyle: const TextStyle(
-          color: AppColors.textLight,
-        ),
-
-        prefixIcon: Icon(
-          icon,
-          color: AppColors.textLight,
-          size: 20,
-        ),
-
+        hintStyle: const TextStyle(color: AppColors.textLight),
+        prefixIcon: Icon(icon, color: AppColors.textLight, size: 20),
         suffixIcon: suffix,
-
         filled: true,
         fillColor: Colors.white,
-
-        contentPadding:
-            const EdgeInsets.symmetric(
+        contentPadding: const EdgeInsets.symmetric(
           vertical: 16,
           horizontal: 16,
         ),
-
         border: OutlineInputBorder(
-          borderRadius:
-              BorderRadius.circular(12),
-
+          borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
         ),
       ),

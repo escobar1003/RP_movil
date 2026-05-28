@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:bootstrap_icons/bootstrap_icons.dart';
+import 'package:recycling_points/games/recycling_game_screen.dart';
 
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
@@ -40,7 +41,6 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               // ------------------ HEADER ------------------
               Row(
                 children: [
@@ -61,9 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _nombre.isEmpty
-                              ? 'Hola'
-                              : 'Hola, $_nombre',
+                          _nombre.isEmpty ? 'Hola' : 'Hola, $_nombre',
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w800,
@@ -125,10 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.all(22),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFF2E9E6F),
-                      Color(0xFF57C58A),
-                    ],
+                    colors: [Color(0xFF2E9E6F), Color(0xFF57C58A)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -145,8 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Expanded(
                       child: Column(
-                        crossAxisAlignment:
-                            CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
                             'Puntos disponibles',
@@ -172,12 +166,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               const SizedBox(width: 8),
 
                               Container(
-                                padding:
-                                    const EdgeInsets.all(6),
+                                padding: const EdgeInsets.all(6),
                                 decoration: BoxDecoration(
                                   color: Colors.amber,
-                                  borderRadius:
-                                      BorderRadius.circular(50),
+                                  borderRadius: BorderRadius.circular(50),
                                 ),
                                 child: const Icon(
                                   BootstrapIcons.coin,
@@ -192,10 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           const Text(
                             'Sigue así, cada acción suma un cambio.',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                            ),
+                            style: TextStyle(color: Colors.white, fontSize: 14),
                           ),
                         ],
                       ),
@@ -322,8 +311,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   children: [
                     Row(
-                      mainAxisAlignment:
-                          MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: const [
                         Text(
                           'Nivel: Verde',
@@ -350,12 +338,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: const LinearProgressIndicator(
                         value: 0.8,
                         minHeight: 10,
-                        backgroundColor:
-                            AppColors.green100,
-                        valueColor:
-                            AlwaysStoppedAnimation(
-                          AppColors.primary,
-                        ),
+                        backgroundColor: AppColors.green100,
+                        valueColor: AlwaysStoppedAnimation(AppColors.primary),
                       ),
                     ),
 
@@ -363,10 +347,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     const Text(
                       '¡Genial! Aún puedes ganar más puntos y subir de nivel.',
-                      style: TextStyle(
-                        color: AppColors.textMid,
-                        fontSize: 13,
-                      ),
+                      style: TextStyle(color: AppColors.textMid, fontSize: 13),
                     ),
                   ],
                 ),
@@ -398,8 +379,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) =>
-                                const ReciclarScreen(),
+                            builder: (_) => const ReciclarScreen(),
                           ),
                         );
                       },
@@ -418,8 +398,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) =>
-                                const MisCanjesScreen(),
+                            builder: (_) => const MisCanjesScreen(),
                           ),
                         );
                       },
@@ -439,9 +418,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (_) =>
-                                const MapaPuntosScreen(
-                              soloMapa: true,
-                            ),
+                                const MapaPuntosScreen(soloMapa: true),
                           ),
                         );
                       },
@@ -464,9 +441,7 @@ class _HomeScreenState extends State<HomeScreen> {
               GestureDetector(
                 onTap: () => Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => const RecyclingGameScreen(),
-                  ),
+                  MaterialPageRoute(builder: (_) => RecyclingGameScreen()),
                 ),
                 child: Container(
                   width: double.infinity,
@@ -579,19 +554,14 @@ class _ImpactoItem extends StatelessWidget {
               color: color.withOpacity(0.12),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              icon,
-              color: color,
-              size: 18,
-            ),
+            child: Icon(icon, color: color, size: 18),
           ),
 
           const SizedBox(width: 12),
 
           Expanded(
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   value,
@@ -642,19 +612,14 @@ class _AccionCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding:
-            const EdgeInsets.symmetric(vertical: 18),
+        padding: const EdgeInsets.symmetric(vertical: 18),
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(18),
         ),
         child: Column(
           children: [
-            Icon(
-              icon,
-              color: iconColor,
-              size: 28,
-            ),
+            Icon(icon, color: iconColor, size: 28),
 
             const SizedBox(height: 8),
 
