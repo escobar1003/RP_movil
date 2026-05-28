@@ -34,6 +34,7 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
   String _pesoAproximado = '';
   String _nivelReciclabilidad = '';
   String _recomendacionIA = '';
+  Color _colorCaneca = Colors.white;
 
   @override
   void initState() {
@@ -105,51 +106,64 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
             _confianza = confianza.round();
             _mostrarResultado = true;
 
-            if (clase.toLowerCase().contains('botella') ||
-                clase.toLowerCase().contains('plastic')) {
-              _nombre = 'Botella de plástico';
-              _tipo = 'Plástico (PET)';
+            final String c = clase.toLowerCase();
+            if (c == 'plastico') {
+              _nombre = 'Plástico';
+              _tipo = 'Residuo Aprovechable';
+              _caneco = 'Caneco Blanco';
+              _deposito = 'Aprovechable';
+              _descripcion = 'Botellas, envases, bolsas, empaques.';
+              _colorCaneca = const Color(0xFFF5F5F5);
               _cantidadEstimada = '1 unidad';
-              _pesoAproximado = '0.5 kg';
+              _pesoAproximado = '0.3 kg';
               _nivelReciclabilidad = 'Alto';
               _recomendacionIA = 'Enjuaga y aplasta antes de depositar.';
-            } else if (clase.toLowerCase().contains('lata') ||
-                clase.toLowerCase().contains('can') ||
-                clase.toLowerCase().contains('metal')) {
-              _nombre = 'Lata de Aluminio';
-              _tipo = 'Metal';
+            } else if (c == 'metal') {
+              _nombre = 'Metal';
+              _tipo = 'Residuo Aprovechable';
+              _caneco = 'Caneco Blanco';
+              _deposito = 'Aprovechable';
+              _descripcion = 'Latas, tapas, envases metálicos.';
+              _colorCaneca = const Color(0xFFF5F5F5);
               _cantidadEstimada = '1 unidad';
               _pesoAproximado = '0.3 kg';
               _nivelReciclabilidad = 'Alto';
               _recomendacionIA = 'Aplasta la lata para ahorrar espacio.';
-            } else if (clase.toLowerCase().contains('vidrio') ||
-                clase.toLowerCase().contains('glass')) {
-              _nombre = 'Botella de Vidrio';
-              _tipo = 'Vidrio';
+            } else if (c == 'vidrio') {
+              _nombre = 'Vidrio';
+              _tipo = 'Residuo Aprovechable';
+              _caneco = 'Caneco Blanco';
+              _deposito = 'Aprovechable';
+              _descripcion = 'Botellas, frascos, envases de vidrio.';
+              _colorCaneca = const Color(0xFFF5F5F5);
               _cantidadEstimada = '1 unidad';
               _pesoAproximado = '0.8 kg';
               _nivelReciclabilidad = 'Alto';
               _recomendacionIA = 'Envuelve en papel antes de depositar.';
-            } else if (clase.toLowerCase().contains('carton') ||
-                clase.toLowerCase().contains('papel')) {
-              _nombre = 'Caja de Cartón';
-              _tipo = 'Cartón';
+            } else if (c == 'carton') {
+              _nombre = 'Cartón';
+              _tipo = 'Residuo Aprovechable';
+              _caneco = 'Caneco Blanco';
+              _deposito = 'Aprovechable';
+              _descripcion = 'Cajas, empaques de cartón, papel.';
+              _colorCaneca = const Color(0xFFF5F5F5);
               _cantidadEstimada = '1 unidad';
               _pesoAproximado = '0.4 kg';
               _nivelReciclabilidad = 'Alto';
-              _recomendacionIA = 'Dóblala para que ocupe menos espacio.';
+              _recomendacionIA = 'Dóblalo para que ocupe menos espacio.';
             } else {
-              _nombre = clase;
-              _tipo = 'Residuo Identificado';
+              _nombre = c.isNotEmpty ? c : 'Desconocido';
+              _tipo = 'Residuo No Aprovechable';
+              _caneco = 'Caneco Negro';
+              _deposito = 'No aprovechable';
+              _descripcion = 'Papel higiénico, servilletas, cartones contaminados, papeles metalizados.';
+              _colorCaneca = const Color(0xFF2E2E2E);
               _cantidadEstimada = '1 unidad';
-              _pesoAproximado = '0.5 kg';
-              _nivelReciclabilidad = 'Medio';
-              _recomendacionIA = 'Depositar en el contenedor correspondiente.';
+              _pesoAproximado = '0.2 kg';
+              _nivelReciclabilidad = 'Bajo';
+              _recomendacionIA = 'Depositar en Caneco Negro. No apto para reciclaje.';
             }
-            _estado = 'Aprovechable';
-            _caneco = 'Caneco Blanco';
-            _deposito = 'Aprovechable';
-            _descripcion = 'Plásticos, vidrio, metal, papel y cartón.';
+            _estado = _deposito == 'Aprovechable' ? 'Aprovechable' : 'No clasificado';
           });
         } else {
           setState(() {
@@ -158,8 +172,13 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
             _estado = 'No clasificado';
             _confianza = 0;
             _caneco = 'Caneco Negro';
-            _deposito = 'No aprovechables';
-            _descripcion = 'Papel higiénico, servilletas, cartones contaminados.';
+            _deposito = 'No aprovechable';
+            _descripcion = 'Papel higiénico, servilletas, cartones contaminados, papeles metalizados.';
+            _colorCaneca = const Color(0xFF2E2E2E);
+            _nivelReciclabilidad = 'Bajo';
+            _recomendacionIA = 'Depositar en Caneco Negro. No apto para reciclaje.';
+            _cantidadEstimada = '1 unidad';
+            _pesoAproximado = '0.2 kg';
             _mostrarResultado = true;
           });
         }
@@ -188,6 +207,7 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
         'pesoAproximado': _pesoAproximado,
         'nivelReciclabilidad': _nivelReciclabilidad,
         'recomendacionIA': _recomendacionIA,
+        'colorCaneca': '#${_colorCaneca.value.toRadixString(16).padLeft(8, '0')}',
       };
 
   @override
@@ -321,10 +341,22 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
                     Container(
                       width: 52, height: 52,
                       decoration: BoxDecoration(
-                        color: Colors.teal.withOpacity(0.1),
+                        color: _colorCaneca.computeLuminance() > 0.5
+                            ? const Color(0xFFE8F5E9)
+                            : const Color(0xFF2E2E2E).withOpacity(0.15),
                         borderRadius: BorderRadius.circular(14),
                       ),
-                      child: const Icon(Icons.local_drink, color: Colors.teal, size: 28),
+                      child: Icon(
+                        _nombre == 'Plástico' ? Icons.local_drink :
+                        _nombre == 'Metal' ? Icons.build :
+                        _nombre == 'Vidrio' ? Icons.local_drink :
+                        _nombre == 'Cartón' ? Icons.inventory_2_outlined :
+                        Icons.help_outline,
+                        color: _colorCaneca == const Color(0xFF2E2E2E)
+                            ? const Color(0xFF2E2E2E)
+                            : AppColors.primary,
+                        size: 28,
+                      ),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
@@ -410,20 +442,53 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
                     Container(
                       width: 44, height: 44,
                       decoration: BoxDecoration(
-                        color: AppColors.yellow100,
+                        color: _colorCaneca,
                         borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: _colorCaneca.computeLuminance() > 0.5
+                              ? Colors.grey.shade300
+                              : Colors.transparent,
+                        ),
                       ),
-                      child: const Icon(Icons.delete_outline, color: Colors.orange),
+                      child: Icon(
+                        _colorCaneca == const Color(0xFF2E2E2E)
+                            ? Icons.delete_forever_outlined
+                            : Icons.delete_outline,
+                        color: _colorCaneca.computeLuminance() > 0.5
+                            ? Colors.grey.shade700
+                            : Colors.white70,
+                      ),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(_caneco,
-                              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: AppColors.textDark)),
+                          Row(
+                            children: [
+                              Container(
+                                width: 12, height: 12,
+                                decoration: BoxDecoration(
+                                  color: _colorCaneca,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: _colorCaneca.computeLuminance() > 0.5
+                                        ? Colors.grey.shade300
+                                        : Colors.transparent,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(_caneco,
+                                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: AppColors.textDark)),
+                            ],
+                          ),
+                          const SizedBox(height: 2),
                           Text(_deposito,
                               style: const TextStyle(color: AppColors.textLight, fontSize: 13)),
+                          const SizedBox(height: 2),
+                          Text(_descripcion,
+                              style: TextStyle(color: Colors.grey[400], fontSize: 11)),
                         ],
                       ),
                     ),
