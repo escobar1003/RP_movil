@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bootstrap_icons/bootstrap_icons.dart';
+import 'resumen_entrega_screen.dart';
 
 class ReservasScreen extends StatefulWidget {
   final Map<String, dynamic> aliado;
@@ -77,57 +78,71 @@ class _ReservasScreenState extends State<ReservasScreen> {
   }
 
   Future<void> _confirmarReserva() async {
-    setState(() => loading = true);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ResumenEntregaScreen(
+          aliado: widget.aliado,
+          datosIA: widget.datosIA,
+          fecha: _fechaFormateada,
+          hora: _horaFormateada,
+          observaciones: observacionesController.text,
+          onConfirmar: () async {
+            setState(() => loading = true);
 
-    await Future.delayed(const Duration(seconds: 2));
+            await Future.delayed(const Duration(seconds: 2));
 
-    if (mounted) {
-      setState(() {
-        loading = false;
-      });
+            if (mounted) {
+              setState(() {
+                loading = false;
+              });
 
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (_) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEAF3DE),
-                  borderRadius: BorderRadius.circular(50),
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (_) => AlertDialog(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEAF3DE),
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        child: const Icon(Icons.check_circle, color: Color(0xFF3B6D11), size: 48),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text('¡Reserva confirmada!',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      Text('Pendiente de confirmación por el encargado.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 13, color: Colors.grey[600])),
+                      const SizedBox(height: 4),
+                      Text('Recibirás una notificación cuando sea aceptada.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 12, color: Colors.grey[400])),
+                    ],
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Aceptar'),
+                    ),
+                  ],
                 ),
-                child: const Icon(Icons.check_circle, color: Color(0xFF3B6D11), size: 48),
-              ),
-              const SizedBox(height: 16),
-              const Text('¡Reserva confirmada!',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              Text('Pendiente de confirmación por el encargado.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 13, color: Colors.grey[600])),
-              const SizedBox(height: 4),
-              Text('Recibirás una notificación cuando sea aceptada.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[400])),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                Navigator.pop(context);
-                Navigator.pop(context);
-              },
-              child: const Text('Aceptar'),
-            ),
-          ],
+              );
+            }
+          },
         ),
-      );
-    }
+      ),
+    );
   }
 
   @override
