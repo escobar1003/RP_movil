@@ -8,6 +8,7 @@ import 'mapa_puntos_screen.dart';
 import 'reciclar_screen.dart';
 import 'mis_canjes_screen.dart';
 import 'configuracion_screen.dart';
+import '../games/recycling_game_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
