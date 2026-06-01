@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../services/auth_service.dart';
 import 'historial_entregas_screen.dart';
 import 'mis_canjes_screen.dart';
-import 'welcome_screen.dart';
 import 'editar_perfil_screen.dart';
 
 class PerfilScreen extends StatefulWidget {
@@ -39,11 +39,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
   Future<void> _cerrarSesion() async {
     await AuthService.logout();
     if (!mounted) return;
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const WelcomeScreen()),
-      (_) => false,
-    );
+    SystemNavigator.pop();
   }
 
   @override
