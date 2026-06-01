@@ -20,6 +20,7 @@ class _RegisterScreenState
   final _nombre = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
+  final _telefono = TextEditingController();
 
   bool _obscure = true;
 
@@ -54,6 +55,7 @@ class _RegisterScreenState
         nombre: _nombre.text,
         correo: _email.text,
         password: _password.text,
+        telefono: _telefono.text.isNotEmpty ? _telefono.text : null,
       );
 
       // REGISTER EXITOSO
@@ -189,6 +191,19 @@ class _RegisterScreenState
                   });
                 },
               ),
+            ),
+
+            const SizedBox(height: 18),
+
+            // TELÉFONO
+            _label('Teléfono (opcional)'),
+
+            const SizedBox(height: 6),
+
+            _field(
+              controller: _telefono,
+              hint: '300 123 4567',
+              icon: Icons.phone_outlined,
             ),
 
             const SizedBox(height: 36),
