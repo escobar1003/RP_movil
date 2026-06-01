@@ -51,12 +51,21 @@ class AuthService {
     required String nombre,
     required String correo,
     required String password,
+    String? telefono,
   }) async {
+    final body = <String, dynamic>{
+      'nombre': nombre,
+      'correo': correo,
+      'password': password,
+    };
+    if (telefono != null && telefono.isNotEmpty) {
+      body['telefono'] = telefono;
+    }
 
     final response = await http.post(
       Uri.parse('$baseUrl/registrarse'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'nombre': nombre, 'correo': correo, 'password': password}),
+      body: jsonEncode(body),
     );
 
     return jsonDecode(response.body);
