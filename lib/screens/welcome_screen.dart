@@ -120,7 +120,7 @@ class WelcomeScreen extends StatelessWidget {
                           builder: (_) => const RegisterScreen(),
                         ),
                       ),
-                      child: const Text('Comenzar'),
+                      child: const Text('Registrarse'),
                     ),
                   ),
 
