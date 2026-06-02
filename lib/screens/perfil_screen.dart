@@ -6,6 +6,7 @@ import 'mis_canjes_screen.dart';
 import 'editar_perfil_screen.dart';
 import 'welcome_screen.dart';
 import 'configuracion_screen.dart';
+import 'notificaciones_screen.dart';
 
 class PerfilScreen extends StatefulWidget {
   const PerfilScreen({super.key});
@@ -390,7 +391,10 @@ class _PerfilScreenState extends State<PerfilScreen> {
             label: 'Notificaciones',
             color: const Color(0xFF0F6E56),
             bg: const Color(0xFFE1F5EE),
-            onTap: () {},
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const NotificacionesScreen()),
+            ),
           ),
           Divider(height: 1, color: Colors.grey.withOpacity(0.1), indent: 60),
 
