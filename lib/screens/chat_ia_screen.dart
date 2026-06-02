@@ -33,14 +33,17 @@ class _ChatIaScreenState extends State<ChatIaScreen> {
 
     try {
       // IP local configurada para tu entorno
-      final url = Uri.parse('http://localhost:3333/api/chat');
+      // ✅ POR ESTO
+final url = Uri.parse('https://backend-rp-arreglado-n8p8.onrender.com/api/chat');
 
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'mensaje': text}),
+        body: jsonEncode({'pregunta': text}),
       );
 
+      print('STATUS: ${response.statusCode}');
+      print('BODY: ${response.body}');
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
