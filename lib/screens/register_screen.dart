@@ -38,10 +38,10 @@ class _RegisterScreenState
       return;
     }
 
-    if (_password.text.trim().length < 10) {
+    if (_password.text.trim().length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('La contraseña debe tener mínimo 10 caracteres'),
+          content: Text('La contraseña debe tener mínimo 6 caracteres'),
           backgroundColor: Color(0xFFA32D2D),
         ),
       );
