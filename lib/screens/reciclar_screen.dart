@@ -92,7 +92,7 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
       final XFile foto = await _cameraController!.takePicture();
       setState(() => _rutaImagenLocal = foto.path);
 
-      const ipServidor = 'localhost';
+      const ipServidor = '192.168.1.12';
       final url = Uri.parse('http://$ipServidor:3333/api/detectar-material');
 
       final request = http.MultipartRequest('POST', url);
