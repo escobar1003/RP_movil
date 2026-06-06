@@ -6,7 +6,7 @@ import 'package:latlong2/latlong.dart';
 import '../theme/app_theme.dart';
 import '../data/puntos_reciclaje_data.dart';
 import 'reservas.dart';
-
+import 'package:geolocator/geolocator.dart';
 class MapaPuntosScreen extends StatefulWidget {
   final bool soloMapa;
   final Map<String, dynamic>? datosIA;
@@ -21,6 +21,46 @@ class _MapaPuntosScreenState extends State<MapaPuntosScreen> {
 
   Map<String, dynamic>? puntoSeleccionado;
   final MapController _mapController = MapController();
+  LatLng? _miUbicacion;
+  bool _cargandoUbicacion = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _obtenerUbicacion();
+  }
+
+  Future<void> _obtenerUbicacion() async {
+    try {
+      bool servicioActivo = await Geolocator.isLocationServiceEnabled();
+      if (!servicioActivo) {
+        setState(() => _cargandoUbicacion = false);
+        return;
+      }
+      LocationPermission permiso = await Geolocator.checkPermission();
+      if (permiso == LocationPermission.denied) {
+        permiso = await Geolocator.requestPermission();
+        if (permiso == LocationPermission.denied) {
+          setState(() => _cargandoUbicacion = false);
+          return;
+        }
+      }
+      if (permiso == LocationPermission.deniedForever) {
+        setState(() => _cargandoUbicacion = false);
+        return;
+      }
+      Position posicion = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+      );
+      setState(() {
+        _miUbicacion = LatLng(posicion.latitude, posicion.longitude);
+        _cargandoUbicacion = false;
+      });
+      _mapController.move(_miUbicacion!, 14.0);
+    } catch (e) {
+      setState(() => _cargandoUbicacion = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +84,30 @@ class _MapaPuntosScreenState extends State<MapaPuntosScreen> {
                 userAgentPackageName: 'com.recycling.points',
               ),
               MarkerLayer(
-                markers: puntosReciclaje.map((punto) {
+                markers: [
+                  if (_miUbicacion != null)
+                    Marker(
+                      point: _miUbicacion!,
+                      width: 60,
+                      height: 60,
+                      child: Container(
+                        width: 20,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 3),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.blue.withOpacity(0.4),
+                              blurRadius: 10,
+                              spreadRadius: 4,
+                            ) ,
+                          ],
+                        ),
+                      ),
+                    ),
+                  ...puntosReciclaje.map((punto) {
                   final bool activo =
                       puntoSeleccionado?['nombre'] == punto['nombre'];
                   return Marker(
@@ -78,6 +141,7 @@ class _MapaPuntosScreenState extends State<MapaPuntosScreen> {
                     ),
                   );
                 }).toList(),
+                  ],
               ),
             ],
           ),
