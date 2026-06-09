@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import '../services/auth_service.dart';
 
 class ApiService {
+  // static const String baseUrl = 'http://localhost:3333/api';
   static const String baseUrl = 'https://backend-rp-arreglado-n8p8.onrender.com/api';
 
   static Future<Map<String, String>> _headers({bool auth = true}) async {
@@ -55,7 +56,8 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> asignarPuntos(Map<String, dynamic> body) async {
-    const puntosBase = 'https://backend-rp-arreglado-n8p8.onrender.com/puntos';
+    // const puntosBase = 'http://localhost:3333/api/puntos';
+    const puntosBase = 'https://backend-rp-arreglado-n8p8.onrender.com/api/puntos';
     final response = await http.post(
       Uri.parse('$puntosBase/asignar'),
       headers: {'Content-Type': 'application/json'},

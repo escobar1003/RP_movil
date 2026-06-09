@@ -109,7 +109,11 @@ class AuthService {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'correo': correo}),
     );
-    return jsonDecode(response.body);
+    final data = jsonDecode(response.body);
+    if (response.statusCode >= 400) {
+      throw Exception(data['mensaje'] ?? data['message'] ?? 'Error del servidor');
+    }
+    return data;
   }
 
   static Future<Map<String, dynamic>> recuperarPasswordRestablecer({
@@ -120,9 +124,13 @@ class AuthService {
     final response = await http.post(
       Uri.parse('$baseUrl/recuperar-password/restablecer'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'correo': correo, 'codigo': codigo, 'password': password}),
+      body: jsonEncode({'correo': correo, 'codigo': codigo, 'nuevaPassword': password}),
     );
-    return jsonDecode(response.body);
+    final data = jsonDecode(response.body);
+    if (response.statusCode >= 400) {
+      throw Exception(data['mensaje'] ?? data['message'] ?? 'Error del servidor');
+    }
+    return data;
   }
 
   // CERRAR SESIÓN (API + local)

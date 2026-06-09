@@ -1,8 +1,4 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
-import 'editar_perfil_screen.dart';
-import 'historial_entregas_screen.dart';
-import 'welcome_screen.dart';
 
 class ConfiguracionScreen extends StatefulWidget {
   const ConfiguracionScreen({super.key});
@@ -30,7 +26,14 @@ class _ConfiguracionScreenState
 
         children: [
 
-         
+          // PERFIL
+          const Text(
+            'Cuenta',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
 
           const SizedBox(height: 10),
 
@@ -38,10 +41,7 @@ class _ConfiguracionScreenState
             icono: Icons.person,
             titulo: 'Editar perfil',
             subtitulo: 'Cambiar información personal',
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const EditarPerfilScreen()),
-            ),
+            onTap: () {},
           ),
 
           _buildTile(
@@ -124,10 +124,7 @@ class _ConfiguracionScreenState
             icono: Icons.history,
             titulo: 'Historial de reciclaje',
             subtitulo: 'Ver entregas realizadas',
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const HistorialEntregasScreen()),
-            ),
+            onTap: () {},
           ),
 
           _buildTile(
@@ -180,7 +177,25 @@ class _ConfiguracionScreenState
 
           const SizedBox(height: 30),
 
-          
+          // CERRAR SESIÓN
+          SizedBox(
+            width: double.infinity,
+            height: 55,
+
+            child: ElevatedButton.icon(
+              onPressed: () {},
+
+              icon: const Icon(Icons.logout),
+
+              label: const Text(
+                'Cerrar sesión',
+              ),
+
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+              ),
+            ),
+          ),
         ],
       ),
     );
