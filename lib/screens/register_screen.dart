@@ -16,6 +16,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _nombre = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
+  final _telefono = TextEditingController();
 
   bool _obscure = true;
 
@@ -35,7 +36,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
-    // MODIFICACIÓN SOLICITADA: Ajuste de validación de caracteres
     if (_password.text.trim().length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -50,9 +50,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       print("Conectando con el servidor: ${_email.text.trim()}");
 
       final response = await AuthService.register(
-        nombre: _nombre.text.trim(),
-        correo: _email.text.trim(),
-        password: _password.text.trim(),
+        nombre: _nombre.text,
+        correo: _email.text,
+        password: _password.text,
+        telefono: _telefono.text.isNotEmpty ? _telefono.text : null,
       );
 
       print("====== RESPUESTA RECIBIDA ======");
@@ -152,6 +153,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 },
               ),
             ),
+
+            const SizedBox(height: 18),
+
+            // TELÉFONO
+            _label('Teléfono (opcional)'),
+
+            const SizedBox(height: 6),
+
+            _field(
+              controller: _telefono,
+              hint: '300 123 4567',
+              icon: Icons.phone_outlined,
+            ),
+
             const SizedBox(height: 36),
             SizedBox(
               width: double.infinity,

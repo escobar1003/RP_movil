@@ -1,47 +1,39 @@
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart';
+import 'editar_perfil_screen.dart';
+import 'historial_entregas_screen.dart';
+import 'welcome_screen.dart';
 
 class ConfiguracionScreen extends StatefulWidget {
   const ConfiguracionScreen({super.key});
 
   @override
-  State<ConfiguracionScreen> createState() =>
-      _ConfiguracionScreenState();
+  State<ConfiguracionScreen> createState() => _ConfiguracionScreenState();
 }
 
-class _ConfiguracionScreenState
-    extends State<ConfiguracionScreen> {
-
+class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
   bool notificaciones = true;
   bool modoOscuro = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Configuración'),
-      ),
+      appBar: AppBar(title: const Text('Configuración')),
 
       body: ListView(
         padding: const EdgeInsets.all(16),
 
         children: [
-
-          // PERFIL
-          const Text(
-            'Cuenta',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-
           const SizedBox(height: 10),
 
           _buildTile(
             icono: Icons.person,
             titulo: 'Editar perfil',
             subtitulo: 'Cambiar información personal',
-            onTap: () {},
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const EditarPerfilScreen()),
+            ),
           ),
 
           _buildTile(
@@ -63,10 +55,7 @@ class _ConfiguracionScreenState
           // PREFERENCIAS
           const Text(
             'Preferencias',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 10),
@@ -82,9 +71,7 @@ class _ConfiguracionScreenState
 
             title: const Text('Notificaciones'),
 
-            subtitle: const Text(
-              'Recibir alertas y recordatorios',
-            ),
+            subtitle: const Text('Recibir alertas y recordatorios'),
 
             secondary: const Icon(Icons.notifications),
           ),
@@ -100,9 +87,7 @@ class _ConfiguracionScreenState
 
             title: const Text('Modo oscuro'),
 
-            subtitle: const Text(
-              'Cambiar apariencia de la app',
-            ),
+            subtitle: const Text('Cambiar apariencia de la app'),
 
             secondary: const Icon(Icons.dark_mode),
           ),
@@ -112,10 +97,7 @@ class _ConfiguracionScreenState
           // RECICLAJE
           const Text(
             'Reciclaje',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 10),
@@ -124,7 +106,12 @@ class _ConfiguracionScreenState
             icono: Icons.history,
             titulo: 'Historial de reciclaje',
             subtitulo: 'Ver entregas realizadas',
-            onTap: () {},
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const HistorialEntregasScreen(),
+              ),
+            ),
           ),
 
           _buildTile(
@@ -146,10 +133,7 @@ class _ConfiguracionScreenState
           // INFORMACIÓN
           const Text(
             'Información',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 10),
@@ -176,32 +160,12 @@ class _ConfiguracionScreenState
           ),
 
           const SizedBox(height: 30),
-
-          // CERRAR SESIÓN
-          SizedBox(
-            width: double.infinity,
-            height: 55,
-
-            child: ElevatedButton.icon(
-              onPressed: () {},
-
-              icon: const Icon(Icons.logout),
-
-              label: const Text(
-                'Cerrar sesión',
-              ),
-
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-              ),
-            ),
-          ),
         ],
       ),
     );
   }
 
-   Widget _buildTile({
+  Widget _buildTile({
     required IconData icono,
     required String titulo,
     required String subtitulo,
@@ -211,15 +175,10 @@ class _ConfiguracionScreenState
       elevation: 2,
       margin: const EdgeInsets.only(bottom: 12),
 
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
 
       child: ListTile(
-        leading: Icon(
-          icono,
-          color: Colors.green,
-        ),
+        leading: Icon(icono, color: Colors.green),
 
         title: Text(titulo),
 

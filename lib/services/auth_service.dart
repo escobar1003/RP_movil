@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
   static const String baseUrl =
-      'https://backend-rp-arreglado-q254.onrender.com';
+      'https://backend-rp-arreglado-n8p8.onrender.com/';
 
   // LOGIN - MODIFICADO CON EL PREFIJO CORRECTO
   static Future<Map<String, dynamic>> login({
@@ -53,15 +53,21 @@ class AuthService {
     required String nombre,
     required String correo,
     required String password,
+    String? telefono,
   }) async {
+    final body = <String, dynamic>{
+      'nombre': nombre,
+      'correo': correo,
+      'password': password,
+    };
+    if (telefono != null && telefono.isNotEmpty) {
+      body['telefono'] = telefono;
+    }
+
     final response = await http.post(
       Uri.parse('$baseUrl/api/auth/registrarse'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'nombre': nombre,
-        'correo': correo,
-        'password': password,
-      }),
+      body: jsonEncode(body),
     );
 
     return jsonDecode(response.body);

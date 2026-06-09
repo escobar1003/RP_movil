@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import '../services/usuario_service.dart';
 import 'historial_entregas_screen.dart';
 import 'mis_canjes_screen.dart';
-import 'welcome_screen.dart';
 import 'editar_perfil_screen.dart';
+import 'welcome_screen.dart';
+import 'configuracion_screen.dart';
+import 'notificaciones_screen.dart';
 
 class PerfilScreen extends StatefulWidget {
   const PerfilScreen({super.key});
@@ -16,6 +19,11 @@ class _PerfilScreenState extends State<PerfilScreen> {
   String _nombre = '';
   String _correo = '';
   String _rol = '';
+  String _telefono = '';
+  int _reciclajes = 0;
+  int _puntos = 0;
+  int _canjesCount = 0;
+  int _puntosGanados = 0;
 
   @override
   void initState() {
@@ -24,25 +32,44 @@ class _PerfilScreenState extends State<PerfilScreen> {
   }
 
   Future<void> _cargarDatos() async {
-    final nombre = await AuthService.getNombre();
-    final correo = await AuthService.getCorreo();
-    final rol = await AuthService.getRol();
-    if (mounted) {
-      setState(() {
-        _nombre = nombre;
-        _correo = correo;
-        _rol = rol;
-      });
-    }
+    _nombre = await AuthService.getNombre();
+    _correo = await AuthService.getCorreo();
+    _rol = await AuthService.getRol();
+    _telefono = await AuthService.getTelefono();
+
+    try {
+      final perfil = await UsuarioService.getPerfil();
+      if (perfil['nombre'] != null) _nombre = perfil['nombre'];
+      if (perfil['correo'] != null) _correo = perfil['correo'];
+      if (perfil['rol'] != null) _rol = perfil['rol'];
+      if (perfil['telefono'] != null) _telefono = perfil['telefono'];
+    } catch (_) {}
+
+    try {
+      final puntos = await UsuarioService.getResumenPuntos();
+      _puntos = puntos['saldo'] ?? 0;
+      _puntosGanados = puntos['ganados'] ?? 0;
+    } catch (_) {}
+
+    try {
+      final entregas = await UsuarioService.getEntregas();
+      _reciclajes = (entregas['entregas'] as List?)?.length ?? 0;
+    } catch (_) {}
+
+    try {
+      final canjes = await UsuarioService.getCanjes();
+      _canjesCount = (canjes['canjes'] as List?)?.length ?? 0;
+    } catch (_) {}
+
+    if (mounted) setState(() {});
   }
 
   Future<void> _cerrarSesion() async {
     await AuthService.logout();
     if (!mounted) return;
-    Navigator.pushAndRemoveUntil(
-      context,
+    Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const WelcomeScreen()),
-      (_) => false,
+      (route) => false,
     );
   }
 
@@ -103,8 +130,11 @@ class _PerfilScreenState extends State<PerfilScreen> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: const Icon(Icons.camera_alt_outlined,
-                      size: 16, color: Color(0xFF2D5A1B)),
+                  child: const Icon(
+                    Icons.camera_alt_outlined,
+                    size: 16,
+                    color: Color(0xFF2D5A1B),
+                  ),
                 ),
               ),
             ],
@@ -166,7 +196,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
               icon: Icons.recycling,
               iconColor: const Color(0xFF2D5A1B),
               iconBg: const Color(0xFFEAF3DE),
-              value: '0',
+              value: '$_reciclajes',
               label: 'Reciclajes',
             ),
           ),
@@ -176,7 +206,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
               icon: Icons.stars_rounded,
               iconColor: const Color(0xFF854F0B),
               iconBg: const Color(0xFFFAEEDA),
-              value: '0',
+              value: '$_puntos',
               label: 'Puntos',
             ),
           ),
@@ -186,7 +216,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
               icon: Icons.emoji_events_outlined,
               iconColor: const Color(0xFF185FA5),
               iconBg: const Color(0xFFE6F1FB),
-              value: '0',
+              value: '$_canjesCount',
               label: 'Canjes',
             ),
           ),
@@ -235,10 +265,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
               color: Color(0xFF1E3A0F),
             ),
           ),
-          Text(
-            label,
-            style: TextStyle(fontSize: 11, color: Colors.grey[500]),
-          ),
+          Text(label, style: TextStyle(fontSize: 11, color: Colors.grey[500])),
         ],
       ),
     );
@@ -274,7 +301,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                 ),
               ),
               Text(
-                '0 / 3,000 pts',
+                '$_puntos / 3,000 pts',
                 style: TextStyle(fontSize: 12, color: Colors.grey[500]),
               ),
             ],
@@ -282,8 +309,8 @@ class _PerfilScreenState extends State<PerfilScreen> {
           const SizedBox(height: 12),
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: const LinearProgressIndicator(
-              value: 0,
+            child: LinearProgressIndicator(
+              value: (_puntos / 3000).clamp(0.0, 1.0),
               minHeight: 9,
               backgroundColor: Color(0xFFEAF3DE),
               valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF7BC043)),
@@ -315,16 +342,18 @@ class _PerfilScreenState extends State<PerfilScreen> {
       ),
       child: Column(
         children: [
-
           _buildMenuRow(
             icon: Icons.person_outline,
             label: 'Editar perfil',
             color: const Color(0xFF2D5A1B),
             bg: const Color(0xFFEAF3DE),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const EditarPerfilScreen()),
-            ),
+            onTap: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const EditarPerfilScreen()),
+              );
+              _cargarDatos();
+            },
           ),
           Divider(height: 1, color: Colors.grey.withOpacity(0.1), indent: 60),
 
@@ -349,9 +378,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
             bg: const Color(0xFFFAEEDA),
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (_) => const MisCanjesScreen(),
-              ),
+              MaterialPageRoute(builder: (_) => const MisCanjesScreen()),
             ),
           ),
           Divider(height: 1, color: Colors.grey.withOpacity(0.1), indent: 60),
@@ -361,7 +388,10 @@ class _PerfilScreenState extends State<PerfilScreen> {
             label: 'Notificaciones',
             color: const Color(0xFF0F6E56),
             bg: const Color(0xFFE1F5EE),
-            onTap: () {},
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const NotificacionesScreen()),
+            ),
           ),
           Divider(height: 1, color: Colors.grey.withOpacity(0.1), indent: 60),
 
@@ -370,7 +400,10 @@ class _PerfilScreenState extends State<PerfilScreen> {
             label: 'Configuración',
             color: const Color(0xFF5F5E5A),
             bg: const Color(0xFFF1EFE8),
-            onTap: () {},
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ConfiguracionScreen()),
+            ),
           ),
           Divider(height: 1, color: Colors.grey.withOpacity(0.1), indent: 60),
 
@@ -391,7 +424,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
             bg: const Color(0xFFFCEBEB),
             onTap: _cerrarSesion,
           ),
-
         ],
       ),
     );
@@ -431,8 +463,11 @@ class _PerfilScreenState extends State<PerfilScreen> {
                 ),
               ),
             ),
-            Icon(Icons.arrow_forward_ios_rounded,
-                size: 14, color: Colors.grey[400]),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 14,
+              color: Colors.grey[400],
+            ),
           ],
         ),
       ),

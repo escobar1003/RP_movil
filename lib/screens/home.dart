@@ -4,11 +4,13 @@ import 'package:recycling_points/games/recycling_game_screen.dart';
 
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
+import '../services/usuario_service.dart';
 
 import 'mapa_puntos_screen.dart';
 import 'reciclar_screen.dart';
 import 'mis_canjes_screen.dart';
 import 'configuracion_screen.dart';
+import '../games/recycling_game_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,16 +21,40 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String _nombre = '';
+  int _puntos = 0;
+  int _reciclajes = 0;
+  double _pesoTotal = 0;
 
   @override
   void initState() {
     super.initState();
-    _cargarNombre();
+    _cargarDatos();
   }
 
-  Future<void> _cargarNombre() async {
-    final nombre = await AuthService.getNombre();
-    setState(() => _nombre = nombre);
+  Future<void> _cargarDatos() async {
+    _nombre = await AuthService.getNombre();
+
+    try {
+      final perfil = await UsuarioService.getPerfil();
+      if (perfil['nombre'] != null) _nombre = perfil['nombre'];
+    } catch (_) {}
+
+    try {
+      final puntos = await UsuarioService.getResumenPuntos();
+      _puntos = puntos['saldo'] ?? 0;
+    } catch (_) {}
+
+    try {
+      final entregas = await UsuarioService.getEntregas();
+      final lista = entregas['entregas'] as List? ?? [];
+      _reciclajes = lista.length;
+      _pesoTotal = lista.fold(
+        0.0,
+        (sum, e) => sum + (e['pesoTotal'] ?? e['peso_total'] ?? 0).toDouble(),
+      );
+    } catch (_) {}
+
+    if (mounted) setState(() {});
   }
 
   @override
@@ -154,8 +180,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           Row(
                             children: [
-                              const Text(
-                                '2,560',
+                              Text(
+                                _puntos.toString(),
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 38,
@@ -233,8 +259,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         Expanded(
                           child: _ImpactoItem(
                             icon: BootstrapIcons.recycle,
-                            value: '12.5 kg',
-                            label: 'Plástico reciclado',
+                            value: '${_pesoTotal.toStringAsFixed(1)} kg',
+                            label: 'Peso total reciclado',
                             color: AppColors.primary,
                           ),
                         ),
@@ -244,7 +270,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         Expanded(
                           child: _ImpactoItem(
                             icon: BootstrapIcons.truck,
-                            value: '8',
+                            value: '$_reciclajes',
                             label: 'Reciclajes',
                             color: Colors.green,
                           ),
@@ -259,7 +285,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         Expanded(
                           child: _ImpactoItem(
                             icon: BootstrapIcons.leaf,
-                            value: '8.4 kg',
+                            value:
+                                '${(_pesoTotal * 1.5).toStringAsFixed(1)} kg',
                             label: 'CO₂ evitado',
                             color: Colors.lightGreen,
                           ),
@@ -270,7 +297,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         Expanded(
                           child: _ImpactoItem(
                             icon: BootstrapIcons.star_fill,
-                            value: '2,560',
+                            value: '$_puntos',
                             label: 'Puntos totales',
                             color: Colors.amber,
                           ),
@@ -312,8 +339,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        Text(
+                      children: [
+                        const Text(
                           'Nivel: Verde',
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
@@ -322,8 +349,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
 
                         Text(
-                          '80%',
-                          style: TextStyle(
+                          '${_puntos} pts',
+                          style: const TextStyle(
                             fontWeight: FontWeight.w700,
                             color: AppColors.primary,
                           ),
@@ -335,11 +362,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     ClipRRect(
                       borderRadius: BorderRadius.circular(10),
-                      child: const LinearProgressIndicator(
-                        value: 0.8,
+                      child: LinearProgressIndicator(
+                        value: (_puntos / 3000).clamp(0.0, 1.0),
                         minHeight: 10,
                         backgroundColor: AppColors.green100,
-                        valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          AppColors.primary,
+                        ),
                       ),
                     ),
 

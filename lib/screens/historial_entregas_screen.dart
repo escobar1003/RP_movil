@@ -1,6 +1,10 @@
 // lib/screens/historial_entregas_screen.dart
 
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../services/auth_service.dart';
+import '../theme/app_theme.dart';
 
 class HistorialEntregasScreen extends StatefulWidget {
   const HistorialEntregasScreen({super.key});
@@ -11,7 +15,6 @@ class HistorialEntregasScreen extends StatefulWidget {
 }
 
 class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
-
   // Filtro activo: 'todos', 'recientes', 'completados'
   String _filtro = 'todos';
 
@@ -115,8 +118,11 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
             children: [
               GestureDetector(
                 onTap: () => Navigator.pop(context),
-                child: const Icon(Icons.arrow_back_ios_rounded,
-                    color: Colors.white, size: 20),
+                child: const Icon(
+                  Icons.arrow_back_ios_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 12),
               const Text(
@@ -157,10 +163,7 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
         ),
         Text(
           label,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.65),
-            fontSize: 12,
-          ),
+          style: TextStyle(color: Colors.white.withOpacity(0.65), fontSize: 12),
         ),
       ],
     );
@@ -271,7 +274,6 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
       ),
       child: Row(
         children: [
-
           // Ícono del material
           Container(
             width: 50,
@@ -280,8 +282,11 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
               color: e['bg'] as Color,
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(e['icon'] as IconData,
-                color: e['color'] as Color, size: 24),
+            child: Icon(
+              e['icon'] as IconData,
+              color: e['color'] as Color,
+              size: 24,
+            ),
           ),
 
           const SizedBox(width: 14),
@@ -302,16 +307,22 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
                 const SizedBox(height: 3),
                 Row(
                   children: [
-                    Icon(Icons.store_outlined,
-                        size: 12, color: Colors.grey[400]),
+                    Icon(
+                      Icons.store_outlined,
+                      size: 12,
+                      color: Colors.grey[400],
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       e['supermercado'] as String,
                       style: TextStyle(fontSize: 12, color: Colors.grey[500]),
                     ),
                     const SizedBox(width: 8),
-                    Icon(Icons.calendar_today_outlined,
-                        size: 12, color: Colors.grey[400]),
+                    Icon(
+                      Icons.calendar_today_outlined,
+                      size: 12,
+                      color: Colors.grey[400],
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       e['fecha'] as String,
@@ -329,8 +340,11 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.stars_rounded,
-                      size: 14, color: Color(0xFF7BC043)),
+                  const Icon(
+                    Icons.stars_rounded,
+                    size: 14,
+                    color: Color(0xFF7BC043),
+                  ),
                   const SizedBox(width: 3),
                   Text(
                     '+${e['puntos']} pts',
@@ -349,7 +363,6 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
               ),
             ],
           ),
-
         ],
       ),
     );
