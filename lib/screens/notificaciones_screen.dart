@@ -298,7 +298,7 @@ class _NotifCard extends StatelessWidget {
                   left: BorderSide(color: Color(0xFF2D5A1B), width: 3)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),

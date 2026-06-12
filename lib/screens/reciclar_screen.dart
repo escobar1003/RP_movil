@@ -350,7 +350,7 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
                       decoration: BoxDecoration(
                         color: _colorCaneca.computeLuminance() > 0.5
                             ? const Color(0xFFE8F5E9)
-                            : const Color(0xFF2E2E2E).withOpacity(0.15),
+                            : const Color(0xFF2E2E2E).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: Icon(
@@ -662,7 +662,7 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),

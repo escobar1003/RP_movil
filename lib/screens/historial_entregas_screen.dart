@@ -162,7 +162,7 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.65),
+            color: Colors.white.withValues(alpha: 0.65),
             fontSize: 12,
           ),
         ),
@@ -193,7 +193,7 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: Colors.black.withValues(alpha: 0.04),
                     blurRadius: 6,
                   ),
                 ],
@@ -267,7 +267,7 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
