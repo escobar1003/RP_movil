@@ -387,18 +387,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
           Divider(height: 1, color: Colors.grey.withOpacity(0.1), indent: 60),
 
           _buildMenuRow(
-            icon: Icons.notifications_outlined,
-            label: 'Notificaciones',
-            color: const Color(0xFF0F6E56),
-            bg: const Color(0xFFE1F5EE),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const NotificacionesScreen()),
-            ),
-          ),
-          Divider(height: 1, color: Colors.grey.withOpacity(0.1), indent: 60),
-
-          _buildMenuRow(
             icon: Icons.settings_outlined,
             label: 'Configuración',
             color: const Color(0xFF5F5E5A),
