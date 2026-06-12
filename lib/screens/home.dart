@@ -11,7 +11,6 @@ import 'reciclar_screen.dart';
 import 'mis_canjes_screen.dart';
 import 'configuracion_screen.dart';
 import 'notificaciones_screen.dart';
-import '../games/recycling_game_screen.dart';
 import 'reservas.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -94,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(height: 2),
                         const Text(
-                          '¡Gracias por cuidar el planeta!',
+                          'ï¿½Gracias por cuidar el planeta!',
                           style: TextStyle(fontSize: 13, color: AppColors.textMid),
                         ),
                       ],
@@ -171,7 +170,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ],
                           ),
                           const SizedBox(height: 10),
-                          const Text('Sigue así, cada acción suma un cambio.', style: TextStyle(color: Colors.white, fontSize: 14)),
+                          const Text('Sigue asï¿½, cada acciï¿½n suma un cambio.', style: TextStyle(color: Colors.white, fontSize: 14)),
                         ],
                       ),
                     ),
@@ -245,7 +244,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const Text('¡Genial! Aún puedes ganar más puntos y subir de nivel.', style: TextStyle(color: AppColors.textMid, fontSize: 13)),
+                    const Text('ï¿½Genial! Aï¿½n puedes ganar mï¿½s puntos y subir de nivel.', style: TextStyle(color: AppColors.textMid, fontSize: 13)),
                   ],
                 ),
               ),
@@ -253,7 +252,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 24),
 
               // ------------------ ACCIONES RAPIDAS ------------------
-              const Text('Acciones rápidas', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17, color: AppColors.textDark)),
+              const Text('Acciones rï¿½pidas', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17, color: AppColors.textDark)),
               const SizedBox(height: 14),
               Row(
                 children: [
@@ -267,46 +266,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 24),
 
-              // ------------------------- JUEGO -------------------------
-              const Text('Mini juego', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17, color: AppColors.textDark)),
-              const SizedBox(height: 14),
-              GestureDetector(
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RecyclingGameScreen())),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [Color(0xFF43A047), Color(0xFF66BB6A)], begin: Alignment.topLeft, end: Alignment.bottomRight),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [BoxShadow(color: Colors.green.withValues(alpha: 0.3), blurRadius: 14, offset: const Offset(0, 6))],
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(16)),
-                        child: const Icon(Icons.sports_esports, color: Colors.white, size: 36),
-                      ),
-                      const SizedBox(width: 18),
-                      const Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('¡Recicla jugando!', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800)),
-                            SizedBox(height: 4),
-                            Text('Atrapa los residuos en el bote correcto.\nGana puntos y salva el planeta.', style: TextStyle(color: Colors.white70, fontSize: 13)),
-                          ],
-                        ),
-                      ),
-                      const Icon(Icons.arrow_forward_ios, color: Colors.white54, size: 18),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // ?? BOTÓN TEMPORAL DE PRUEBA — borrar después
+              // ?? BOTï¿½N TEMPORAL DE PRUEBA ï¿½ borrar despuï¿½s
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -318,7 +278,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           aliado: {
                             'idPunto': 1,
                             'nombre': 'Punto de prueba',
-                            'direccion': 'Dirección de prueba',
+                            'direccion': 'Direcciï¿½n de prueba',
                           },
                         ),
                       ),
