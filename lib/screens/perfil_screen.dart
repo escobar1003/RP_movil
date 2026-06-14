@@ -153,7 +153,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
             Text(
               _correo,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.65),
+                color: Colors.white.withValues(alpha: 0.65),
                 fontSize: 13,
               ),
             ),
@@ -239,7 +239,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -280,7 +280,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -334,7 +334,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -355,7 +355,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
               _cargarDatos();
             },
           ),
-          Divider(height: 1, color: Colors.grey.withOpacity(0.1), indent: 60),
+          Divider(height: 1, color: Colors.grey.withValues(alpha: 0.1), indent: 60),
 
           _buildMenuRow(
             icon: Icons.history,
@@ -369,7 +369,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
               ),
             ),
           ),
-          Divider(height: 1, color: Colors.grey.withOpacity(0.1), indent: 60),
+          Divider(height: 1, color: Colors.grey.withValues(alpha: 0.1), indent: 60),
 
           _buildMenuRow(
             icon: Icons.card_giftcard_outlined,
@@ -381,19 +381,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
               MaterialPageRoute(builder: (_) => const MisCanjesScreen()),
             ),
           ),
-          Divider(height: 1, color: Colors.grey.withOpacity(0.1), indent: 60),
-
-          _buildMenuRow(
-            icon: Icons.notifications_outlined,
-            label: 'Notificaciones',
-            color: const Color(0xFF0F6E56),
-            bg: const Color(0xFFE1F5EE),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const NotificacionesScreen()),
-            ),
-          ),
-          Divider(height: 1, color: Colors.grey.withOpacity(0.1), indent: 60),
+          Divider(height: 1, color: Colors.grey.withValues(alpha: 0.1), indent: 60),
 
           _buildMenuRow(
             icon: Icons.settings_outlined,
@@ -405,7 +393,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
               MaterialPageRoute(builder: (_) => const ConfiguracionScreen()),
             ),
           ),
-          Divider(height: 1, color: Colors.grey.withOpacity(0.1), indent: 60),
+          Divider(height: 1, color: Colors.grey.withValues(alpha: 0.1), indent: 60),
 
           _buildMenuRow(
             icon: Icons.help_outline,
@@ -415,7 +403,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
             onTap: () {},
           ),
 
-          Divider(height: 1, color: Colors.grey.withOpacity(0.15)),
+          Divider(height: 1, color: Colors.grey.withValues(alpha: 0.15)),
 
           _buildMenuRow(
             icon: Icons.logout,

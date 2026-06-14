@@ -3,16 +3,17 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  static const String baseUrl =
-      'https://backend-rp-arreglado-n8p8.onrender.com/';
 
-  // LOGIN - MODIFICADO CON EL PREFIJO CORRECTO
+  static const String baseUrl = 'https://backend-rp-arreglado-n8p8.onrender.com/api/auth';
+
+  // LOGIN
   static Future<Map<String, dynamic>> login({
     required String correo,
     required String password,
   }) async {
+
     final response = await http.post(
-      Uri.parse('$baseUrl/api/auth/iniciar-sesion'),
+      Uri.parse('$baseUrl/iniciar-sesion'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'correo': correo, 'password': password}),
     );
@@ -37,10 +38,7 @@ class AuthService {
           await prefs.setString('usuario_rol', data['usuario']['rol']);
         }
         if (data['usuario']['telefono'] != null) {
-          await prefs.setString(
-            'usuario_telefono',
-            data['usuario']['telefono'],
-          );
+          await prefs.setString('usuario_telefono', data['usuario']['telefono']);
         }
       }
     }
@@ -48,7 +46,7 @@ class AuthService {
     return data;
   }
 
-  // REGISTER - MODIFICADO CON EL PREFIJO CORRECTO
+  // REGISTER
   static Future<Map<String, dynamic>> register({
     required String nombre,
     required String correo,
@@ -65,7 +63,7 @@ class AuthService {
     }
 
     final response = await http.post(
-      Uri.parse('$baseUrl/api/auth/registrarse'),
+      Uri.parse('$baseUrl/registrarse'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(body),
     );
@@ -104,16 +102,18 @@ class AuthService {
     return prefs.getString('usuario_telefono') ?? '';
   }
 
-  // RECUPERAR CONTRASEÑA - MODIFICADO CON EL PREFIJO CORRECTO
-  static Future<Map<String, dynamic>> recuperarPasswordSolicitar(
-    String correo,
-  ) async {
+  // RECUPERAR CONTRASEÑA
+  static Future<Map<String, dynamic>> recuperarPasswordSolicitar(String correo) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/api/auth/recuperar-password/solicitar'),
+      Uri.parse('$baseUrl/recuperar-password/solicitar'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'correo': correo}),
     );
-    return jsonDecode(response.body);
+    final data = jsonDecode(response.body);
+    if (response.statusCode >= 400) {
+      throw Exception(data['mensaje'] ?? data['message'] ?? 'Error del servidor');
+    }
+    return data;
   }
 
   static Future<Map<String, dynamic>> recuperarPasswordRestablecer({
@@ -122,15 +122,15 @@ class AuthService {
     required String password,
   }) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/api/auth/recuperar-password/restablecer'),
+      Uri.parse('$baseUrl/recuperar-password/restablecer'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'correo': correo,
-        'codigo': codigo,
-        'password': password,
-      }),
+      body: jsonEncode({'correo': correo, 'codigo': codigo, 'nuevaPassword': password}),
     );
-    return jsonDecode(response.body);
+    final data = jsonDecode(response.body);
+    if (response.statusCode >= 400) {
+      throw Exception(data['mensaje'] ?? data['message'] ?? 'Error del servidor');
+    }
+    return data;
   }
 
   // CERRAR SESIÓN (API + local)
@@ -139,7 +139,7 @@ class AuthService {
       final token = await getToken();
       if (token != null) {
         await http.delete(
-          Uri.parse('$baseUrl/api/auth/cerrar-sesion'),
+          Uri.parse('$baseUrl/cerrar-sesion'),
           headers: {'Authorization': 'Bearer $token'},
         );
       }
