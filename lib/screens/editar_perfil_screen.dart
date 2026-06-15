@@ -81,9 +81,9 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
   try {
     final resultado = await UsuarioService.updatePerfil(
       nombre: _nombreController.text.trim(),
+      apellido: _apellidoController.text.trim(),
       telefono: _telefonoController.text.trim(),
     );
-
     // Verifica si el backend devolvió error
     if (resultado['status'] == 'error' || resultado['error'] != null) {
       final msg = resultado['mensaje'] ?? resultado['error'] ?? 'Error del servidor';
@@ -176,14 +176,12 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
                                       : null,
                                 ),
                                 _divider(),
-                                _campo(
+                               _campo(
                                   label: 'Apellido',
                                   controller: _apellidoController,
                                   hint: 'Tu apellido',
                                   icon: Icons.person_outline_rounded,
-                                  // readonly hasta que el backend lo soporte
-                                  enabled: false,
-                                  sufijo: _badgePendiente(),
+                                  enabled: true,
                                 ),
                                 _divider(),
                                 _campo(
@@ -235,7 +233,7 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
                                 SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
-                                    'Apellido e info estarán disponibles cuando el backend los soporte.',
+                                    'Info estará disponible próximamente.',
                                     style: TextStyle(
                                         fontSize: 12,
                                         color: Color(0xFF854F0B),

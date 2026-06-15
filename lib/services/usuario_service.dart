@@ -8,10 +8,12 @@ class UsuarioService {
 
   static Future<Map<String, dynamic>> updatePerfil({
     required String nombre,
+    required String apellido,  // ← agrega esto
     required String telefono,
   }) async {
     return ApiService.put('/usuario/perfil', body: {
       'nombre': nombre,
+      'apellido': apellido,    // ← agrega esto
       'telefono': telefono,
     });
   }
@@ -75,6 +77,6 @@ class UsuarioService {
   }
 
   static Future<Map<String, dynamic>> cancelarReserva(int id) async {
-    return ApiService.delete('/usuario/reservas/$id');
+    return ApiService.put('/usuario/reservas/$id/cancelar', body: {});
   }
 }
