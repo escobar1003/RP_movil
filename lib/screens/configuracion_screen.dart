@@ -175,27 +175,6 @@ class _ConfiguracionScreenState
             onTap: () {},
           ),
 
-          const SizedBox(height: 30),
-
-          // CERRAR SESIÓN
-          SizedBox(
-            width: double.infinity,
-            height: 55,
-
-            child: ElevatedButton.icon(
-              onPressed: () {},
-
-              icon: const Icon(Icons.logout),
-
-              label: const Text(
-                'Cerrar sesión',
-              ),
-
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-              ),
-            ),
-          ),
         ],
       ),
     );

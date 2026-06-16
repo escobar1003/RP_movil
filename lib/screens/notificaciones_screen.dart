@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import '../models/notificacion_model.dart';
-import '../data/notificaciones_data.dart';
+import '../services/usuario_service.dart';
 
 class NotificacionesScreen extends StatefulWidget {
   const NotificacionesScreen({super.key});
@@ -14,6 +14,8 @@ class NotificacionesScreen extends StatefulWidget {
 class _NotificacionesScreenState extends State<NotificacionesScreen> {
   List<NotificacionModel> _todas = [];
   String _filtroActivo = 'Todas';
+  bool _cargando = true;
+  String? _error;
 
   final List<String> _filtros = [
     'Todas', 'Citas', 'Puntos', 'Canjes', 'Logros', 'Sistema'
@@ -22,12 +24,48 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
   @override
   void initState() {
     super.initState();
-    // Por ahora usamos datos locales; cuando el backend esté listo
-    // reemplaza esta línea por una llamada a la API
-    _todas = List.from(notificacionesPrueba);
+    _cargarNotificaciones();
   }
 
-  // ── Filtrar según chip seleccionado ──────────────────
+  Future<void> _cargarNotificaciones() async {
+    setState(() {
+      _cargando = true;
+      _error = null;
+    });
+    try {
+      final data = await UsuarioService.getNotificaciones();
+      final lista = (data['notificaciones'] as List?) ?? [];
+      setState(() {
+        _todas = lista.map((e) => NotificacionModel.fromJson(e as Map<String, dynamic>)).toList();
+        _cargando = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = 'No se pudieron cargar las notificaciones';
+        _cargando = false;
+      });
+    }
+  }
+
+  Future<void> _marcarLeida(int id) async {
+    try {
+      await UsuarioService.marcarNotificacionLeida(id);
+    } catch (_) {}
+    setState(() {
+      final i = _todas.indexWhere((n) => n.id == id);
+      if (i != -1) _todas[i] = _todas[i].marcarLeida();
+    });
+  }
+
+  Future<void> _marcarTodasLeidas() async {
+    try {
+      await UsuarioService.marcarTodasNotificacionesLeidas();
+    } catch (_) {}
+    setState(() {
+      _todas = _todas.map((n) => n.marcarLeida()).toList();
+    });
+  }
+
   List<NotificacionModel> get _filtradas {
     switch (_filtroActivo) {
       case 'Citas':
@@ -56,22 +94,6 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
 
   int get _noLeidas => _todas.where((n) => !n.leida).length;
 
-  // ── Marcar una notificación como leída ───────────────
-  void _marcarLeida(int id) {
-    setState(() {
-      final i = _todas.indexWhere((n) => n.id == id);
-      if (i != -1) _todas[i] = _todas[i].marcarLeida();
-    });
-  }
-
-  // ── Marcar todas como leídas ─────────────────────────
-  void _marcarTodasLeidas() {
-    setState(() {
-      _todas = _todas.map((n) => n.marcarLeida()).toList();
-    });
-  }
-
-  // ── Agrupar por fecha ────────────────────────────────
   Map<String, List<NotificacionModel>> _agrupar(List<NotificacionModel> lista) {
     final ahora = DateTime.now();
     final hoy = DateTime(ahora.year, ahora.month, ahora.day);
@@ -91,8 +113,6 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final grupos = _agrupar(_filtradas);
-
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6EF),
       appBar: AppBar(
@@ -101,7 +121,7 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
         title: Row(
           children: [
             const Text('Notificaciones'),
-            if (_noLeidas > 0) ...[
+            if (!_cargando && _noLeidas > 0) ...[
               const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -116,7 +136,7 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
           ],
         ),
         actions: [
-          if (_noLeidas > 0)
+          if (!_cargando && _noLeidas > 0)
             TextButton(
               onPressed: _marcarTodasLeidas,
               child: const Text('Leer todas',
@@ -124,56 +144,88 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
             ),
         ],
       ),
-      body: Column(
-        children: [
-          // ── Chips de filtro ───────────────────────────
-          SizedBox(
-            height: 48,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              itemCount: _filtros.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
-              itemBuilder: (_, i) {
-                final activo = _filtros[i] == _filtroActivo;
-                return GestureDetector(
-                  onTap: () => setState(() => _filtroActivo = _filtros[i]),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: activo
-                          ? const Color(0xFF2D5A1B)
-                          : Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: activo
-                            ? const Color(0xFF2D5A1B)
-                            : const Color(0xFFD3D1C7),
-                      ),
-                    ),
-                    child: Text(_filtros[i],
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: activo ? Colors.white : const Color(0xFF5F5E5A),
-                        )),
-                  ),
-                );
-              },
-            ),
-          ),
+      body: _buildBody(),
+    );
+  }
 
-          // ── Lista agrupada ────────────────────────────
-          Expanded(
-            child: grupos.isEmpty
-                ? _buildVacia()
-                : ListView(
+  Widget _buildBody() {
+    if (_cargando) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_error != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.cloud_off_outlined, size: 64, color: Colors.grey[300]),
+              const SizedBox(height: 12),
+              Text(
+                _error!,
+                style: TextStyle(color: Colors.grey[400], fontSize: 15),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              TextButton.icon(
+                onPressed: _cargarNotificaciones,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Reintentar'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final grupos = _agrupar(_filtradas);
+
+    return Column(
+      children: [
+        SizedBox(
+          height: 48,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            itemCount: _filtros.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            itemBuilder: (_, i) {
+              final activo = _filtros[i] == _filtroActivo;
+              return GestureDetector(
+                onTap: () => setState(() => _filtroActivo = _filtros[i]),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: activo ? const Color(0xFF2D5A1B) : Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: activo ? const Color(0xFF2D5A1B) : const Color(0xFFD3D1C7),
+                    ),
+                  ),
+                  child: Text(_filtros[i],
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: activo ? Colors.white : const Color(0xFF5F5E5A),
+                      )),
+                ),
+              );
+            },
+          ),
+        ),
+
+        Expanded(
+          child: grupos.isEmpty
+              ? _buildVacia()
+              : RefreshIndicator(
+                  onRefresh: _cargarNotificaciones,
+                  child: ListView(
                     padding: const EdgeInsets.fromLTRB(12, 4, 12, 20),
                     children: grupos.entries.map((entry) {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Etiqueta de grupo
                           Padding(
                             padding: const EdgeInsets.fromLTRB(4, 12, 4, 6),
                             child: Text(entry.key,
@@ -183,7 +235,6 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
                                     color: Color(0xFF9DB8A0),
                                     letterSpacing: 0.5)),
                           ),
-                          // Cards del grupo
                           ...entry.value.map((n) => _NotifCard(
                                 notif: n,
                                 onTap: () => _marcarLeida(n.id),
@@ -192,9 +243,9 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
                       );
                     }).toList(),
                   ),
-          ),
-        ],
-      ),
+                ),
+        ),
+      ],
     );
   }
 
@@ -221,7 +272,6 @@ class _NotifCard extends StatelessWidget {
 
   const _NotifCard({required this.notif, required this.onTap});
 
-  // Devuelve ícono, color de fondo e color del ícono según tipo
   _IconConfig get _config {
     switch (notif.tipo) {
       case TipoNotificacion.citaAceptada:
@@ -307,7 +357,6 @@ class _NotifCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Ícono
             Container(
               width: 44,
               height: 44,
@@ -318,8 +367,6 @@ class _NotifCard extends StatelessWidget {
               child: Icon(cfg.icono, color: cfg.color, size: 22),
             ),
             const SizedBox(width: 12),
-
-            // Texto
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -360,8 +407,6 @@ class _NotifCard extends StatelessWidget {
                 ],
               ),
             ),
-
-            // Punto verde si no leída
             if (!notif.leida)
               Container(
                 width: 8,
