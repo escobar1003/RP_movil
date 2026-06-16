@@ -15,14 +15,11 @@ const dirLight = new BABYLON.DirectionalLight('dir', new BABYLON.Vector3(-0.5, -
 dirLight.position = new BABYLON.Vector3(5, 10, 5);
 dirLight.intensity = 0.4;
 
-const groundMat = new BABYLON.StandardMaterial('groundMat', scene);
-
 const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: 24, height: 24 }, scene);
 
-const groundTex = new BABYLON.GridMaterial('groundTex', scene);
-groundTex.mainColor = new BABYLON.Color3(0.35, 0.65, 0.25);
-groundTex.lineColor = new BABYLON.Color3(0.3, 0.55, 0.2);
-groundTex.opacity = 0.3;
+const groundTex = new BABYLON.StandardMaterial('groundTex', scene);
+groundTex.diffuseColor = new BABYLON.Color3(0.35, 0.65, 0.25);
+groundTex.specularColor = BABYLON.Color3.Black();
 ground.material = groundTex;
 const pathMat = new BABYLON.StandardMaterial('pathMat', scene);
 pathMat.diffuseColor = new BABYLON.Color3(0.6, 0.55, 0.45);
@@ -345,6 +342,7 @@ window.onFlutterCommand = onFlutterCommand;
 
 engine.runRenderLoop(() => scene.render());
 window.addEventListener('resize', () => engine.resize());
+setTimeout(() => engine.resize(), 100);
 
 canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
@@ -525,7 +523,7 @@ function showFloatText(position, text, isGood) {
   plane.material = mat;
   const startY = plane.position.y;
   let elapsed = 0;
-  scene.onBeforeRenderObservable.add((_, state) => {
+  const obs = scene.onBeforeRenderObservable.add((_, state) => {
     elapsed += state.deltaTime / 1000;
     plane.position.y = startY + elapsed * 1.5;
     plane.rotation.x = Math.sin(elapsed * 3) * 0.05;
@@ -533,6 +531,7 @@ function showFloatText(position, text, isGood) {
     if (elapsed > 1.2) {
       plane.dispose();
       dt.dispose();
+      scene.onBeforeRenderObservable.remove(obs);
     }
   });
 }
@@ -552,7 +551,7 @@ function spawnParticles(position, isGood) {
     const vy = 2 + Math.random() * 2;
     const vz = (Math.random() - 0.5) * 3;
     let life = 0;
-    scene.onBeforeRenderObservable.add((_, state) => {
+    const obs = scene.onBeforeRenderObservable.add((_, state) => {
       life += state.deltaTime / 1000;
       box.position.x += vx * state.deltaTime / 1000;
       box.position.y += vy * state.deltaTime / 1000 - 9.8 * life * state.deltaTime / 1000;
@@ -560,7 +559,10 @@ function spawnParticles(position, isGood) {
       box.rotation.x += state.deltaTime / 1000 * 5;
       box.rotation.z += state.deltaTime / 1000 * 5;
       pMat.alpha = Math.max(0, 1 - life / 1.0);
-      if (life > 1.0) box.dispose();
+      if (life > 1.0) {
+        box.dispose();
+        scene.onBeforeRenderObservable.remove(obs);
+      }
     });
   }
 }
