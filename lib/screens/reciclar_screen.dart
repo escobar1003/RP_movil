@@ -93,7 +93,7 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
       setState(() => _rutaImagenLocal = foto.path);
 
       const ipServidor = '192.168.1.12';
-      final url = Uri.parse('https://backend-rp-arreglado-n8p8.onrender.com/api/detectar-material');
+      final url = Uri.parse('https://recycling-ia-service.onrender.com/api/detectar-material');
 
       final request = http.MultipartRequest('POST', url);
       request.files.add(await http.MultipartFile.fromPath('image', foto.path));
