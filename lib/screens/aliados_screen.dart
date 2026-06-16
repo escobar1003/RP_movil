@@ -99,7 +99,7 @@ class AliadosScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 3),
             ),
@@ -189,7 +189,7 @@ class AliadosScreen extends StatelessWidget {
               const SizedBox(height: 14),
 
               // ── Divider ────────────────────────────────────
-              Divider(color: Colors.grey.withOpacity(0.12), height: 1),
+              Divider(color: Colors.grey.withValues(alpha: 0.12), height: 1),
               const SizedBox(height: 12),
 
               // ── Horario ────────────────────────────────────

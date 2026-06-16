@@ -99,7 +99,7 @@ class _MapaPuntosScreenState extends State<MapaPuntosScreen> {
                           border: Border.all(color: Colors.white, width: 3),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.blue.withOpacity(0.4),
+                              color: Colors.blue.withValues(alpha: 0.4),
                               blurRadius: 10,
                               spreadRadius: 4,
                             ) ,
@@ -129,7 +129,7 @@ class _MapaPuntosScreenState extends State<MapaPuntosScreen> {
                           border: Border.all(color: Colors.white, width: 2.5),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
+                              color: Colors.black.withValues(alpha: 0.2),
                               blurRadius: 8,
                               offset: const Offset(0, 3),
                             ),
@@ -163,7 +163,7 @@ class _MapaPuntosScreenState extends State<MapaPuntosScreen> {
                           borderRadius: BorderRadius.circular(14),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withValues(alpha: 0.1),
                               blurRadius: 8,
                             ),
                           ],
@@ -182,7 +182,7 @@ class _MapaPuntosScreenState extends State<MapaPuntosScreen> {
                           borderRadius: BorderRadius.circular(14),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withValues(alpha: 0.1),
                               blurRadius: 8,
                             ),
                           ],
@@ -222,7 +222,7 @@ class _MapaPuntosScreenState extends State<MapaPuntosScreen> {
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.12),
+                      color: Colors.black.withValues(alpha: 0.12),
                       blurRadius: 20,
                       offset: const Offset(0, -4),
                     ),

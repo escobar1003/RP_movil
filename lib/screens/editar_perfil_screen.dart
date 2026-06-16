@@ -20,7 +20,6 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nombreController     = TextEditingController();
   final _apellidoController   = TextEditingController();
-  final _correoController     = TextEditingController();
   final _telefonoController   = TextEditingController();
   final _infoController       = TextEditingController();
 
@@ -44,7 +43,6 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
       final u = perfil['usuario'] ?? perfil; // acepta ambas estructuras
       _nombreController.text   = u['nombre']   ?? '';
       _apellidoController.text = u['apellido'] ?? '';
-      _correoController.text   = u['correo']   ?? '';
       _telefonoController.text = u['telefono'] ?? '';
       _infoController.text     = u['info']     ?? '';
       _fotoUrlActual           = u['imagen'];
@@ -129,7 +127,6 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
   void dispose() {
     _nombreController.dispose();
     _apellidoController.dispose();
-    _correoController.dispose();
     _telefonoController.dispose();
     _infoController.dispose();
     super.dispose();
@@ -184,17 +181,6 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
                                   // readonly hasta que el backend lo soporte
                                   enabled: false,
                                   sufijo: _badgePendiente(),
-                                ),
-                                _divider(),
-                                _campo(
-                                  label: 'Correo electrónico',
-                                  controller: _correoController,
-                                  hint: 'tu@correo.com',
-                                  icon: Icons.mail_outline_rounded,
-                                  teclado: TextInputType.emailAddress,
-                                  enabled: false,      // correo no editable por ahora
-                                  sufijo: const Icon(Icons.lock_outline_rounded,
-                                      size: 16, color: Color(0xFF9DB8A0)),
                                 ),
                                 _divider(),
                                 _campo(
@@ -322,7 +308,7 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -417,7 +403,7 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withValues(alpha: 0.06),
               blurRadius: 10,
               offset: const Offset(0, -3))
         ],

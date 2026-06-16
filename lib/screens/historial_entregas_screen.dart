@@ -1,9 +1,7 @@
 // lib/screens/historial_entregas_screen.dart
 
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import '../services/auth_service.dart';
+import '../services/usuario_service.dart';
 import '../theme/app_theme.dart';
 
 class HistorialEntregasScreen extends StatefulWidget {
@@ -15,72 +13,100 @@ class HistorialEntregasScreen extends StatefulWidget {
 }
 
 class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
-
-  // Filtro activo: 'todos', 'recientes', 'completados'
   String _filtro = 'todos';
+  bool _cargando = true;
+  String? _error;
+  List<Map<String, dynamic>> _entregas = [];
 
-  // Datos de prueba — vendrán del backend después
-  final List<Map<String, dynamic>> _entregas = [
-    {
-      'supermercado': 'Éxito',
-      'material': 'Plástico',
-      'peso': '1.2 kg',
-      'puntos': 120,
-      'fecha': '12 May 2026',
-      'estado': 'completado',
-      'icon': Icons.water_drop_outlined,
-      'color': const Color(0xFF185FA5),
-      'bg': const Color(0xFFE6F1FB),
-    },
-    {
-      'supermercado': 'D1',
-      'material': 'Papel',
-      'peso': '0.8 kg',
-      'puntos': 80,
-      'fecha': '10 May 2026',
-      'estado': 'completado',
-      'icon': Icons.description_outlined,
-      'color': const Color(0xFF3B6D11),
-      'bg': const Color(0xFFEAF3DE),
-    },
-    {
-      'supermercado': 'Jumbo',
-      'material': 'Vidrio',
-      'peso': '2.1 kg',
-      'puntos': 210,
-      'fecha': '05 May 2026',
-      'estado': 'completado',
-      'icon': Icons.wine_bar_outlined,
-      'color': const Color(0xFF0F6E56),
-      'bg': const Color(0xFFE1F5EE),
-    },
-    {
-      'supermercado': 'Carulla',
-      'material': 'Cartón',
-      'peso': '3.5 kg',
-      'puntos': 350,
-      'fecha': '01 May 2026',
-      'estado': 'completado',
-      'icon': Icons.inventory_2_outlined,
-      'color': const Color(0xFF854F0B),
-      'bg': const Color(0xFFFAEEDA),
-    },
-    {
-      'supermercado': 'Éxito',
-      'material': 'Metal',
-      'peso': '0.5 kg',
-      'puntos': 50,
-      'fecha': '28 Abr 2026',
-      'estado': 'completado',
-      'icon': Icons.hardware_outlined,
-      'color': const Color(0xFF5F5E5A),
-      'bg': const Color(0xFFF1EFE8),
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _cargarEntregas();
+  }
+
+  Future<void> _cargarEntregas() async {
+    setState(() {
+      _cargando = true;
+      _error = null;
+    });
+    try {
+      final data = await UsuarioService.getEntregas();
+      final lista = (data['entregas'] as List?) ?? [];
+      setState(() {
+        _entregas = lista.map((e) => _normalizarEntrega(e as Map<String, dynamic>)).toList();
+        _cargando = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = 'No se pudieron cargar las entregas';
+        _cargando = false;
+      });
+    }
+  }
+
+  Map<String, dynamic> _normalizarEntrega(Map<String, dynamic> item) {
+    final material = _materialConfig(item['material'] ?? '');
+    final punto = item['punto'] as Map<String, dynamic>? ?? {};
+    final rawPeso = item['pesoTotal'] ?? item['peso_total'] ?? 0;
+    final pesoNum = (rawPeso is num) ? rawPeso.toDouble() : 0.0;
+    return {
+      'supermercado': punto['nombre'] ?? item['supermercado'] ?? 'Sin punto',
+      'material': item['material'] ?? 'Material',
+      'peso': _formatearPeso(pesoNum),
+      'pesoNum': pesoNum,
+      'puntos': item['puntos'] ?? item['puntosObtenidos'] ?? 0,
+      'fecha': _formatearFecha(item['fecha'] ?? ''),
+      'estado': item['estado'] ?? 'pendiente',
+      'icon': material['icon'],
+      'color': material['color'],
+      'bg': material['bg'],
+    };
+  }
+
+  String _formatearPeso(double kg) {
+    if (kg >= 1) return '${kg.toStringAsFixed(1)} kg';
+    return '${(kg * 1000).toStringAsFixed(0)} g';
+  }
+
+  String _formatearFecha(String fecha) {
+    if (fecha.isEmpty) return '';
+    try {
+      final dt = DateTime.parse(fecha);
+      final meses = [
+        'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+        'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
+      ];
+      return '${dt.day} ${meses[dt.month - 1]} ${dt.year}';
+    } catch (_) {
+      return fecha;
+    }
+  }
+
+  Map<String, dynamic> _materialConfig(String material) {
+    final map = {
+      'plastico':   {'icon': Icons.water_drop_outlined,    'color': const Color(0xFF185FA5), 'bg': const Color(0xFFE6F1FB)},
+      'papel':      {'icon': Icons.description_outlined,   'color': const Color(0xFF3B6D11), 'bg': const Color(0xFFEAF3DE)},
+      'vidrio':     {'icon': Icons.wine_bar_outlined,      'color': const Color(0xFF0F6E56), 'bg': const Color(0xFFE1F5EE)},
+      'carton':     {'icon': Icons.inventory_2_outlined,   'color': const Color(0xFF854F0B), 'bg': const Color(0xFFFAEEDA)},
+      'metal':      {'icon': Icons.hardware_outlined,      'color': const Color(0xFF5F5E5A), 'bg': const Color(0xFFF1EFE8)},
+      'organico':   {'icon': Icons.eco_outlined,           'color': const Color(0xFF4A7C2E), 'bg': const Color(0xFFE8F5E0)},
+      'electronico':{'icon': Icons.devices_outlined,       'color': const Color(0xFF6B3FA0), 'bg': const Color(0xFFF0E6FA)},
+    };
+    return map[material.toLowerCase().trim()] ?? {
+      'icon': Icons.recycling_outlined,
+      'color': const Color(0xFF2D5A1B),
+      'bg': const Color(0xFFE8F0E0),
+    };
+  }
 
   List<Map<String, dynamic>> get _filtradas {
     if (_filtro == 'todos') return _entregas;
-    return _entregas.where((e) => e['estado'] == _filtro).toList();
+    return _entregas.where((e) {
+      if (_filtro == 'recientes') {
+        return e['estado'] == 'completado' || e['estado'] == 'pendiente';
+      }
+      return e['estado'] == _filtro;
+    }).toList();
   }
 
   @override
@@ -100,8 +126,8 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
     );
   }
 
-  // ── HEADER ───────────────────────────────────────────────
   Widget _buildHeader() {
+    final totalKg = _entregas.fold<double>(0.0, (sum, e) => sum + (e['pesoNum'] as double));
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
@@ -134,12 +160,11 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
             ],
           ),
           const SizedBox(height: 20),
-          // Stats grandes
           Row(
             children: [
-              _buildHeaderStat('45.8 kg', 'Total reciclado'),
+              _buildHeaderStat('${totalKg.toStringAsFixed(1)} kg', 'Total reciclado'),
               const SizedBox(width: 32),
-              _buildHeaderStat('23', 'Total entregas'),
+              _buildHeaderStat('${_entregas.length}', 'Total entregas'),
             ],
           ),
         ],
@@ -162,7 +187,7 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.65),
+            color: Colors.white.withValues(alpha: 0.65),
             fontSize: 12,
           ),
         ),
@@ -193,7 +218,7 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: Colors.black.withValues(alpha: 0.04),
                     blurRadius: 6,
                   ),
                 ],
@@ -234,6 +259,36 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
 
   // ── LISTA ────────────────────────────────────────────────
   Widget _buildLista() {
+    if (_cargando) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_error != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.cloud_off_outlined, size: 64, color: Colors.grey[300]),
+              const SizedBox(height: 12),
+              Text(
+                _error!,
+                style: TextStyle(color: Colors.grey[400], fontSize: 15),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              TextButton.icon(
+                onPressed: _cargarEntregas,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Reintentar'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     if (_filtradas.isEmpty) {
       return Center(
         child: Column(
@@ -267,7 +322,7 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

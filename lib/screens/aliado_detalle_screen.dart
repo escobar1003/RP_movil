@@ -61,14 +61,14 @@ class AliadoDetalleScreen extends StatelessWidget {
                     top: 40,
                     child: Icon(Icons.eco,
                         size: 120,
-                        color: Colors.white.withOpacity(0.07)),
+                        color: Colors.white.withValues(alpha: 0.07)),
                   ),
                   Positioned(
                     left: -20,
                     bottom: 0,
                     child: Icon(Icons.eco,
                         size: 80,
-                        color: Colors.white.withOpacity(0.05)),
+                        color: Colors.white.withValues(alpha: 0.05)),
                   ),
 
                   // Logo del supermercado centrado
@@ -229,7 +229,7 @@ class AliadoDetalleScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -275,7 +275,7 @@ class AliadoDetalleScreen extends StatelessWidget {
         if (!isFirst)
           Divider(
             height: 1,
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             indent: 56,
           ),
         Padding(
@@ -287,7 +287,7 @@ class AliadoDetalleScreen extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: iconColor.withOpacity(0.1),
+                  color: iconColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(icon, color: iconColor, size: 18),

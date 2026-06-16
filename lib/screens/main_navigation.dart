@@ -19,7 +19,7 @@ class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
   bool _cargado = false;
 
-  final List<Widget> _screens = const [
+  final List<Widget> _screens = const[
     HomeScreen(),
     HistorialEntregasScreen(),
     RecompensasScreen(),

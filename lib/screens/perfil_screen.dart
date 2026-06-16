@@ -130,8 +130,11 @@ class _PerfilScreenState extends State<PerfilScreen> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: const Icon(Icons.camera_alt_outlined,
-                      size: 16, color: Color(0xFF2D5A1B)),
+                  child: const Icon(
+                    Icons.camera_alt_outlined,
+                    size: 16,
+                    color: Color(0xFF2D5A1B),
+                  ),
                 ),
               ),
             ],
@@ -150,7 +153,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
             Text(
               _correo,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.65),
+                color: Colors.white.withValues(alpha: 0.65),
                 fontSize: 13,
               ),
             ),
@@ -236,7 +239,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -262,10 +265,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
               color: Color(0xFF1E3A0F),
             ),
           ),
-          Text(
-            label,
-            style: TextStyle(fontSize: 11, color: Colors.grey[500]),
-          ),
+          Text(label, style: TextStyle(fontSize: 11, color: Colors.grey[500])),
         ],
       ),
     );
@@ -280,7 +280,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -334,7 +334,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -342,7 +342,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
       ),
       child: Column(
         children: [
-
           _buildMenuRow(
             icon: Icons.person_outline,
             label: 'Editar perfil',
@@ -356,7 +355,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
               _cargarDatos();
             },
           ),
-          Divider(height: 1, color: Colors.grey.withOpacity(0.1), indent: 60),
+          Divider(height: 1, color: Colors.grey.withValues(alpha: 0.1), indent: 60),
 
           _buildMenuRow(
             icon: Icons.history,
@@ -370,7 +369,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
               ),
             ),
           ),
-          Divider(height: 1, color: Colors.grey.withOpacity(0.1), indent: 60),
+          Divider(height: 1, color: Colors.grey.withValues(alpha: 0.1), indent: 60),
 
           _buildMenuRow(
             icon: Icons.card_giftcard_outlined,
@@ -379,24 +378,10 @@ class _PerfilScreenState extends State<PerfilScreen> {
             bg: const Color(0xFFFAEEDA),
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (_) => const MisCanjesScreen(),
-              ),
+              MaterialPageRoute(builder: (_) => const MisCanjesScreen()),
             ),
           ),
-          Divider(height: 1, color: Colors.grey.withOpacity(0.1), indent: 60),
-
-          _buildMenuRow(
-            icon: Icons.notifications_outlined,
-            label: 'Notificaciones',
-            color: const Color(0xFF0F6E56),
-            bg: const Color(0xFFE1F5EE),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const NotificacionesScreen()),
-            ),
-          ),
-          Divider(height: 1, color: Colors.grey.withOpacity(0.1), indent: 60),
+          Divider(height: 1, color: Colors.grey.withValues(alpha: 0.1), indent: 60),
 
           _buildMenuRow(
             icon: Icons.settings_outlined,
@@ -408,7 +393,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
               MaterialPageRoute(builder: (_) => const ConfiguracionScreen()),
             ),
           ),
-          Divider(height: 1, color: Colors.grey.withOpacity(0.1), indent: 60),
+          Divider(height: 1, color: Colors.grey.withValues(alpha: 0.1), indent: 60),
 
           _buildMenuRow(
             icon: Icons.help_outline,
@@ -418,7 +403,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
             onTap: () {},
           ),
 
-          Divider(height: 1, color: Colors.grey.withOpacity(0.15)),
+          Divider(height: 1, color: Colors.grey.withValues(alpha: 0.15)),
 
           _buildMenuRow(
             icon: Icons.logout,
@@ -427,7 +412,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
             bg: const Color(0xFFFCEBEB),
             onTap: _cerrarSesion,
           ),
-
         ],
       ),
     );
@@ -467,8 +451,11 @@ class _PerfilScreenState extends State<PerfilScreen> {
                 ),
               ),
             ),
-            Icon(Icons.arrow_forward_ios_rounded,
-                size: 14, color: Colors.grey[400]),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 14,
+              color: Colors.grey[400],
+            ),
           ],
         ),
       ),

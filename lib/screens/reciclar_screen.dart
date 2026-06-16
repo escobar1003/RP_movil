@@ -66,10 +66,10 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
       }
     } catch (e) {
       debugPrint('Error cámara: $e');
-      if (mounted) setState(() {
+      if (mounted) setState((){
         _errorCamara = true;
         _mensajeErrorCamara = 'Error al iniciar la cámara.\nAsegúrate de haber otorgado permisos de cámara en Ajustes > Aplicaciones > recycling_points > Permisos.\n\nError: $e';
-      });
+       });
     }
   }
 
@@ -93,7 +93,7 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
       setState(() => _rutaImagenLocal = foto.path);
 
       const ipServidor = '192.168.1.12';
-      final url = Uri.parse('http://$ipServidor:3333/api/detectar-material');
+      final url = Uri.parse('https://backend-rp-arreglado-n8p8.onrender.com/api/detectar-material');
 
       final request = http.MultipartRequest('POST', url);
       request.files.add(await http.MultipartFile.fromPath('image', foto.path));
@@ -350,7 +350,7 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
                       decoration: BoxDecoration(
                         color: _colorCaneca.computeLuminance() > 0.5
                             ? const Color(0xFFE8F5E9)
-                            : const Color(0xFF2E2E2E).withOpacity(0.15),
+                            : const Color(0xFF2E2E2E).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: Icon(
@@ -662,7 +662,7 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
