@@ -5,6 +5,7 @@ import 'package:recycling_points/screens/reservas.dart';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
 import '../services/usuario_service.dart';
+import '../games/game_screen.dart';
 
 import 'mapa_puntos_screen.dart';
 import 'reciclar_screen.dart';
@@ -209,6 +210,61 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // ------------------ JUEGO 3D ------------------
+              const Text('Minijuego 3D', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17, color: AppColors.textDark)),
+              const SizedBox(height: 14),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const GameScreen()));
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF2E9E6F), Color(0xFF57C58A)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 14, offset: const Offset(0, 6))],
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('�Aprende reciclando!', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800)),
+                            const SizedBox(height: 6),
+                            const Text('Recoge residuos en 3D y depos�talos en el contenedor correcto.', style: TextStyle(color: Colors.white70, fontSize: 13)),
+                            const SizedBox(height: 12),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(BootstrapIcons.joystick, color: Colors.white, size: 16),
+                                  SizedBox(width: 6),
+                                  Text('Jugar ahora', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(BootstrapIcons.joystick, color: Colors.white, size: 60),
+                    ],
+                  ),
                 ),
               ),
 
