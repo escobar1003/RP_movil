@@ -6,6 +6,8 @@
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Necesitamos acceso a la cámara para clasificar tus residuos.</string>
 	<key>CFBundleDisplayName</key>
 	<string>Recycling Points</string>
 	<key>CFBundleExecutable</key>
@@ -66,5 +68,6 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	
 </dict>
 </plist>

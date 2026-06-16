@@ -130,8 +130,11 @@ class _PerfilScreenState extends State<PerfilScreen> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: const Icon(Icons.camera_alt_outlined,
-                      size: 16, color: Color(0xFF2D5A1B)),
+                  child: const Icon(
+                    Icons.camera_alt_outlined,
+                    size: 16,
+                    color: Color(0xFF2D5A1B),
+                  ),
                 ),
               ),
             ],
@@ -262,10 +265,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
               color: Color(0xFF1E3A0F),
             ),
           ),
-          Text(
-            label,
-            style: TextStyle(fontSize: 11, color: Colors.grey[500]),
-          ),
+          Text(label, style: TextStyle(fontSize: 11, color: Colors.grey[500])),
         ],
       ),
     );
@@ -342,7 +342,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
       ),
       child: Column(
         children: [
-
           _buildMenuRow(
             icon: Icons.person_outline,
             label: 'Editar perfil',
@@ -379,9 +378,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
             bg: const Color(0xFFFAEEDA),
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (_) => const MisCanjesScreen(),
-              ),
+              MaterialPageRoute(builder: (_) => const MisCanjesScreen()),
             ),
           ),
           Divider(height: 1, color: Colors.grey.withValues(alpha: 0.1), indent: 60),
@@ -415,7 +412,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
             bg: const Color(0xFFFCEBEB),
             onTap: _cerrarSesion,
           ),
-
         ],
       ),
     );
@@ -455,8 +451,11 @@ class _PerfilScreenState extends State<PerfilScreen> {
                 ),
               ),
             ),
-            Icon(Icons.arrow_forward_ios_rounded,
-                size: 14, color: Colors.grey[400]),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 14,
+              color: Colors.grey[400],
+            ),
           ],
         ),
       ),
