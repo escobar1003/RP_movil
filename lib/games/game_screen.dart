@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_android/webview_flutter_android.dart';
 
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key});
@@ -36,6 +38,9 @@ class _GameScreenState extends State<GameScreen> {
         .replaceFirst('/* CSS */', css)
         .replaceFirst('/* JS */', js);
 
+    final file = File('${Directory.systemTemp.path}/eco_recicla_game.html');
+    await file.writeAsString(composedHtml);
+
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..addJavaScriptChannel('GameChannel', onMessageReceived: _onGameMessage)
@@ -43,8 +48,14 @@ class _GameScreenState extends State<GameScreen> {
         NavigationDelegate(onPageFinished: (_) {
           setState(() => _isLoading = false);
         }),
-      )
-      ..loadHtmlString(composedHtml);
+      );
+
+    if (_controller!.platform is AndroidWebViewController) {
+      final android = _controller!.platform as AndroidWebViewController;
+      await android.setMixedContentMode(MixedContentMode.compatibilityMode);
+    }
+
+    await _controller!.loadRequest(Uri.file(file.path));
 
     setState(() {});
   }
@@ -71,6 +82,14 @@ class _GameScreenState extends State<GameScreen> {
             _paperCount = data['paper'] as int;
             _organicCount = data['organic'] as int;
           });
+          break;
+        case 'error':
+          debugPrint('Game error: ${data['message']}');
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error: ${data['message']}'), backgroundColor: Colors.red, duration: const Duration(seconds: 5)),
+            );
+          }
           break;
         case 'feedback':
           _showFeedback(data['correct'] as bool);
