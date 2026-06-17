@@ -89,6 +89,14 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
       final msg = resultado['mensaje'] ?? resultado['error'] ?? 'Error del servidor';
       throw Exception(msg);
     }
+    // Subir foto si el usuario eligió una nueva
+    if (!kIsWeb && _fotoArchivo != null) {
+      final urlFoto = await UsuarioService.subirFotoPerfil(_fotoArchivo!);
+      if (urlFoto != null) {
+        setState(() => _fotoUrlActual = urlFoto);
+      }
+    }
+
 
     // Actualizar caché local
     final prefs = await SharedPreferences.getInstance();

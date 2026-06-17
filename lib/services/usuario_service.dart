@@ -1,4 +1,10 @@
+
+import 'auth_service.dart';
 import 'api_service.dart';
+import 'dart:io';
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 
 class UsuarioService {
   // ── PERFIL ────────────────────────────────────────────────
@@ -79,4 +85,30 @@ class UsuarioService {
   static Future<Map<String, dynamic>> cancelarReserva(int id) async {
     return ApiService.put('/usuario/reservas/$id/cancelar', body: {});
   }
+  
+  static Future<String?> subirFotoPerfil(File foto) async {
+  try {
+    final token = await AuthService.getToken();
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse('${ApiService.baseUrl}/usuario/perfil/foto'),
+    );
+    request.headers['Authorization'] = 'Bearer $token';
+    request.files.add(await http.MultipartFile.fromPath(
+      'foto',
+      foto.path,
+    ));
+    final streamed = await request.send();
+    final response = await http.Response.fromStream(streamed);
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['foto'] as String?;
+    }
+    debugPrint('Error subiendo foto: ${response.body}');
+    return null;
+  } catch (e) {
+    debugPrint('Error subiendo foto: $e');
+    return null;
+  }
+}
 }
