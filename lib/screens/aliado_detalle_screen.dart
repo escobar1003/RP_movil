@@ -1,4 +1,4 @@
-// lib/screens/aliado_detalle_screen.dart
+// lib/screens/aliado_detalle_screen.dart angie
 
 import 'package:flutter/material.dart';
 import '../models/aliado_model.dart';

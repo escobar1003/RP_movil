@@ -1,4 +1,4 @@
-// lib/screens/notificaciones_screen.dart
+// lib/screens/notificaciones_screen.dart angie
 
 import 'package:flutter/material.dart';
 import '../models/notificacion_model.dart';

@@ -1,3 +1,4 @@
+// lib/screens/configuracion_screen.dart angie
 import 'package:flutter/material.dart';
 
 class ConfiguracionScreen extends StatefulWidget {
