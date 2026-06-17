@@ -100,6 +100,8 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
 
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
+      debugPrint('=== IA Status: ${response.statusCode}');
+      debugPrint('=== IA Body: ${response.body}');
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
