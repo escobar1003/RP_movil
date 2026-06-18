@@ -96,89 +96,146 @@ class _PerfilScreenState extends State<PerfilScreen> {
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 28, 20, 28),
-      decoration: const BoxDecoration(
-        color: Color(0xFF2D5A1B),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(32),
-          bottomRight: Radius.circular(32),
-        ),
-      ),
-      child: Column(
+      child: Stack(
         children: [
-          Stack(
-            children: [
-              Container(
-                width: 90,
-                height: 90,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF7BC043),
-                  borderRadius: BorderRadius.circular(45),
-                  border: Border.all(color: Colors.white, width: 3),
-                ),
-                child: const Icon(Icons.person, color: Colors.white, size: 52),
-              ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: const Icon(
-                    Icons.camera_alt_outlined,
-                    size: 16,
-                    color: Color(0xFF2D5A1B),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Text(
-            _nombre,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          if (_correo.isNotEmpty) ...[
-            const SizedBox(height: 4),
-            Text(
-              _correo,
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.65),
-                fontSize: 13,
-              ),
-            ),
-          ],
-          const SizedBox(height: 6),
+          // Fondo verde
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-            decoration: BoxDecoration(
-              color: const Color(0xFF7BC043),
-              borderRadius: BorderRadius.circular(20),
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(20, 28, 20, 28),
+            decoration: const BoxDecoration(
+              color: Color(0xFF2D5A1B),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(32),
+                bottomRight: Radius.circular(32),
+              ),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
+            child: Column(
               children: [
-                const Icon(Icons.eco, size: 14, color: Colors.white),
-                const SizedBox(width: 5),
+                Stack(
+                  children: [
+                    Container(
+                      width: 90,
+                      height: 90,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF7BC043),
+                        borderRadius: BorderRadius.circular(45),
+                        border: Border.all(color: Colors.white, width: 3),
+                      ),
+                      child: const Icon(Icons.person, color: Colors.white, size: 52),
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        width: 28,
+                        height: 28,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Icon(
+                          Icons.camera_alt_outlined,
+                          size: 16,
+                          color: Color(0xFF2D5A1B),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
                 Text(
-                  _rol == 'admin' ? 'Administrador' : 'Flor Verde',
+                  _nombre,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (_correo.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    _correo,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.65),
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF7BC043),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.eco, size: 14, color: Colors.white),
+                      const SizedBox(width: 5),
+                      Text(
+                        _rol == 'admin' ? 'Administrador' : 'Flor Verde',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
+            ),
+          ),
+          // ── Hoja superior izquierda ──
+          Positioned(
+            top: 8,
+            left: 8,
+            child: Transform.rotate(
+              angle: -0.3,
+              child: Icon(
+                Icons.eco,
+                size: 28,
+                color: Colors.white.withValues(alpha: 0.2),
+              ),
+            ),
+          ),
+          // ── Hoja grande lateral izquierdo ──
+          Positioned(
+            top: 60,
+            left: -16,
+            child: Transform.rotate(
+              angle: -0.8,
+              child: Icon(
+                Icons.eco,
+                size: 64,
+                color: Colors.white.withValues(alpha: 0.12),
+              ),
+            ),
+          ),
+          // ── Hoja grande esquina inferior derecha ──
+          Positioned(
+            bottom: -10,
+            right: -14,
+            child: Transform.rotate(
+              angle: 2.0,
+              child: Icon(
+                Icons.eco,
+                size: 72,
+                color: Colors.white.withValues(alpha: 0.10),
+              ),
+            ),
+          ),
+          // ── Líneas curvas de viento ──
+          Positioned.fill(
+            child: IgnorePointer(
+              child: CustomPaint(
+                painter: _WindPainter(
+                  color: Colors.white.withValues(alpha: 0.07),
+                ),
+              ),
             ),
           ),
         ],
@@ -461,4 +518,45 @@ class _PerfilScreenState extends State<PerfilScreen> {
       ),
     );
   }
+}
+
+class _WindPainter extends CustomPainter {
+  final Color color;
+  _WindPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    final path1 = Path()
+      ..moveTo(size.width * -0.1, size.height * 0.15)
+      ..quadraticBezierTo(
+        size.width * 0.3, size.height * 0.05,
+        size.width * 0.7, size.height * 0.2,
+      );
+    canvas.drawPath(path1, paint);
+
+    final path2 = Path()
+      ..moveTo(size.width * 0.3, size.height * 0.1)
+      ..quadraticBezierTo(
+        size.width * 0.6, size.height * 0.25,
+        size.width * 0.9, size.height * 0.15,
+      );
+    canvas.drawPath(path2, paint);
+
+    final path3 = Path()
+      ..moveTo(size.width * 0.5, size.height * 0.7)
+      ..quadraticBezierTo(
+        size.width * 0.75, size.height * 0.6,
+        size.width * 1.1, size.height * 0.75,
+      );
+    canvas.drawPath(path3, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
