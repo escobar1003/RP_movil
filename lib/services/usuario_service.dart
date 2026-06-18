@@ -8,10 +8,12 @@ class UsuarioService {
 
   static Future<Map<String, dynamic>> updatePerfil({
     required String nombre,
+    required String apellido,
     required String telefono,
   }) async {
     return ApiService.put('/usuario/perfil', body: {
       'nombre': nombre,
+      'apellido': apellido,
       'telefono': telefono,
     });
   }

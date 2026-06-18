@@ -7,6 +7,7 @@ import 'mapa_puntos_screen.dart';
 import 'reciclar_screen.dart';
 import 'mis_canjes_screen.dart';
 import 'notificaciones_screen.dart';
+import 'juego_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -239,8 +240,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   Expanded(child: _AccionCard(icon: BootstrapIcons.qr_code_scan, label: 'Clasificar', color: AppColors.green100, iconColor: AppColors.primary, onTap: () { Navigator.push(context, MaterialPageRoute(builder: (_) => const ReciclarScreen())); })),
                   const SizedBox(width: 12),
                   Expanded(child: _AccionCard(icon: BootstrapIcons.gift, label: 'Canjear', color: AppColors.yellow100, iconColor: Colors.orange, onTap: () { Navigator.push(context, MaterialPageRoute(builder: (_) => const MisCanjesScreen())); })),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(child: _AccionCard(icon: BootstrapIcons.geo_alt, label: 'Mapa', color: Color(0xFFE3F2FD), iconColor: Colors.blue, onTap: () { Navigator.push(context, MaterialPageRoute(builder: (_) => const MapaPuntosScreen(soloMapa: true))); })),
                   const SizedBox(width: 12),
-                  Expanded(child: _AccionCard(icon: BootstrapIcons.geo_alt, label: 'Mapa', color: const Color(0xFFE3F2FD), iconColor: Colors.blue, onTap: () { Navigator.push(context, MaterialPageRoute(builder: (_) => const MapaPuntosScreen(soloMapa: true))); })),
+                  Expanded(child: _AccionCard(icon: BootstrapIcons.joystick, label: 'Juego Babilon', color: Color(0xFFF3E5F5), iconColor: Colors.purple, onTap: () { Navigator.push(context, MaterialPageRoute(builder: (_) => const JuegoScreen())); })),
                 ],
               ),
 
