@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'game_platform_stub.dart'
+    if (dart.library.html) 'game_platform_web.dart'
+    if (dart.library.io) 'game_platform_mobile.dart';
 
 class JuegoScreen extends StatefulWidget {
   const JuegoScreen({super.key});
@@ -9,14 +11,7 @@ class JuegoScreen extends StatefulWidget {
 }
 
 class _JuegoScreenState extends State<JuegoScreen> {
-  late WebViewController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = WebViewController()
-      ..loadRequest(Uri.parse('http://localhost:5173/'));
-  }
+  final String _gameUrl = 'http://localhost:5173/';
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +25,7 @@ class _JuegoScreenState extends State<JuegoScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: WebViewWidget(controller: _controller),
+      body: PlatformGameView(url: _gameUrl),
     );
   }
 }

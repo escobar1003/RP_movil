@@ -3,7 +3,6 @@ import 'package:bootstrap_icons/bootstrap_icons.dart';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
 import '../services/usuario_service.dart';
-
 import 'mapa_puntos_screen.dart';
 import 'reciclar_screen.dart';
 import 'mis_canjes_screen.dart';
