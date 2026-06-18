@@ -17,6 +17,7 @@ class PerfilScreen extends StatefulWidget {
 
 class _PerfilScreenState extends State<PerfilScreen> {
   String _nombre = '';
+  String _apellido = '';
   String _correo = '';
   String _rol = '';
   String _telefono = '';
@@ -33,6 +34,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
 
   Future<void> _cargarDatos() async {
     _nombre = await AuthService.getNombre();
+    _apellido = await AuthService.getApellido();
     _correo = await AuthService.getCorreo();
     _rol = await AuthService.getRol();
     _telefono = await AuthService.getTelefono();
@@ -40,6 +42,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
     try {
       final perfil = await UsuarioService.getPerfil();
       if (perfil['nombre'] != null) _nombre = perfil['nombre'];
+      if (perfil['apellido'] != null) _apellido = perfil['apellido'];
       if (perfil['correo'] != null) _correo = perfil['correo'];
       if (perfil['rol'] != null) _rol = perfil['rol'];
       if (perfil['telefono'] != null) _telefono = perfil['telefono'];
@@ -146,7 +149,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                 ),
                 const SizedBox(height: 14),
                 Text(
-                  _nombre,
+                  '$_nombre $_apellido'.trim(),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 22,
