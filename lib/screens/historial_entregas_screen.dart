@@ -30,10 +30,16 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
       _error = null;
     });
     try {
-      final data = await UsuarioService.getEntregas();
-      final lista = (data['entregas'] as List?) ?? [];
+      final results = await Future.wait([
+        UsuarioService.getEntregas(),
+        UsuarioService.getReservas(),
+      ]);
+      final entregasData = results[0];
+      final reservasData = results[1];
+      final listaEntregas = ((entregasData['entregas'] as List?) ?? []).map((e) => _normalizarEntrega(e as Map<String, dynamic>));
+      final listaReservas = ((reservasData['reservas'] as List?) ?? []).map((r) => _normalizarReserva(r as Map<String, dynamic>));
       setState(() {
-        _entregas = lista.map((e) => _normalizarEntrega(e as Map<String, dynamic>)).toList();
+        _entregas = [...listaReservas, ...listaEntregas];
         _cargando = false;
       });
     } catch (e) {
@@ -42,6 +48,22 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
         _cargando = false;
       });
     }
+  }
+
+  Map<String, dynamic> _normalizarReserva(Map<String, dynamic> r) {
+    final punto = r['punto'] as Map<String, dynamic>? ?? r['aliado'] as Map<String, dynamic>? ?? {};
+    return {
+      'supermercado': punto['nombre'] ?? r['nombrePunto'] ?? 'Sin punto',
+      'material': 'Pendiente de entrega',
+      'peso': '-',
+      'pesoNum': 0.0,
+      'puntos': 0,
+      'fecha': _formatearFecha(r['fecha'] ?? ''),
+      'estado': 'pendiente',
+      'icon': Icons.schedule_outlined,
+      'color': const Color(0xFFE67E22),
+      'bg': const Color(0xFFFAEEDA),
+    };
   }
 
   Map<String, dynamic> _normalizarEntrega(Map<String, dynamic> item) {
