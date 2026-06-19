@@ -1,10 +1,12 @@
 // lib/screens/editar_perfil_screen.dart
 // ✅ Pon esto al inicio del archivo:
+import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart'; // ← necesario para kIsWeb
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:io';
 import '../services/auth_service.dart';
 import '../services/usuario_service.dart';
 import '../theme/app_theme.dart';
@@ -27,7 +29,8 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
   bool _cargando    = true;
 
   // Foto de perfil
-  File?   _fotoArchivo;       // foto nueva elegida del dispositivo
+  File?   _fotoArchivo;       // foto nueva elegida del dispositivo (móvil)
+  Uint8List? _imagenBytes;    // foto nueva elegida en web
   String? _fotoUrlActual;     // URL que ya viene del servidor
 
   @override
@@ -64,11 +67,12 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
   );
   if (picked == null) return;
 
-  if (!kIsWeb) {
-    // En móvil (Android/iOS) usamos File normal
+  if (kIsWeb) {
+    final bytes = await picked.readAsBytes();
+    setState(() => _imagenBytes = bytes);
+  } else {
     setState(() => _fotoArchivo = File(picked.path));
   }
-  // En web no se puede usar File — se activará cuando conectes la subida real
 }
 
   // ── Guardar cambios ───────────────────────────────────
@@ -77,6 +81,37 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
   setState(() => _guardando = true);
 
   try {
+    // 1. Subir foto si hay una nueva seleccionada
+    bool fotoSubida = false;
+    if (_fotoArchivo != null || _imagenBytes != null) {
+      final token = await AuthService.getToken();
+      if (token == null) throw Exception('Sesión expirada');
+
+      final req = http.MultipartRequest(
+        'POST',
+        Uri.parse('https://backendrparreglado-production.up.railway.app/api/usuario/perfil/foto'),
+      );
+      req.headers['Authorization'] = 'Bearer $token';
+
+      if (kIsWeb && _imagenBytes != null) {
+        req.files.add(http.MultipartFile.fromBytes('foto', _imagenBytes!, filename: 'profile.jpg'));
+      } else if (_fotoArchivo != null) {
+        req.files.add(await http.MultipartFile.fromPath('foto', _fotoArchivo!.path));
+      }
+
+      final streamed = await req.send().timeout(const Duration(seconds: 30));
+      final response = await http.Response.fromStream(streamed);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        _fotoUrlActual = data['foto'];
+        fotoSubida = true;
+      } else {
+        debugPrint('Error subiendo foto: ${response.body}');
+      }
+    }
+
+    // 2. Guardar datos de texto
     final resultado = await UsuarioService.updatePerfil(
       nombre: _nombreController.text.trim(),
       apellido: _apellidoController.text.trim(),
@@ -95,9 +130,9 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Perfil actualizado correctamente'),
-          backgroundColor: Color(0xFF2D5A1B),
+        SnackBar(
+          content: Text(fotoSubida ? 'Perfil y foto actualizados correctamente' : 'Perfil actualizado correctamente'),
+          backgroundColor: const Color(0xFF2D5A1B),
         ),
       );
       Navigator.pop(context, true);
@@ -217,9 +252,10 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
 
   // ── Widget: selector de avatar ──────────────────────────
   Widget _buildAvatarPicker() {
-  // Decide qué imagen mostrar: primero foto local, luego URL del servidor
   ImageProvider? imagenMostrar;
-  if (!kIsWeb && _fotoArchivo != null) {
+  if (kIsWeb && _imagenBytes != null) {
+    imagenMostrar = MemoryImage(_imagenBytes!);
+  } else if (!kIsWeb && _fotoArchivo != null) {
     imagenMostrar = FileImage(_fotoArchivo!);
   } else if (_fotoUrlActual != null && _fotoUrlActual!.isNotEmpty) {
     imagenMostrar = NetworkImage(_fotoUrlActual!);

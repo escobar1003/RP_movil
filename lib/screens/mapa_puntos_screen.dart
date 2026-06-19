@@ -34,51 +34,27 @@ class _MapaPuntosScreenState extends State<MapaPuntosScreen> {
   }
 
   Future<void> _cargarPuntos() async {
-    setState(() {
-      _puntos = [
-        {
-          'idPunto': 1,
-          'nombre': 'Éxito Panamericana',
-          'direccion': 'Cra 9 #18N-230, Popayán',
-          'latitud': '2.4488',
-          'longitud': '-76.6147',
-          'materiales': 'Plástico, Vidrio, Cartón, Metal',
-          'horario': 'Lun–Sáb 8:00–18:00',
-          'telefono': '3123456789',
-        },
-        {
-          'idPunto': 2,
-          'nombre': 'Alkosto Popayán',
-          'direccion': 'Av. Panamericana, Popayán',
-          'latitud': '2.4550',
-          'longitud': '-76.6180',
-          'materiales': 'Plástico, Cartón, Metal',
-          'horario': 'Lun–Dom 9:00–20:00',
-          'telefono': '3134567890',
-        },
-        {
-          'idPunto': 3,
-          'nombre': 'Carulla Versalles',
-          'direccion': 'Calle 5 #8-40, Popayán',
-          'latitud': '2.4400',
-          'longitud': '-76.6080',
-          'materiales': 'Vidrio, Plástico, Papel',
-          'horario': 'Lun–Sáb 7:00–21:00',
-          'telefono': '3145678901',
-        },
-        {
-          'idPunto': 4,
-          'nombre': 'Mercalda El Centro',
-          'direccion': 'Calle 4 #6-50, Popayán',
-          'latitud': '2.4420',
-          'longitud': '-76.6040',
-          'materiales': 'Cartón, Metal, Plástico',
-          'horario': 'Lun–Sáb 8:00–19:00',
-          'telefono': '3156789012',
-        },
-      ];
-      _cargandoPuntos = false;
-    });
+    try {
+      final res = await ApiService.get('/puntos-reciclaje');
+      final List datos = res['puntos'] ?? [];
+      setState(() {
+        _puntos = datos.map((p) => {
+          'idPunto': p['id'],
+          'nombre': p['nombre'] ?? 'Sin nombre',
+          'direccion': p['direccion'] ?? '',
+          'latitud': (p['latitud'] ?? '0').toString(),
+          'longitud': (p['longitud'] ?? '0').toString(),
+          'materiales': p['materiales'] is List
+              ? (p['materiales'] as List).map((m) => m['nombre'] ?? '').join(', ')
+              : 'Sin materiales',
+          'horario': p['horario'] ?? 'No disponible',
+          'telefono': '',
+        }).toList();
+        _cargandoPuntos = false;
+      });
+    } catch (_) {
+      setState(() => _cargandoPuntos = false);
+    }
   }
 
   String _formatMateriales(dynamic materiales) {

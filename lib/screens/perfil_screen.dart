@@ -25,6 +25,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
   int _puntos = 0;
   int _canjesCount = 0;
   int _puntosGanados = 0;
+  String? _fotoUrl;
 
   @override
   void initState() {
@@ -41,11 +42,13 @@ class _PerfilScreenState extends State<PerfilScreen> {
 
     try {
       final perfil = await UsuarioService.getPerfil();
-      if (perfil['nombre'] != null) _nombre = perfil['nombre'];
-      if (perfil['apellido'] != null) _apellido = perfil['apellido'];
-      if (perfil['correo'] != null) _correo = perfil['correo'];
-      if (perfil['rol'] != null) _rol = perfil['rol'];
-      if (perfil['telefono'] != null) _telefono = perfil['telefono'];
+      final u = perfil['usuario'] ?? perfil;
+      if (u['nombre'] != null) _nombre = u['nombre'];
+      if (u['apellido'] != null) _apellido = u['apellido'];
+      if (u['correo'] != null) _correo = u['correo'];
+      if (u['rol'] != null) _rol = u['rol'];
+      if (u['telefono'] != null) _telefono = u['telefono'];
+      if (u['imagen'] != null) _fotoUrl = u['imagen'];
     } catch (_) {}
 
     try {
@@ -126,7 +129,12 @@ class _PerfilScreenState extends State<PerfilScreen> {
                         borderRadius: BorderRadius.circular(45),
                         border: Border.all(color: Colors.white, width: 3),
                       ),
-                      child: const Icon(Icons.person, color: Colors.white, size: 52),
+                      child: _fotoUrl != null && _fotoUrl!.isNotEmpty
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(45),
+                              child: Image.network(_fotoUrl!, fit: BoxFit.cover, width: 90, height: 90),
+                            )
+                          : const Icon(Icons.person, color: Colors.white, size: 52),
                     ),
                     Positioned(
                       bottom: 0,

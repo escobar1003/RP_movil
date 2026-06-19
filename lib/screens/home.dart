@@ -21,6 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _puntos = 0;
   int _reciclajes = 0;
   double _pesoTotal = 0;
+  String? _fotoUrl;
 
   @override
   void initState() {
@@ -33,7 +34,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       final perfil = await UsuarioService.getPerfil();
-      if (perfil['nombre'] != null) _nombre = perfil['nombre'];
+      final u = perfil['usuario'] ?? perfil;
+      if (u['nombre'] != null) _nombre = u['nombre'];
+      if (u['imagen'] != null) _fotoUrl = u['imagen'];
     } catch (_) {}
 
     try {
@@ -65,14 +68,15 @@ class _HomeScreenState extends State<HomeScreen> {
               // ------------------ HEADER ------------------
               Row(
                 children: [
-                  const CircleAvatar(
+                  CircleAvatar(
                     radius: 24,
                     backgroundColor: AppColors.green100,
-                    child: Icon(
-                      BootstrapIcons.person_fill,
-                      color: AppColors.primary,
-                      size: 26,
-                    ),
+                    backgroundImage: _fotoUrl != null && _fotoUrl!.isNotEmpty
+                        ? NetworkImage(_fotoUrl!)
+                        : null,
+                    child: _fotoUrl == null || _fotoUrl!.isEmpty
+                        ? const Icon(BootstrapIcons.person_fill, color: AppColors.primary, size: 26)
+                        : null,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
