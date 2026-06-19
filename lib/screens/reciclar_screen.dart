@@ -81,12 +81,12 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
   String _instruccionesEntrega = 'Entregar en el punto de reciclaje ubicado en el parqueadero.';
 
   Future<void> _escanear() async {
-    if (_cameraController == null || !_cameraController!.value.isInitialized) return;
-
     setState(() {
       _estaCargando = true;
       _mostrarResultado = false;
     });
+
+    await _inicializarCamara();
 
     try {
       final XFile foto = await _cameraController!.takePicture();

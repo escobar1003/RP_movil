@@ -1,12 +1,48 @@
 // lib/screens/recompensas_screen.dart angie
 import 'package:flutter/material.dart';
-import '../data/recompensas_data.dart';
 import '../models/recompensa_model.dart';
-import '../theme/app_theme.dart';
+import '../services/usuario_service.dart';
 import 'recompensa_detalle_screen.dart';
 
-class RecompensasScreen extends StatelessWidget {
+class RecompensasScreen extends StatefulWidget {
   const RecompensasScreen({super.key});
+
+  @override
+  State<RecompensasScreen> createState() => _RecompensasScreenState();
+}
+
+class _RecompensasScreenState extends State<RecompensasScreen> {
+  List<RecompensaModel> _recompensas = [];
+  bool _cargando = true;
+  String? _error;
+  int _puntosUsuario = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarDatos();
+  }
+
+  Future<void> _cargarDatos() async {
+    setState(() => _cargando = true);
+    try {
+      final res = await UsuarioService.getRecompensas();
+      final lista = (res['recompensas'] as List?) ?? [];
+      setState(() {
+        _recompensas = lista.map((j) => RecompensaModel.fromJson(j)).toList();
+        _cargando = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = 'Error al cargar recompensas: $e';
+        _cargando = false;
+      });
+    }
+    try {
+      final pts = await UsuarioService.getResumenPuntos();
+      _puntosUsuario = pts['saldo'] ?? 0;
+    } catch (_) {}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,14 +52,48 @@ class RecompensasScreen extends StatelessWidget {
         child: Column(
           children: [
             _buildHeader(),
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-                itemCount: recompensasEjemplo.length,
-                itemBuilder: (context, index) =>
-                    _buildCard(context, recompensasEjemplo[index]),
+            if (_cargando)
+              const Expanded(
+                child: Center(child: CircularProgressIndicator(color: Color(0xFF2D5A1B))),
+              )
+            else if (_error != null)
+              Expanded(
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.cloud_off, size: 48, color: Colors.grey[400]),
+                        const SizedBox(height: 12),
+                        Text(_error!, textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.grey[600])),
+                        const SizedBox(height: 16),
+                        TextButton(onPressed: _cargarDatos, child: const Text('Reintentar')),
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            else if (_recompensas.isEmpty)
+              const Expanded(
+                child: Center(
+                  child: Text('No hay recompensas disponibles',
+                      style: TextStyle(color: Colors.grey, fontSize: 15)),
+                ),
+              )
+            else
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: _cargarDatos,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                    itemCount: _recompensas.length,
+                    itemBuilder: (context, index) =>
+                        _buildCard(context, _recompensas[index]),
+                  ),
+                ),
               ),
-            ),
           ],
         ),
       ),
@@ -54,7 +124,7 @@ class RecompensasScreen extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Supermercados aliados',
+            'Aliados que reciclan contigo',
             style: TextStyle(color: Colors.white.withValues(alpha: 0.65), fontSize: 13),
           ),
           const SizedBox(height: 20),
@@ -83,9 +153,9 @@ class RecompensasScreen extends StatelessWidget {
                       'Tus puntos disponibles',
                       style: TextStyle(color: Colors.white.withValues(alpha: 0.65), fontSize: 12),
                     ),
-                    const Text(
-                      '2,560 pts',
-                      style: TextStyle(
+                    Text(
+                      '${_puntosUsuario} pts',
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -102,7 +172,7 @@ class RecompensasScreen extends StatelessWidget {
   }
 
   Widget _buildCard(BuildContext context, RecompensaModel recompensa) {
-    final bool esProducto = recompensa.descuentoPorcentaje == 0;
+    final bool esProducto = recompensa.tipoRecompensa?.toLowerCase() == 'producto';
 
     return GestureDetector(
       onTap: () {
@@ -134,11 +204,13 @@ class RecompensasScreen extends StatelessWidget {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: AppColors.green100,
+                  color: const Color(0xFFEAF3DE),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Icon(Icons.store_rounded,
-                    color: AppColors.primary, size: 30),
+                child: Icon(
+                  esProducto ? Icons.card_giftcard : Icons.store_rounded,
+                  color: const Color(0xFF2D5A1B), size: 30,
+                ),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -146,7 +218,7 @@ class RecompensasScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      recompensa.tienda,
+                      recompensa.aliado ?? recompensa.nombre,
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
@@ -155,8 +227,8 @@ class RecompensasScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      recompensa.descripcion,
-                      style: const TextStyle(fontSize: 12, color: AppColors.textLight),
+                      recompensa.descripcion ?? recompensa.nombre,
+                      style: const TextStyle(fontSize: 12, color: Color(0xFF9E9E9E)),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -170,7 +242,7 @@ class RecompensasScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
-                            esProducto ? 'Producto gratis' : '${recompensa.descuentoPorcentaje}% Dto.',
+                            esProducto ? 'Producto' : (recompensa.tipoRecompensa ?? 'Descuento'),
                             style: const TextStyle(
                               fontSize: 11,
                               color: Color(0xFF3B6D11),
@@ -199,7 +271,7 @@ class RecompensasScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, color: AppColors.textLight),
+              const Icon(Icons.chevron_right, color: Color(0xFF9E9E9E)),
             ],
           ),
         ),

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import '../theme/app_theme.dart';
-import '../data/puntos_reciclaje_data.dart';
+import '../services/api_service.dart';
 import 'reservas.dart';
 import 'package:geolocator/geolocator.dart';
 class MapaPuntosScreen extends StatefulWidget {
@@ -23,11 +23,39 @@ class _MapaPuntosScreenState extends State<MapaPuntosScreen> {
   final MapController _mapController = MapController();
   LatLng? _miUbicacion;
   bool _cargandoUbicacion = true;
+  List<Map<String, dynamic>> _puntos = [];
+  bool _cargandoPuntos = true;
 
   @override
   void initState() {
     super.initState();
     _obtenerUbicacion();
+    _cargarPuntos();
+  }
+
+  Future<void> _cargarPuntos() async {
+    try {
+      final data = await ApiService.get('/puntos-reciclaje');
+      final lista = (data['puntos'] as List?) ?? [];
+      setState(() {
+        _puntos = lista
+          .map((p) => Map<String, dynamic>.from(p))
+          .where((p) => p['latitud'] != null && p['longitud'] != null)
+          .toList();
+        _cargandoPuntos = false;
+      });
+    } catch (_) {
+      setState(() => _cargandoPuntos = false);
+    }
+  }
+
+  String _formatMateriales(dynamic materiales) {
+    if (materiales == null) return 'Sin materiales';
+    if (materiales is String) return materiales;
+    if (materiales is List) {
+      return materiales.map((m) => m is Map ? m['nombre'] ?? '' : m.toString()).join(', ');
+    }
+    return materiales.toString();
   }
 
   Future<void> _obtenerUbicacion() async {
@@ -107,17 +135,23 @@ class _MapaPuntosScreenState extends State<MapaPuntosScreen> {
                         ),
                       ),
                     ),
-                  ...puntosReciclaje.map((punto) {
+                  ..._puntos.map((punto) {
                   final bool activo =
                       puntoSeleccionado?['nombre'] == punto['nombre'];
                   return Marker(
-                    point: punto['ubicacion'],
+                    point: LatLng(
+                      double.tryParse(punto['latitud']?.toString() ?? '') ?? 0,
+                      double.tryParse(punto['longitud']?.toString() ?? '') ?? 0,
+                    ),
                     width: 50,
                     height: 50,
                     child: GestureDetector(
                       onTap: () {
                         setState(() => puntoSeleccionado = punto);
-                        _mapController.move(punto['ubicacion'], 15.0);
+                        _mapController.move(LatLng(
+                          double.tryParse(punto['latitud']?.toString() ?? '') ?? 0,
+                          double.tryParse(punto['longitud']?.toString() ?? '') ?? 0,
+                        ), 15.0);
                       },
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
@@ -193,7 +227,9 @@ class _MapaPuntosScreenState extends State<MapaPuntosScreen> {
                                 color: AppColors.primary, size: 18),
                             const SizedBox(width: 8),
                             Text(
-                              '${puntosReciclaje.length} puntos de reciclaje',
+                              _cargandoPuntos
+                                  ? 'Cargando puntos...'
+                                  : '${_puntos.length} puntos de reciclaje',
                               style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -301,7 +337,7 @@ class _MapaPuntosScreenState extends State<MapaPuntosScreen> {
                             size: 14, color: AppColors.textLight),
                         const SizedBox(width: 6),
                         Text(
-                          puntoSeleccionado!['materiales'],
+                          _formatMateriales(puntoSeleccionado!['materiales']),
                           style: const TextStyle(
                               fontSize: 12, color: AppColors.textMid),
                         ),

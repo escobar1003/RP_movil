@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:bootstrap_icons/bootstrap_icons.dart';
-import 'package:recycling_points/screens/reservas.dart';
-
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
 import '../services/usuario_service.dart';
-
 import 'mapa_puntos_screen.dart';
 import 'reciclar_screen.dart';
 import 'mis_canjes_screen.dart';
 import 'notificaciones_screen.dart';
-import 'reservas.dart';
+import 'juego_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -92,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(height: 2),
                         const Text(
-                          '�Gracias por cuidar el planeta!',
+                          'Gracias por cuidar el planeta!',
                           style: TextStyle(fontSize: 13, color: AppColors.textMid),
                         ),
                       ],
@@ -154,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ],
                           ),
                           const SizedBox(height: 10),
-                          const Text('Sigue as�, cada acci�n suma un cambio.', style: TextStyle(color: Colors.white, fontSize: 14)),
+                          const Text('Sigue asi, cada accion suma un cambio.', style: TextStyle(color: Colors.white, fontSize: 14)),
                         ],
                       ),
                     ),
@@ -166,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 24),
 
               // ------------------ RESUMEN IMPACTO ------------------
-              const Text('Resumen de impacto', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17, color: AppColors.textDark)),
+              const Text('Resumen De Impacto', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17, color: AppColors.textDark)),
               const SizedBox(height: 14),
               Container(
                 padding: const EdgeInsets.all(18),
@@ -228,7 +225,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const Text('�Genial! A�n puedes ganar m�s puntos y subir de nivel.', style: TextStyle(color: AppColors.textMid, fontSize: 13)),
+                    const Text('Genial! Aun puedes ganar mas puntos y subir de nivel.', style: TextStyle(color: AppColors.textMid, fontSize: 13)),
                   ],
                 ),
               ),
@@ -236,40 +233,22 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 24),
 
               // ------------------ ACCIONES RAPIDAS ------------------
-              const Text('Acciones r�pidas', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17, color: AppColors.textDark)),
+              const Text('Acciones rapidas', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17, color: AppColors.textDark)),
               const SizedBox(height: 14),
               Row(
                 children: [
                   Expanded(child: _AccionCard(icon: BootstrapIcons.qr_code_scan, label: 'Clasificar', color: AppColors.green100, iconColor: AppColors.primary, onTap: () { Navigator.push(context, MaterialPageRoute(builder: (_) => const ReciclarScreen())); })),
                   const SizedBox(width: 12),
                   Expanded(child: _AccionCard(icon: BootstrapIcons.gift, label: 'Canjear', color: AppColors.yellow100, iconColor: Colors.orange, onTap: () { Navigator.push(context, MaterialPageRoute(builder: (_) => const MisCanjesScreen())); })),
-                  const SizedBox(width: 12),
-                  Expanded(child: _AccionCard(icon: BootstrapIcons.geo_alt, label: 'Mapa', color: const Color(0xFFE3F2FD), iconColor: Colors.blue, onTap: () { Navigator.push(context, MaterialPageRoute(builder: (_) => const MapaPuntosScreen(soloMapa: true))); })),
                 ],
               ),
-
-              const SizedBox(height: 24),
-
-              // ?? BOT�N TEMPORAL DE PRUEBA � borrar despu�s
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ReservasScreen(
-                          aliado: {
-                            'idPunto': 1,
-                            'nombre': 'Punto de prueba',
-                            'direccion': 'Direcci�n de prueba',
-                          },
-                        ),
-                      ),
-                    );
-                  },
-                  child: const Text('?? Probar reserva'),
-                ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(child: _AccionCard(icon: BootstrapIcons.geo_alt, label: 'Mapa', color: Color(0xFFE3F2FD), iconColor: Colors.blue, onTap: () { Navigator.push(context, MaterialPageRoute(builder: (_) => const MapaPuntosScreen(soloMapa: true))); })),
+                  const SizedBox(width: 12),
+                  Expanded(child: _AccionCard(icon: BootstrapIcons.joystick, label: 'Juego Babilon', color: Color(0xFFF3E5F5), iconColor: Colors.purple, onTap: () { Navigator.push(context, MaterialPageRoute(builder: (_) => const JuegoScreen())); })),
+                ],
               ),
 
             ],

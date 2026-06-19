@@ -121,17 +121,18 @@ class AliadoDetalleScreen extends StatelessWidget {
                   const SizedBox(height: 16),
 
                   // ── Descripción ─────────────────────────────
-                  _buildSection(
-                    title: 'Sobre este punto',
-                    child: Text(
-                      aliado.descripcion,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                        height: 1.6,
+                  if (aliado.descripcion != null)
+                    _buildSection(
+                      title: 'Sobre este punto',
+                      child: Text(
+                        aliado.descripcion!,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                          height: 1.6,
+                        ),
                       ),
                     ),
-                  ),
 
                   const SizedBox(height: 16),
 
@@ -250,13 +251,14 @@ class AliadoDetalleScreen extends StatelessWidget {
             label: 'Horario',
             value: aliado.horario,
           ),
-          _buildInfoRow(
-            icon: Icons.phone_outlined,
-            iconColor: const Color(0xFF185FA5),
-            label: 'Teléfono',
-            value: aliado.telefono,
-            isLast: true,
-          ),
+          if (aliado.telefono != null)
+            _buildInfoRow(
+              icon: Icons.phone_outlined,
+              iconColor: const Color(0xFF185FA5),
+              label: 'Teléfono',
+              value: aliado.telefono!,
+              isLast: true,
+            ),
         ],
       ),
     );

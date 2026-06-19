@@ -8,10 +8,12 @@ class UsuarioService {
 
   static Future<Map<String, dynamic>> updatePerfil({
     required String nombre,
+    required String apellido,
     required String telefono,
   }) async {
     return ApiService.put('/usuario/perfil', body: {
       'nombre': nombre,
+      'apellido': apellido,
       'telefono': telefono,
     });
   }
@@ -59,6 +61,11 @@ class UsuarioService {
 
   static Future<Map<String, dynamic>> marcarTodasNotificacionesLeidas() async {
     return ApiService.put('/usuario/notificaciones/leer-todas');
+  }
+
+  // ── RECOMPENSAS ────────────────────────────────────────────
+  static Future<Map<String, dynamic>> getRecompensas() async {
+    return ApiService.get('/usuario/recompensas');
   }
 
   // ── CANJES ────────────────────────────────────────────────
