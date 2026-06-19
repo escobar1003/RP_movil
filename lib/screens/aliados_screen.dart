@@ -1,21 +1,26 @@
-// lib/screens/aliados_screen.dart
-
 import 'package:flutter/material.dart';
-import '../data/aliados_data.dart';
 import '../models/aliado_model.dart';
+import '../services/api_service.dart';
 import 'aliado_detalle_screen.dart';
 
-class AliadosScreen extends StatelessWidget {
+class AliadosScreen extends StatefulWidget {
   const AliadosScreen({super.key});
 
-  // Mapa de colores por material para los badges
-  // Cada material tiene su propio color para identificarlo visualmente
+  @override
+  State<AliadosScreen> createState() => _AliadosScreenState();
+}
+
+class _AliadosScreenState extends State<AliadosScreen> {
+  List<AliadoModel> _aliados = [];
+  bool _cargando = true;
+  String? _error;
+
   static const Map<String, Color> _materialColors = {
-    'Plástico': Color(0xFF185FA5),  // azul
-    'Cartón':   Color(0xFF854F0B),  // ámbar
-    'Vidrio':   Color(0xFF0F6E56),  // teal
-    'Papel':    Color(0xFF3B6D11),  // verde
-    'Metal':    Color(0xFF5F5E5A),  // gris
+    'Plástico': Color(0xFF185FA5),
+    'Cartón':   Color(0xFF854F0B),
+    'Vidrio':   Color(0xFF0F6E56),
+    'Papel':    Color(0xFF3B6D11),
+    'Metal':    Color(0xFF5F5E5A),
   };
 
   static const Map<String, Color> _materialBgColors = {
@@ -25,6 +30,29 @@ class AliadosScreen extends StatelessWidget {
     'Papel':    Color(0xFFEAF3DE),
     'Metal':    Color(0xFFF1EFE8),
   };
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarDatos();
+  }
+
+  Future<void> _cargarDatos() async {
+    setState(() => _cargando = true);
+    try {
+      final res = await ApiService.get('/puntos-reciclaje');
+      final lista = (res['puntos'] as List?) ?? [];
+      setState(() {
+        _aliados = lista.map((j) => AliadoModel.fromJson(j)).toList();
+        _cargando = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = 'Error al cargar: $e';
+        _cargando = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,49 +70,70 @@ class AliadosScreen extends StatelessWidget {
         backgroundColor: const Color(0xFFF4F6EF),
         elevation: 0,
         iconTheme: const IconThemeData(color: Color(0xFF1E3A0F)),
-        // Buscador en el AppBar
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
-            onPressed: () {
-              // TODO: implementar búsqueda
-            },
+            onPressed: () {},
           ),
         ],
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+      body: _buildBody(),
+    );
+  }
 
-          // ── Subtitle ──────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-            child: Text(
-              '${aliadosEjemplo.length} supermercados aliados cerca de ti',
-              style: TextStyle(fontSize: 13, color: Colors.grey[600]),
-            ),
+  Widget _buildBody() {
+    if (_cargando) {
+      return const Center(
+        child: CircularProgressIndicator(color: Color(0xFF2D5A1B)),
+      );
+    }
+    if (_error != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.cloud_off, size: 48, color: Colors.grey[400]),
+              const SizedBox(height: 12),
+              Text(_error!, textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey[600])),
+              const SizedBox(height: 16),
+              TextButton(onPressed: _cargarDatos, child: const Text('Reintentar')),
+            ],
           ),
-
-          // ── Lista de aliados ──────────────────────────────
-          Expanded(
+        ),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+          child: Text(
+            '${_aliados.length} supermercados aliados cerca de ti',
+            style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+          ),
+        ),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: _cargarDatos,
             child: ListView.builder(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              itemCount: aliadosEjemplo.length,
+              itemCount: _aliados.length,
               itemBuilder: (context, index) {
-                return _buildAliadoCard(context, aliadosEjemplo[index]);
+                return _buildAliadoCard(context, _aliados[index]);
               },
             ),
           ),
-
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _buildAliadoCard(BuildContext context, AliadoModel aliado) {
     return GestureDetector(
       onTap: () {
-        // Navegar al detalle pasando el aliado completo
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -110,12 +159,8 @@ class AliadosScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
-              // ── Fila superior: logo + nombre + flecha ──────
               Row(
                 children: [
-
-                  // Logo/avatar del supermercado
                   Container(
                     width: 52,
                     height: 52,
@@ -129,10 +174,7 @@ class AliadosScreen extends StatelessWidget {
                       size: 28,
                     ),
                   ),
-
                   const SizedBox(width: 14),
-
-                  // Nombre y dirección
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -167,8 +209,6 @@ class AliadosScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-
-                  // Flecha
                   Container(
                     width: 32,
                     height: 32,
@@ -182,17 +222,11 @@ class AliadosScreen extends StatelessWidget {
                       color: Color(0xFF3B6D11),
                     ),
                   ),
-
                 ],
               ),
-
               const SizedBox(height: 14),
-
-              // ── Divider ────────────────────────────────────
               Divider(color: Colors.grey.withValues(alpha: 0.12), height: 1),
               const SizedBox(height: 12),
-
-              // ── Horario ────────────────────────────────────
               Row(
                 children: [
                   Icon(Icons.access_time_rounded,
@@ -204,10 +238,7 @@ class AliadosScreen extends StatelessWidget {
                   ),
                 ],
               ),
-
               const SizedBox(height: 10),
-
-              // ── Badges de materiales ────────────────────────
               Wrap(
                 spacing: 6,
                 runSpacing: 6,
@@ -232,7 +263,6 @@ class AliadosScreen extends StatelessWidget {
                   );
                 }).toList(),
               ),
-
             ],
           ),
         ),

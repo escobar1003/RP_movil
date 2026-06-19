@@ -86,14 +86,12 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
       'Entregar en el punto de reciclaje ubicado en el parqueadero.';
 
   Future<void> _escanear() async {
-    print('ENTRO A ESCANEAR');
-    if (_cameraController == null || !_cameraController!.value.isInitialized)
-      return;
-
     setState(() {
       _estaCargando = true;
       _mostrarResultado = false;
     });
+
+    await _inicializarCamara();
 
     try {
       final XFile foto = await _cameraController!.takePicture();
@@ -110,8 +108,8 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
 
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
-      print('STATUS: ${response.statusCode}');
-      print('BODY: ${response.body}');
+      debugPrint('=== IA Status: ${response.statusCode}');
+      debugPrint('=== IA Body: ${response.body}');
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);

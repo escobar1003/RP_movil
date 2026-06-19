@@ -40,6 +40,9 @@ class AuthService {
         if (data['usuario']['telefono'] != null) {
           await prefs.setString('usuario_telefono', data['usuario']['telefono']);
         }
+        if (data['usuario']['apellido'] != null) {
+          await prefs.setString('usuario_apellido', data['usuario']['apellido']);
+        }
       }
     }
 
@@ -75,6 +78,11 @@ class AuthService {
   static Future<String> getNombre() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('nombre_usuario') ?? 'Usuario';
+  }
+
+  static Future<String> getApellido() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('usuario_apellido') ?? '';
   }
 
   static Future<String?> getToken() async {

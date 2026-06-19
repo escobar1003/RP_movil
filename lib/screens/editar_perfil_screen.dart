@@ -20,7 +20,6 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nombreController     = TextEditingController();
   final _apellidoController   = TextEditingController();
-  final _correoController     = TextEditingController();
   final _telefonoController   = TextEditingController();
   final _infoController       = TextEditingController();
 
@@ -44,13 +43,12 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
       final u = perfil['usuario'] ?? perfil; // acepta ambas estructuras
       _nombreController.text   = u['nombre']   ?? '';
       _apellidoController.text = u['apellido'] ?? '';
-      _correoController.text   = u['correo']   ?? '';
       _telefonoController.text = u['telefono'] ?? '';
       _infoController.text     = u['info']     ?? '';
       _fotoUrlActual           = u['imagen'];
     } catch (_) {
-      // fallback a SharedPreferences si el backend falla
       _nombreController.text   = await AuthService.getNombre();
+      _apellidoController.text = await AuthService.getApellido();
       _telefonoController.text = await AuthService.getTelefono();
     }
     if (mounted) setState(() => _cargando = false);
@@ -81,18 +79,18 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
   try {
     final resultado = await UsuarioService.updatePerfil(
       nombre: _nombreController.text.trim(),
+      apellido: _apellidoController.text.trim(),
       telefono: _telefonoController.text.trim(),
     );
 
-    // Verifica si el backend devolvió error
     if (resultado['status'] == 'error' || resultado['error'] != null) {
       final msg = resultado['mensaje'] ?? resultado['error'] ?? 'Error del servidor';
       throw Exception(msg);
     }
 
-    // Actualizar caché local
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('nombre_usuario', _nombreController.text.trim());
+    await prefs.setString('usuario_apellido', _apellidoController.text.trim());
     await prefs.setString('usuario_telefono', _telefonoController.text.trim());
 
     if (mounted) {
@@ -129,7 +127,6 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
   void dispose() {
     _nombreController.dispose();
     _apellidoController.dispose();
-    _correoController.dispose();
     _telefonoController.dispose();
     _infoController.dispose();
     super.dispose();
@@ -181,20 +178,6 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
                                   controller: _apellidoController,
                                   hint: 'Tu apellido',
                                   icon: Icons.person_outline_rounded,
-                                  // readonly hasta que el backend lo soporte
-                                  enabled: false,
-                                  sufijo: _badgePendiente(),
-                                ),
-                                _divider(),
-                                _campo(
-                                  label: 'Correo electrónico',
-                                  controller: _correoController,
-                                  hint: 'tu@correo.com',
-                                  icon: Icons.mail_outline_rounded,
-                                  teclado: TextInputType.emailAddress,
-                                  enabled: false,      // correo no editable por ahora
-                                  sufijo: const Icon(Icons.lock_outline_rounded,
-                                      size: 16, color: Color(0xFF9DB8A0)),
                                 ),
                                 _divider(),
                                 _campo(
@@ -213,34 +196,6 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
                                   maxLines: 3,
                                   enabled: false,
                                   sufijo: _badgePendiente(),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          const SizedBox(height: 12),
-
-                          // ── Nota campos deshabilitados ──
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 10),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFAEEDA),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Row(
-                              children: const [
-                                Icon(Icons.schedule_rounded,
-                                    size: 16, color: Color(0xFF854F0B)),
-                                SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    'Apellido e info estarán disponibles cuando el backend los soporte.',
-                                    style: TextStyle(
-                                        fontSize: 12,
-                                        color: Color(0xFF854F0B),
-                                        height: 1.4),
-                                  ),
                                 ),
                               ],
                             ),
