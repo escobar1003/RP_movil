@@ -11,7 +11,7 @@ class JuegoScreen extends StatefulWidget {
 }
 
 class _JuegoScreenState extends State<JuegoScreen> {
-  final String _gameUrl = 'http://localhost:5173/';
+  final String _gameUrl = 'http://192.168.1.10:5173/';
 
   @override
   Widget build(BuildContext context) {

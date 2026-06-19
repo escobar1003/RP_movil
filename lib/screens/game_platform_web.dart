@@ -1,6 +1,5 @@
-import 'dart:html' as html;
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:web/web.dart' as web;
 
 class PlatformGameView extends StatefulWidget {
   final String url;
@@ -17,10 +16,12 @@ class _PlatformGameViewState extends State<PlatformGameView> {
   void initState() {
     super.initState();
     _viewType = 'game-iframe-${identityHashCode(this)}';
-    ui.platformViewRegistry.registerViewFactory(
+    // ignore: avoid_dynamic_calls
+    (WidgetsFlutterBinding.ensureInitialized() as dynamic).platformViewRegistry
+      .registerViewFactory(
       _viewType,
       (int viewId) {
-        final iframe = html.IFrameElement()
+        final iframe = web.HTMLIFrameElement()
           ..src = widget.url
           ..style.border = 'none'
           ..width = '100%'

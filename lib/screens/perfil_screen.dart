@@ -1,4 +1,6 @@
+import 'dart:io'; // ← MODIFICADO: para FileImage
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // ← MODIFICADO
 import '../services/auth_service.dart';
 import '../services/usuario_service.dart';
 import 'historial_entregas_screen.dart';
@@ -25,6 +27,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
   int _puntos = 0;
   int _canjesCount = 0;
   int _puntosGanados = 0;
+  String? _fotoPath; // ← MODIFICADO: ruta de la foto local
 
   @override
   void initState() {
@@ -65,6 +68,12 @@ class _PerfilScreenState extends State<PerfilScreen> {
     } catch (_) {}
 
     if (mounted) setState(() {});
+    // ← MODIFICADO: carga la ruta de la foto guardada
+    final prefs = await SharedPreferences.getInstance();
+    final savedPath = prefs.getString('foto_perfil_path');
+    if (savedPath != null && File(savedPath).existsSync()) {
+      _fotoPath = savedPath;
+    }
   }
 
   Future<void> _cerrarSesion() async {
@@ -116,18 +125,27 @@ class _PerfilScreenState extends State<PerfilScreen> {
             ),
             child: Column(
               children: [
-                Stack(
-                  children: [
-                    Container(
-                      width: 90,
-                      height: 90,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF7BC043),
-                        borderRadius: BorderRadius.circular(45),
-                        border: Border.all(color: Colors.white, width: 3),
+                  Stack(
+                    children: [
+                      Container(
+                        width: 90,
+                        height: 90,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF7BC043),
+                          borderRadius: BorderRadius.circular(45),
+                          border: Border.all(color: Colors.white, width: 3),
+                          // ← MODIFICADO: muestra la foto si existe
+                          image: _fotoPath != null
+                              ? DecorationImage(
+                                  image: FileImage(File(_fotoPath!)),
+                                  fit: BoxFit.cover)
+                              : null,
+                        ),
+                        // ← MODIFICADO: oculta el icono si hay foto
+                        child: _fotoPath == null
+                            ? const Icon(Icons.person, color: Colors.white, size: 52)
+                            : null,
                       ),
-                      child: const Icon(Icons.person, color: Colors.white, size: 52),
-                    ),
                     Positioned(
                       bottom: 0,
                       right: 0,
