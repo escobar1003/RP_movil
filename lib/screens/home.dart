@@ -246,7 +246,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Expanded(child: _AccionCard(icon: BootstrapIcons.geo_alt, label: 'Mapa', color: Color(0xFFE3F2FD), iconColor: Colors.blue, onTap: () { Navigator.push(context, MaterialPageRoute(builder: (_) => const MapaPuntosScreen(soloMapa: true))); })),
+                  Expanded(child: _AccionCard(icon: BootstrapIcons.geo_alt, label: 'Mapa', color: Color(0xFFE3F2FD), iconColor: Colors.blue, onTap: () { Navigator.push(context, MaterialPageRoute(builder: (_) => const MapaPuntosScreen(soloMapa: false))); })),
                   const SizedBox(width: 12),
                   Expanded(child: _AccionCard(icon: BootstrapIcons.joystick, label: 'Juego Babilon', color: Color(0xFFF3E5F5), iconColor: Colors.purple, onTap: () { Navigator.push(context, MaterialPageRoute(builder: (_) => const JuegoScreen())); })),
                 ],

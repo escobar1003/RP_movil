@@ -33,13 +33,16 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
       final results = await Future.wait([
         UsuarioService.getEntregas(),
         UsuarioService.getReservas(),
+        UsuarioService.getHistorialPuntos(),
       ]);
       final entregasData = results[0];
       final reservasData = results[1];
+      final historialPuntos = results[2];
       final listaEntregas = ((entregasData['entregas'] as List?) ?? []).map((e) => _normalizarEntrega(e as Map<String, dynamic>));
       final listaReservas = ((reservasData['reservas'] as List?) ?? []).map((r) => _normalizarReserva(r as Map<String, dynamic>));
+      final listaMovimientos = ((historialPuntos['movimientos'] as List?) ?? []).map((m) => _normalizarMovimiento(m as Map<String, dynamic>));
       setState(() {
-        _entregas = [...listaReservas, ...listaEntregas];
+        _entregas = [...listaMovimientos, ...listaReservas, ...listaEntregas];
         _cargando = false;
       });
     } catch (e) {
@@ -63,6 +66,50 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
       'icon': Icons.schedule_outlined,
       'color': const Color(0xFFE67E22),
       'bg': const Color(0xFFFAEEDA),
+    };
+  }
+
+  Map<String, dynamic> _normalizarMovimiento(Map<String, dynamic> m) {
+    final tipo = m['tipoMovimiento'] as String? ?? 'ajuste';
+    final puntos = m['puntos'] as num? ?? 0;
+    final esGanado = tipo == 'ganados';
+
+    IconData icon;
+    Color color, bg;
+    String label;
+
+    switch (tipo) {
+      case 'ganados':
+        icon = Icons.add_circle_outlined;
+        color = const Color(0xFF2D5A1B);
+        bg = const Color(0xFFE8F5E0);
+        label = 'Entrega registrada';
+        break;
+      case 'descontados':
+        icon = Icons.remove_circle_outlined;
+        color = const Color(0xFFC0392B);
+        bg = const Color(0xFFFDEDEC);
+        label = 'Canje de recompensa';
+        break;
+      default:
+        icon = Icons.tune_outlined;
+        color = const Color(0xFFE67E22);
+        bg = const Color(0xFFFAEEDA);
+        label = 'Ajuste de puntos';
+        break;
+    }
+
+    return {
+      'supermercado': m['descripcion'] ?? label,
+      'material': label,
+      'peso': '-',
+      'pesoNum': 0.0,
+      'puntos': esGanado ? puntos : -puntos.abs(),
+      'fecha': _formatearFecha(m['fechaMovimiento'] ?? ''),
+      'estado': 'completado',
+      'icon': icon,
+      'color': color,
+      'bg': bg,
     };
   }
 
@@ -172,7 +219,7 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
               ),
               const SizedBox(width: 12),
               const Text(
-                'Mis entregas',
+                'Mi actividad',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 20,
@@ -267,7 +314,7 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
       child: Row(
         children: [
           Text(
-            '${_filtradas.length} entregas',
+            '${_filtradas.length} movimientos',
             style: TextStyle(
               fontSize: 13,
               color: Colors.grey[600],
@@ -318,10 +365,10 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
           children: [
             Icon(Icons.inbox_outlined, size: 64, color: Colors.grey[300]),
             const SizedBox(height: 12),
-            Text(
-              'No hay entregas aquí',
-              style: TextStyle(color: Colors.grey[400], fontSize: 15),
-            ),
+          Text(
+            'No hay movimientos aquí',
+            style: TextStyle(color: Colors.grey[400], fontSize: 15),
+          ),
           ],
         ),
       );
@@ -414,11 +461,15 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
                       size: 14, color: Color(0xFF7BC043)),
                   const SizedBox(width: 3),
                   Text(
-                    '+${e['puntos']} pts',
-                    style: const TextStyle(
+                    (e['puntos'] as num) >= 0
+                        ? '+${e['puntos']} pts'
+                        : '${e['puntos']} pts',
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF2D5A1B),
+                      color: (e['puntos'] as num) >= 0
+                          ? const Color(0xFF2D5A1B)
+                          : const Color(0xFFC0392B),
                     ),
                   ),
                 ],
