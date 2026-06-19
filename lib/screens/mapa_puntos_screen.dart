@@ -39,11 +39,10 @@ class _MapaPuntosScreenState extends State<MapaPuntosScreen> {
       final data = await ApiService.get('/puntos-reciclaje');
       final lista = (data['puntos'] as List?) ?? [];
       setState(() {
-        _puntos = lista.map((p) => Map<String, dynamic>.from(p)).where((p) {
-          final lat = p['latitud'];
-          final lng = p['longitud'];
-          return lat != null && lng != null && lat.toString().isNotEmpty && lng.toString().isNotEmpty;
-        }).toList();
+        _puntos = lista
+          .map((p) => Map<String, dynamic>.from(p))
+          .where((p) => p['latitud'] != null && p['longitud'] != null)
+          .toList();
         _cargandoPuntos = false;
       });
     } catch (_) {
@@ -158,8 +157,8 @@ class _MapaPuntosScreenState extends State<MapaPuntosScreen> {
                       puntoSeleccionado?['nombre'] == punto['nombre'];
                   return Marker(
                     point: LatLng(
-                      double.parse(punto['latitud'].toString()),
-                      double.parse(punto['longitud'].toString()),
+                      double.tryParse(punto['latitud']?.toString() ?? '') ?? 0,
+                      double.tryParse(punto['longitud']?.toString() ?? '') ?? 0,
                     ),
                     width: 50,
                     height: 50,
@@ -167,8 +166,8 @@ class _MapaPuntosScreenState extends State<MapaPuntosScreen> {
                       onTap: () {
                         setState(() => puntoSeleccionado = punto);
                         _mapController.move(LatLng(
-                          double.parse(punto['latitud'].toString()),
-                          double.parse(punto['longitud'].toString()),
+                          double.tryParse(punto['latitud']?.toString() ?? '') ?? 0,
+                          double.tryParse(punto['longitud']?.toString() ?? '') ?? 0,
                         ), 15.0);
                       },
                       child: AnimatedContainer(
