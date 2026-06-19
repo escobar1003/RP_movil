@@ -59,17 +59,21 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
         await _cameraController!.initialize();
         if (mounted) setState(() => _camaraInicializada = true);
       } else {
-        if (mounted) setState(() {
-          _errorCamara = true;
-          _mensajeErrorCamara = 'No se encontró ninguna cámara en el dispositivo.';
-        });
+        if (mounted)
+          setState(() {
+            _errorCamara = true;
+            _mensajeErrorCamara =
+                'No se encontró ninguna cámara en el dispositivo.';
+          });
       }
     } catch (e) {
       debugPrint('Error cámara: $e');
-      if (mounted) setState((){
-        _errorCamara = true;
-        _mensajeErrorCamara = 'Error al iniciar la cámara.\nAsegúrate de haber otorgado permisos de cámara en Ajustes > Aplicaciones > recycling_points > Permisos.\n\nError: $e';
-       });
+      if (mounted)
+        setState(() {
+          _errorCamara = true;
+          _mensajeErrorCamara =
+              'Error al iniciar la cámara.\nAsegúrate de haber otorgado permisos de cámara en Ajustes > Aplicaciones > recycling_points > Permisos.\n\nError: $e';
+        });
     }
   }
 
@@ -78,10 +82,13 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
   String _direccionEntrega = 'Cra 9 #18N-230, Popayán';
   String _horarioEntrega = 'Lun–Sáb 8:00–18:00';
   String _puntosEstimados = '150 pts';
-  String _instruccionesEntrega = 'Entregar en el punto de reciclaje ubicado en el parqueadero.';
+  String _instruccionesEntrega =
+      'Entregar en el punto de reciclaje ubicado en el parqueadero.';
 
   Future<void> _escanear() async {
-    if (_cameraController == null || !_cameraController!.value.isInitialized) return;
+    print('ENTRO A ESCANEAR');
+    if (_cameraController == null || !_cameraController!.value.isInitialized)
+      return;
 
     setState(() {
       _estaCargando = true;
@@ -93,27 +100,34 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
       setState(() => _rutaImagenLocal = foto.path);
 
       const ipServidor = '192.168.1.12';
-      final url = Uri.parse('https://backend-rp-arreglado-n8p8.onrender.com/api/detectar-material');
+      final url = Uri.parse(
+        'https://backend-rp-arreglado-n8p8.onrender.com/api/detectar-material',
+      );
 
       final request = http.MultipartRequest('POST', url);
       request.files.add(await http.MultipartFile.fromPath('image', foto.path));
+      print('ENVIANDO PETICION...');
 
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
+      print('STATUS: ${response.statusCode}');
+      print('BODY: ${response.body}');
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
 
-        if (data['detectado'] == true) {
-          final resultado = data['resultado'];
-          final String clase = resultado['objeto'];
-          final double confianza = resultado['confianza'] * 100;
+        // Verificamos si el backend nos envió el material directamente
+        if (data.containsKey('material')) {
+          final String clase = data['material']; // Aquí tomamos 'metal'
+          final double confianza =
+              95.0; // Valor fijo ya que no viene en el nuevo JSON
 
           setState(() {
             _confianza = confianza.round();
             _mostrarResultado = true;
 
             final String c = clase.toLowerCase();
+
             if (c == 'plastico') {
               _nombre = 'Plástico';
               _tipo = 'Residuo Aprovechable';
@@ -163,14 +177,18 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
               _tipo = 'Residuo No Aprovechable';
               _caneco = 'Caneco Negro';
               _deposito = 'No aprovechable';
-              _descripcion = 'Papel higiénico, servilletas, cartones contaminados, papeles metalizados.';
+              _descripcion =
+                  'Papel higiénico, servilletas, cartones contaminados, papeles metalizados.';
               _colorCaneca = const Color(0xFF2E2E2E);
               _cantidadEstimada = '1 unidad';
               _pesoAproximado = '0.2 kg';
               _nivelReciclabilidad = 'Bajo';
-              _recomendacionIA = 'Depositar en Caneco Negro. No apto para reciclaje.';
+              _recomendacionIA =
+                  'Depositar en Caneco Negro. No apto para reciclaje.';
             }
-            _estado = _deposito == 'Aprovechable' ? 'Aprovechable' : 'No clasificado';
+            _estado = _deposito == 'Aprovechable'
+                ? 'Aprovechable'
+                : 'No clasificado';
           });
         } else {
           setState(() {
@@ -180,10 +198,12 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
             _confianza = 0;
             _caneco = 'Caneco Negro';
             _deposito = 'No aprovechable';
-            _descripcion = 'Papel higiénico, servilletas, cartones contaminados, papeles metalizados.';
+            _descripcion =
+                'Papel higiénico, servilletas, cartones contaminados, papeles metalizados.';
             _colorCaneca = const Color(0xFF2E2E2E);
             _nivelReciclabilidad = 'Bajo';
-            _recomendacionIA = 'Depositar en Caneco Negro. No apto para reciclaje.';
+            _recomendacionIA =
+                'Depositar en Caneco Negro. No apto para reciclaje.';
             _cantidadEstimada = '1 unidad';
             _pesoAproximado = '0.2 kg';
             _mostrarResultado = true;
@@ -203,19 +223,19 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
   }
 
   Map<String, dynamic> get _datosIA => {
-        'material': _nombre,
-        'tipo': _tipo,
-        'estado': _estado,
-        'confianza': _confianza,
-        'caneco': _caneco,
-        'deposito': _deposito,
-        'descripcion': _descripcion,
-        'cantidadEstimada': _cantidadEstimada,
-        'pesoAproximado': _pesoAproximado,
-        'nivelReciclabilidad': _nivelReciclabilidad,
-        'recomendacionIA': _recomendacionIA,
-        'colorCaneca': '#${_colorCaneca.value.toRadixString(16).padLeft(8, '0')}',
-      };
+    'material': _nombre,
+    'tipo': _tipo,
+    'estado': _estado,
+    'confianza': _confianza,
+    'caneco': _caneco,
+    'deposito': _deposito,
+    'descripcion': _descripcion,
+    'cantidadEstimada': _cantidadEstimada,
+    'pesoAproximado': _pesoAproximado,
+    'nivelReciclabilidad': _nivelReciclabilidad,
+    'recomendacionIA': _recomendacionIA,
+    'colorCaneca': '#${_colorCaneca.value.toRadixString(16).padLeft(8, '0')}',
+  };
 
   @override
   void dispose() {
@@ -225,19 +245,27 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
 
   Color _nivelColor(String nivel) {
     switch (nivel) {
-      case 'Alto': return const Color(0xFF3B6D11);
-      case 'Medio': return Colors.orange;
-      case 'Bajo': return Colors.red;
-      default: return Colors.grey;
+      case 'Alto':
+        return const Color(0xFF3B6D11);
+      case 'Medio':
+        return Colors.orange;
+      case 'Bajo':
+        return Colors.red;
+      default:
+        return Colors.grey;
     }
   }
 
   Color _nivelBg(String nivel) {
     switch (nivel) {
-      case 'Alto': return const Color(0xFFEAF3DE);
-      case 'Medio': return const Color(0xFFFAEEDA);
-      case 'Bajo': return const Color(0xFFFCEBEB);
-      default: return Colors.grey[100]!;
+      case 'Alto':
+        return const Color(0xFFEAF3DE);
+      case 'Medio':
+        return const Color(0xFFFAEEDA);
+      case 'Bajo':
+        return const Color(0xFFFCEBEB);
+      default:
+        return Colors.grey[100]!;
     }
   }
 
@@ -252,15 +280,18 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
           context,
           MaterialPageRoute(builder: (_) => const ChatIaScreen()),
         ),
-        icon: const Icon(Icons.chat_bubble_outline_rounded,
-            color: Colors.white, size: 22),
-        label: const Text('Chat IA',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+        icon: const Icon(
+          Icons.chat_bubble_outline_rounded,
+          color: Colors.white,
+          size: 22,
+        ),
+        label: const Text(
+          'Chat IA',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
-      appBar: AppBar(
-        title: const Text('Clasificar con IA'),
-      ),
+      appBar: AppBar(title: const Text('Clasificar con IA')),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -289,13 +320,20 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.error_outline,
-                              size: 48, color: Colors.red),
+                          const Icon(
+                            Icons.error_outline,
+                            size: 48,
+                            color: Colors.red,
+                          ),
                           const SizedBox(height: 8),
-                          Text(_mensajeErrorCamara,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                  color: Colors.red, fontSize: 12)),
+                          Text(
+                            _mensajeErrorCamara,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 12,
+                            ),
+                          ),
                           const SizedBox(height: 12),
                           TextButton.icon(
                             onPressed: () {
@@ -329,8 +367,11 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
                       ),
                     )
                   else
-                    const Icon(Icons.camera_alt_outlined,
-                        size: 56, color: Colors.black26),
+                    const Icon(
+                      Icons.camera_alt_outlined,
+                      size: 56,
+                      color: Colors.black26,
+                    ),
                   if (!_errorCamara) const _ScannerFrame(),
                 ],
               ),
@@ -340,13 +381,13 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
 
             // ── Resultado IA ───────────────────────────────
             if (_mostrarResultado) ...[
-
               _buildCard(
                 margin: const EdgeInsets.symmetric(horizontal: 24),
                 child: Row(
                   children: [
                     Container(
-                      width: 52, height: 52,
+                      width: 52,
+                      height: 52,
                       decoration: BoxDecoration(
                         color: _colorCaneca.computeLuminance() > 0.5
                             ? const Color(0xFFE8F5E9)
@@ -354,11 +395,15 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: Icon(
-                        _nombre == 'Plástico' ? Icons.local_drink :
-                        _nombre == 'Metal' ? Icons.build :
-                        _nombre == 'Vidrio' ? Icons.local_drink :
-                        _nombre == 'Cartón' ? Icons.inventory_2_outlined :
-                        Icons.help_outline,
+                        _nombre == 'Plástico'
+                            ? Icons.local_drink
+                            : _nombre == 'Metal'
+                            ? Icons.build
+                            : _nombre == 'Vidrio'
+                            ? Icons.local_drink
+                            : _nombre == 'Cartón'
+                            ? Icons.inventory_2_outlined
+                            : Icons.help_outline,
                         color: _colorCaneca == const Color(0xFF2E2E2E)
                             ? const Color(0xFF2E2E2E)
                             : AppColors.primary,
@@ -370,22 +415,49 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Material identificado',
-                              style: TextStyle(fontSize: 11, color: AppColors.textLight)),
+                          const Text(
+                            'Material identificado',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: AppColors.textLight,
+                            ),
+                          ),
                           const SizedBox(height: 2),
-                          Text(_nombre,
-                              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: AppColors.textDark)),
-                          Text(_tipo,
-                              style: const TextStyle(fontSize: 12, color: AppColors.textLight)),
+                          Text(
+                            _nombre,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                              color: AppColors.textDark,
+                            ),
+                          ),
+                          Text(
+                            _tipo,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textLight,
+                            ),
+                          ),
                         ],
                       ),
                     ),
                     Column(
                       children: [
-                        Text('$_confianza%',
-                            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.primary)),
-                        const Text('Confianza',
-                            style: TextStyle(fontSize: 10, color: AppColors.textLight)),
+                        Text(
+                          '$_confianza%',
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                        const Text(
+                          'Confianza',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: AppColors.textLight,
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -398,12 +470,24 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
                 margin: const EdgeInsets.symmetric(horizontal: 24),
                 child: Row(
                   children: [
-                    _datoColumna(Icons.inventory_2_outlined, 'Cantidad', _cantidadEstimada),
+                    _datoColumna(
+                      Icons.inventory_2_outlined,
+                      'Cantidad',
+                      _cantidadEstimada,
+                    ),
                     Container(width: 1, height: 40, color: Colors.grey[200]),
-                    _datoColumna(Icons.monitor_weight_outlined, 'Peso aprox.', _pesoAproximado),
+                    _datoColumna(
+                      Icons.monitor_weight_outlined,
+                      'Peso aprox.',
+                      _pesoAproximado,
+                    ),
                     Container(width: 1, height: 40, color: Colors.grey[200]),
-                    _datoColumna(Icons.recycling, 'Reciclabilidad', _nivelReciclabilidad,
-                        valueColor: _nivelColor(_nivelReciclabilidad)),
+                    _datoColumna(
+                      Icons.recycling,
+                      'Reciclabilidad',
+                      _nivelReciclabilidad,
+                      valueColor: _nivelColor(_nivelReciclabilidad),
+                    ),
                   ],
                 ),
               ),
@@ -421,18 +505,34 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
                         color: const Color(0xFFE8F5E9),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(Icons.auto_awesome, color: AppColors.primary, size: 18),
+                      child: const Icon(
+                        Icons.auto_awesome,
+                        color: AppColors.primary,
+                        size: 18,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Recomendación IA',
-                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textDark)),
+                          const Text(
+                            'Recomendación IA',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textDark,
+                            ),
+                          ),
                           const SizedBox(height: 3),
-                          Text(_recomendacionIA,
-                              style: const TextStyle(fontSize: 13, color: AppColors.textLight, height: 1.4)),
+                          Text(
+                            _recomendacionIA,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: AppColors.textLight,
+                              height: 1.4,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -447,7 +547,8 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
                 child: Row(
                   children: [
                     Container(
-                      width: 44, height: 44,
+                      width: 44,
+                      height: 44,
                       decoration: BoxDecoration(
                         color: _colorCaneca,
                         borderRadius: BorderRadius.circular(12),
@@ -474,7 +575,8 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
                           Row(
                             children: [
                               Container(
-                                width: 12, height: 12,
+                                width: 12,
+                                height: 12,
                                 decoration: BoxDecoration(
                                   color: _colorCaneca,
                                   shape: BoxShape.circle,
@@ -486,27 +588,52 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
                                 ),
                               ),
                               const SizedBox(width: 6),
-                              Text(_caneco,
-                                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: AppColors.textDark)),
+                              Text(
+                                _caneco,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 15,
+                                  color: AppColors.textDark,
+                                ),
+                              ),
                             ],
                           ),
                           const SizedBox(height: 2),
-                          Text(_deposito,
-                              style: const TextStyle(color: AppColors.textLight, fontSize: 13)),
+                          Text(
+                            _deposito,
+                            style: const TextStyle(
+                              color: AppColors.textLight,
+                              fontSize: 13,
+                            ),
+                          ),
                           const SizedBox(height: 2),
-                          Text(_descripcion,
-                              style: TextStyle(color: Colors.grey[400], fontSize: 11)),
+                          Text(
+                            _descripcion,
+                            style: TextStyle(
+                              color: Colors.grey[400],
+                              fontSize: 11,
+                            ),
+                          ),
                         ],
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: _nivelBg(_nivelReciclabilidad),
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: Text(_nivelReciclabilidad,
-                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: _nivelColor(_nivelReciclabilidad))),
+                      child: Text(
+                        _nivelReciclabilidad,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: _nivelColor(_nivelReciclabilidad),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -528,24 +655,48 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
                             color: const Color(0xFFE3F0FF),
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Icon(Icons.local_shipping_outlined,
-                              color: Color(0xFF185FA5), size: 18),
+                          child: const Icon(
+                            Icons.local_shipping_outlined,
+                            color: Color(0xFF185FA5),
+                            size: 18,
+                          ),
                         ),
                         const SizedBox(width: 10),
-                        const Text('Información de entrega',
-                            style: TextStyle(
-                                fontWeight: FontWeight.w700, fontSize: 14, color: AppColors.textDark)),
+                        const Text(
+                          'Información de entrega',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                            color: AppColors.textDark,
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 12),
-                    _entregaFila(Icons.store_rounded, 'Punto sugerido', _puntoEntrega),
+                    _entregaFila(
+                      Icons.store_rounded,
+                      'Punto sugerido',
+                      _puntoEntrega,
+                    ),
                     const SizedBox(height: 8),
-                    _entregaFila(Icons.location_on_outlined, 'Dirección', _direccionEntrega),
+                    _entregaFila(
+                      Icons.location_on_outlined,
+                      'Dirección',
+                      _direccionEntrega,
+                    ),
                     const SizedBox(height: 8),
-                    _entregaFila(Icons.access_time_rounded, 'Horario', _horarioEntrega),
+                    _entregaFila(
+                      Icons.access_time_rounded,
+                      'Horario',
+                      _horarioEntrega,
+                    ),
                     const SizedBox(height: 8),
-                    _entregaFila(Icons.stars_rounded, 'Puntos estimados', _puntosEstimados,
-                        valorColor: const Color(0xFF854F0B)),
+                    _entregaFila(
+                      Icons.stars_rounded,
+                      'Puntos estimados',
+                      _puntosEstimados,
+                      valorColor: const Color(0xFF854F0B),
+                    ),
                     const SizedBox(height: 10),
                     Container(
                       padding: const EdgeInsets.all(10),
@@ -556,11 +707,21 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(Icons.info_outline, size: 16, color: AppColors.textLight),
+                          const Icon(
+                            Icons.info_outline,
+                            size: 16,
+                            color: AppColors.textLight,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
-                            child: Text(_instruccionesEntrega,
-                                style: const TextStyle(fontSize: 12, color: AppColors.textLight, height: 1.4)),
+                            child: Text(
+                              _instruccionesEntrega,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textLight,
+                                height: 1.4,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -576,13 +737,16 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
               child: SizedBox(
-                width: double.infinity, height: 50,
+                width: double.infinity,
+                height: 50,
                 child: ElevatedButton.icon(
                   onPressed: _estaCargando ? null : _escanear,
                   icon: const Icon(Icons.qr_code_scanner, size: 20),
-                  label: Text(_estaCargando
-                      ? 'Analizando...'
-                      : (_mostrarResultado ? 'Escanear otro' : 'Escanear')),
+                  label: Text(
+                    _estaCargando
+                        ? 'Analizando...'
+                        : (_mostrarResultado ? 'Escanear otro' : 'Escanear'),
+                  ),
                 ),
               ),
             ),
@@ -592,7 +756,8 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: SizedBox(
-                  width: double.infinity, height: 50,
+                  width: double.infinity,
+                  height: 50,
                   child: ElevatedButton.icon(
                     icon: const Icon(Icons.map, size: 20),
                     label: const Text('Reciclar ahora'),
@@ -622,33 +787,57 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
     );
   }
 
-  Widget _datoColumna(IconData icon, String label, String value, {Color? valueColor}) {
+  Widget _datoColumna(
+    IconData icon,
+    String label,
+    String value, {
+    Color? valueColor,
+  }) {
     return Expanded(
       child: Column(
         children: [
           Icon(icon, size: 20, color: AppColors.primary),
           const SizedBox(height: 4),
-          Text(value,
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: valueColor ?? AppColors.textDark)),
-          Text(label, style: const TextStyle(fontSize: 10, color: AppColors.textLight)),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: valueColor ?? AppColors.textDark,
+            ),
+          ),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 10, color: AppColors.textLight),
+          ),
         ],
       ),
     );
   }
 
-  Widget _entregaFila(IconData icon, String label, String valor, {Color? valorColor}) {
+  Widget _entregaFila(
+    IconData icon,
+    String label,
+    String valor, {
+    Color? valorColor,
+  }) {
     return Row(
       children: [
         Icon(icon, size: 16, color: AppColors.textLight),
         const SizedBox(width: 8),
-        Text(label,
-            style: const TextStyle(fontSize: 12, color: AppColors.textLight)),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 12, color: AppColors.textLight),
+        ),
         const Spacer(),
-        Text(valor,
-            style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: valorColor ?? AppColors.textDark)),
+        Text(
+          valor,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: valorColor ?? AppColors.textDark,
+          ),
+        ),
       ],
     );
   }
@@ -684,9 +873,21 @@ class _ScannerFrame extends StatelessWidget {
         child: Stack(
           children: [
             Positioned(top: 0, left: 0, child: _Esquina(top: true, left: true)),
-            Positioned(top: 0, right: 0, child: _Esquina(top: true, left: false)),
-            Positioned(bottom: 0, left: 0, child: _Esquina(top: false, left: true)),
-            Positioned(bottom: 0, right: 0, child: _Esquina(top: false, left: false)),
+            Positioned(
+              top: 0,
+              right: 0,
+              child: _Esquina(top: true, left: false),
+            ),
+            Positioned(
+              bottom: 0,
+              left: 0,
+              child: _Esquina(top: false, left: true),
+            ),
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: _Esquina(top: false, left: false),
+            ),
           ],
         ),
       ),
@@ -723,13 +924,25 @@ class _EsquinaPainter extends CustomPainter {
     final h = size.height;
     const r = 6.0;
     if (top && left) {
-      path.moveTo(0, h); path.lineTo(0, r); path.quadraticBezierTo(0, 0, r, 0); path.lineTo(w, 0);
+      path.moveTo(0, h);
+      path.lineTo(0, r);
+      path.quadraticBezierTo(0, 0, r, 0);
+      path.lineTo(w, 0);
     } else if (top && !left) {
-      path.moveTo(0, 0); path.lineTo(w - r, 0); path.quadraticBezierTo(w, 0, w, r); path.lineTo(w, h);
+      path.moveTo(0, 0);
+      path.lineTo(w - r, 0);
+      path.quadraticBezierTo(w, 0, w, r);
+      path.lineTo(w, h);
     } else if (!top && left) {
-      path.moveTo(0, 0); path.lineTo(0, h - r); path.quadraticBezierTo(0, h, r, h); path.lineTo(w, h);
+      path.moveTo(0, 0);
+      path.lineTo(0, h - r);
+      path.quadraticBezierTo(0, h, r, h);
+      path.lineTo(w, h);
     } else {
-      path.moveTo(0, h); path.lineTo(w - r, h); path.quadraticBezierTo(w, h, w, h - r); path.lineTo(w, 0);
+      path.moveTo(0, h);
+      path.lineTo(w - r, h);
+      path.quadraticBezierTo(w, h, w, h - r);
+      path.lineTo(w, 0);
     }
     canvas.drawPath(path, paint);
   }
