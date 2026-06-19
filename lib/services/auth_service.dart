@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
 
-  static const String baseUrl = 'https://backend-rp-arreglado-n8p8.onrender.com/api/auth';
+  static const String baseUrl = 'https://backendrparreglado-production.up.railway.app/api/auth';
 
   // LOGIN
   static Future<Map<String, dynamic>> login({

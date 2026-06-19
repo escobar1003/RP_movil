@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:bootstrap_icons/bootstrap_icons.dart';
 import 'resumen_entrega_screen.dart';
 import '../services/api_service.dart';
+import '../theme/app_theme.dart';
 
 class ReservasScreen extends StatefulWidget {
   final Map<String, dynamic> aliado;
@@ -259,6 +260,70 @@ class _ReservasScreenState extends State<ReservasScreen> {
               const SizedBox(height: 20),
             ],
 
+            // ── Información de entrega ────────────────────
+            if (widget.datosIA != null) ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0xFFE3F0FF), width: 1.5),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE3F0FF),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(Icons.local_shipping_outlined,
+                              color: Color(0xFF185FA5), size: 18),
+                        ),
+                        const SizedBox(width: 10),
+                        const Text('Información de entrega',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w700, fontSize: 14, color: AppColors.textDark)),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    _entregaFila(Icons.store_rounded, 'Punto sugerido', widget.datosIA!['puntoSugerido'] ?? '-'),
+                    const SizedBox(height: 8),
+                    _entregaFila(Icons.location_on_outlined, 'Dirección', widget.datosIA!['direccionEntrega'] ?? '-'),
+                    const SizedBox(height: 8),
+                    _entregaFila(Icons.access_time_rounded, 'Horario', widget.datosIA!['horarioEntrega'] ?? '-'),
+                    const SizedBox(height: 8),
+                    _entregaFila(Icons.stars_rounded, 'Puntos estimados', widget.datosIA!['puntosEstimados'] ?? '-',
+                        valorColor: const Color(0xFF854F0B)),
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF5F5F5),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(Icons.info_outline, size: 16, color: AppColors.textLight),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(widget.datosIA!['instruccionesEntrega'] ?? '-',
+                                style: const TextStyle(fontSize: 12, color: AppColors.textLight, height: 1.4)),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+
             // ── Estado ────────────────────────────────────
             Container(
               width: double.infinity,
@@ -412,6 +477,23 @@ class _ReservasScreenState extends State<ReservasScreen> {
               style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
         ],
       ),
+    );
+  }
+
+  Widget _entregaFila(IconData icon, String label, String valor, {Color? valorColor}) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: AppColors.textLight),
+        const SizedBox(width: 8),
+        Text(label,
+            style: const TextStyle(fontSize: 12, color: AppColors.textLight)),
+        const Spacer(),
+        Text(valor,
+            style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: valorColor ?? AppColors.textDark)),
+      ],
     );
   }
 }

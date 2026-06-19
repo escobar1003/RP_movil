@@ -1,8 +1,10 @@
+import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import '../theme/app_theme.dart';
 import 'mapa_puntos_screen.dart';
 import 'chat_ia_screen.dart';
@@ -22,6 +24,7 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
   List<CameraDescription>? _cameras;
   bool _camaraInicializada = false;
   String? _rutaImagenLocal;
+  Uint8List? _imagenBytes;
 
   String _nombre = 'Detectando...';
   String _tipo = '';
@@ -39,7 +42,7 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
   @override
   void initState() {
     super.initState();
-    _inicializarCamara();
+    if (!kIsWeb) _inicializarCamara();
   }
 
   bool _errorCamara = false;
@@ -86,19 +89,35 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
       _mostrarResultado = false;
     });
 
-    await _inicializarCamara();
+    late final XFile foto;
+
+    if (kIsWeb) {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(source: ImageSource.gallery);
+      if (picked == null) {
+        if (mounted) setState(() => _estaCargando = false);
+        return;
+      }
+      foto = picked;
+      final bytes = await foto.readAsBytes();
+      setState(() => _imagenBytes = bytes);
+    } else {
+      await _inicializarCamara();
+      foto = await _cameraController!.takePicture();
+      setState(() => _rutaImagenLocal = foto.path);
+    }
 
     try {
-      final XFile foto = await _cameraController!.takePicture();
-      setState(() => _rutaImagenLocal = foto.path);
-
-      const ipServidor = '192.168.1.12';
-      final url = Uri.parse('https://backend-rp-arreglado-n8p8.onrender.com/api/detectar-material');
+      final url = Uri.parse('https://backendrparreglado-production.up.railway.app/api/detectar-material');
 
       final request = http.MultipartRequest('POST', url);
-      request.files.add(await http.MultipartFile.fromPath('image', foto.path));
+      request.files.add(http.MultipartFile.fromBytes(
+        'image',
+        await foto.readAsBytes(),
+        filename: 'photo.jpg',
+      ));
 
-      final streamedResponse = await request.send();
+      final streamedResponse = await request.send().timeout(const Duration(seconds: 30));
       final response = await http.Response.fromStream(streamedResponse);
       debugPrint('=== IA Status: ${response.statusCode}');
       debugPrint('=== IA Body: ${response.body}');
@@ -217,6 +236,11 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
         'nivelReciclabilidad': _nivelReciclabilidad,
         'recomendacionIA': _recomendacionIA,
         'colorCaneca': '#${_colorCaneca.value.toRadixString(16).padLeft(8, '0')}',
+        'puntoSugerido': _puntoEntrega,
+        'direccionEntrega': _direccionEntrega,
+        'horarioEntrega': _horarioEntrega,
+        'puntosEstimados': _puntosEstimados,
+        'instruccionesEntrega': _instruccionesEntrega,
       };
 
   @override
@@ -312,17 +336,24 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
                     )
                   else if (_estaCargando)
                     const CircularProgressIndicator(color: AppColors.primary)
-                  else if (_mostrarResultado && _rutaImagenLocal != null)
+                  else if (_mostrarResultado && (_rutaImagenLocal != null || _imagenBytes != null))
                     ClipRRect(
                       borderRadius: BorderRadius.circular(20),
-                      child: Image.file(
-                        File(_rutaImagenLocal!),
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: double.infinity,
-                      ),
+                      child: kIsWeb
+                          ? Image.memory(
+                              _imagenBytes!,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: double.infinity,
+                            )
+                          : Image.file(
+                              File(_rutaImagenLocal!),
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: double.infinity,
+                            ),
                     )
-                  else if (_camaraInicializada && _cameraController != null)
+                  else if (!kIsWeb && _camaraInicializada && _cameraController != null)
                     ClipRRect(
                       borderRadius: BorderRadius.circular(20),
                       child: AspectRatio(
@@ -514,63 +545,6 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
                 ),
               ),
 
-              const SizedBox(height: 10),
-
-              // ── Información de entrega ─────────────────────
-              _buildCard(
-                margin: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFE3F0FF),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Icon(Icons.local_shipping_outlined,
-                              color: Color(0xFF185FA5), size: 18),
-                        ),
-                        const SizedBox(width: 10),
-                        const Text('Información de entrega',
-                            style: TextStyle(
-                                fontWeight: FontWeight.w700, fontSize: 14, color: AppColors.textDark)),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    _entregaFila(Icons.store_rounded, 'Punto sugerido', _puntoEntrega),
-                    const SizedBox(height: 8),
-                    _entregaFila(Icons.location_on_outlined, 'Dirección', _direccionEntrega),
-                    const SizedBox(height: 8),
-                    _entregaFila(Icons.access_time_rounded, 'Horario', _horarioEntrega),
-                    const SizedBox(height: 8),
-                    _entregaFila(Icons.stars_rounded, 'Puntos estimados', _puntosEstimados,
-                        valorColor: const Color(0xFF854F0B)),
-                    const SizedBox(height: 10),
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF5F5F5),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Icon(Icons.info_outline, size: 16, color: AppColors.textLight),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(_instruccionesEntrega,
-                                style: const TextStyle(fontSize: 12, color: AppColors.textLight, height: 1.4)),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
               const SizedBox(height: 20),
             ],
 
@@ -635,23 +609,6 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
           Text(label, style: const TextStyle(fontSize: 10, color: AppColors.textLight)),
         ],
       ),
-    );
-  }
-
-  Widget _entregaFila(IconData icon, String label, String valor, {Color? valorColor}) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: AppColors.textLight),
-        const SizedBox(width: 8),
-        Text(label,
-            style: const TextStyle(fontSize: 12, color: AppColors.textLight)),
-        const Spacer(),
-        Text(valor,
-            style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: valorColor ?? AppColors.textDark)),
-      ],
     );
   }
 
