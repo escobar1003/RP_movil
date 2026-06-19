@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../services/auth_service.dart';
 
 class ChatIaScreen extends StatefulWidget {
   const ChatIaScreen({super.key});
@@ -33,19 +32,19 @@ class _ChatIaScreenState extends State<ChatIaScreen> {
     _controller.clear();
 
     try {
-      const apiUrl = 'https://backendrparreglado-production.up.railway.app/api/chat';
-      final token = await AuthService.getToken();
-      final url = Uri.parse(apiUrl);
+      // IP local configurada para tu entorno
+      final url = Uri.parse(
+        'https://backend-rp-arreglado-n8p8.onrender.com/api/chat',
+      );
 
       final response = await http.post(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-          if (token != null) 'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({'pregunta': text}),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'mensaje': text}),
       );
 
+      print('STATUS: ${response.statusCode}');
+      print('BODY: ${response.body}');
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
@@ -58,7 +57,7 @@ class _ChatIaScreenState extends State<ChatIaScreen> {
         setState(() {
           _messages.add({
             'role': 'assistant',
-            'text': 'No pude procesar eso. Revisa el backend.',
+            'text': 'Upps, no pude procesar eso. Revisa el backend.',
           });
         });
       }
