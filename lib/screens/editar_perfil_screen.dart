@@ -9,6 +9,7 @@ import '../services/auth_service.dart';
 import '../services/usuario_service.dart';
 import '../theme/app_theme.dart';
 
+
 class EditarPerfilScreen extends StatefulWidget {
   const EditarPerfilScreen({super.key});
 
@@ -51,6 +52,11 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
       _apellidoController.text = await AuthService.getApellido();
       _telefonoController.text = await AuthService.getTelefono();
     }
+    final prefs = await SharedPreferences.getInstance();
+    final savedPath = prefs.getString('foto_perfil_path');
+    if (savedPath != null && File(savedPath).existsSync()) {
+      _fotoArchivo = File(savedPath);
+    }
     if (mounted) setState(() => _cargando = false);
   }
 
@@ -65,10 +71,10 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
   if (picked == null) return;
 
   if (!kIsWeb) {
-    // En móvil (Android/iOS) usamos File normal
     setState(() => _fotoArchivo = File(picked.path));
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('foto_perfil_path', picked.path);
   }
-  // En web no se puede usar File — se activará cuando conectes la subida real
 }
 
   // ── Guardar cambios ───────────────────────────────────
@@ -120,6 +126,8 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
   Future<void> _restablecer() async {
     setState(() => _cargando = true);
     _fotoArchivo = null;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('foto_perfil_path');
     await _cargarDatos();
   }
 
