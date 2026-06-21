@@ -99,7 +99,7 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
 
       const ipServidor = '192.168.1.12';
       final url = Uri.parse(
-        'https://backend-rp-arreglado-n8p8.onrender.com/api/detectar-material',
+        'https://backendrparreglado-production.up.railway.app/api/detectar-material',
       );
 
       final request = http.MultipartRequest('POST', url);
