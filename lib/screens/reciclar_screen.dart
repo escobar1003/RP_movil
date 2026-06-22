@@ -4,12 +4,15 @@ import 'dart:io';
 import '../theme/app_theme.dart';
 import '../data/materiales_data.dart';
 import '../services/ia_service.dart';
+import '../services/sesion_reciclaje.dart';
 import '../widgets/scanner_frame.dart';
 import 'mapa_puntos_screen.dart';
 import 'chat_ia_screen.dart';
 
 class ReciclarScreen extends StatefulWidget {
-  const ReciclarScreen({super.key});
+  final bool modoAgregar;
+
+  const ReciclarScreen({super.key, this.modoAgregar = false});
 
   @override
   State<ReciclarScreen> createState() => _ReciclarScreenState();
@@ -39,6 +42,7 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
   @override
   void initState() {
     super.initState();
+    if (!widget.modoAgregar) SesionReciclaje.limpiar();
     _inicializarCamara();
   }
 
@@ -96,8 +100,17 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
 
       final material = await IaService.escanear(foto.path);
       if (mounted) {
+        SesionReciclaje.agregar(MaterialEscaneado(
+          data: material,
+          imagenPath: foto.path,
+        ));
+        if (widget.modoAgregar) {
+          Navigator.pop(context, true);
+          return;
+        }
         setState(() {
           _material = material;
+          _rutaImagenLocal = foto.path;
           _mostrarResultado = true;
           _estaCargando = false;
         });
@@ -147,7 +160,37 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
                 TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
-      appBar: AppBar(title: const Text('Clasificar con IA')),
+      appBar: AppBar(
+        title: const Text('Clasificar con IA'),
+        actions: [
+          if (SesionReciclaje.cantidad > 0)
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(right: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.inventory_2_outlined, size: 14, color: Colors.white),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${SesionReciclaje.cantidad}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -181,8 +224,8 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
 
   Widget _buildCamaraVisor() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24),
-      height: 260,
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      height: 420,
       decoration: BoxDecoration(
         color: const Color(0xFFE8E8E8),
         borderRadius: BorderRadius.circular(20),
@@ -226,10 +269,7 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
           else if (_camaraInicializada && _cameraController != null)
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
-              child: AspectRatio(
-                aspectRatio: _cameraController!.value.aspectRatio,
-                child: CameraPreview(_cameraController!),
-              ),
+              child: CameraPreview(_cameraController!),
             )
           else
             const Icon(Icons.camera_alt_outlined, size: 56, color: Colors.black26),
@@ -546,7 +586,10 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
               MaterialPageRoute(
                 builder: (_) => MapaPuntosScreen(
                   soloMapa: false,
-                  datosIA: _datosIA,
+                  datosIA: SesionReciclaje.datosIA.isNotEmpty
+                      ? SesionReciclaje.datosIA.first
+                      : _datosIA,
+                  materialesIA: SesionReciclaje.datosIA,
                 ),
               ),
             );

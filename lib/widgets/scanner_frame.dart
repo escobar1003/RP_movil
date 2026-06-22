@@ -8,7 +8,7 @@ class ScannerFrame extends StatelessWidget {
   Widget build(BuildContext context) {
     return Positioned.fill(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(8),
         child: Stack(
           children: [
             Positioned(top: 0, left: 0, child: _Esquina(top: true, left: true)),
@@ -29,7 +29,7 @@ class _Esquina extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      size: const Size(28, 28),
+      size: const Size(50, 50),
       painter: _EsquinaPainter(top: top, left: left),
     );
   }

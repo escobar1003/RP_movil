@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:bootstrap_icons/bootstrap_icons.dart';
+import 'dart:io';
 import 'resumen_entrega_screen.dart';
+import 'reciclar_screen.dart';
+import '../data/materiales_data.dart';
 import '../services/api_service.dart';
+import '../services/sesion_reciclaje.dart';
 
 class ReservasScreen extends StatefulWidget {
   final Map<String, dynamic> aliado;
   final Map<String, dynamic>? datosIA;
+  final List<Map<String, dynamic>>? materialesIA;
 
   const ReservasScreen({
     super.key,
     required this.aliado,
     this.datosIA,
+    this.materialesIA,
   });
 
   @override
@@ -30,18 +36,6 @@ class _ReservasScreenState extends State<ReservasScreen> {
   @override
   void initState() {
     super.initState();
-
-   
-
-    if (widget.datosIA != null) {
-      final material = (widget.datosIA!['tipo'] ?? '').toString().toLowerCase();
-      for (var m in materiales) {
-        if (material.contains(m.nombre.toLowerCase())) {
-          m.seleccionado = true;
-          break;
-        }
-      }
-    }
   }
 
   Future<void> _seleccionarFecha() async {
@@ -78,13 +72,30 @@ class _ReservasScreenState extends State<ReservasScreen> {
     return '$hora:$min';
   }
 
+  List<Map<String, dynamic>> get _materialesLista {
+    if (SesionReciclaje.cantidad > 0) return SesionReciclaje.datosIA;
+    return widget.materialesIA ?? (widget.datosIA != null ? [widget.datosIA!] : []);
+  }
+
+  Future<void> _agregarMaterial() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const ReciclarScreen(modoAgregar: true),
+      ),
+    );
+    if (mounted) setState(() {});
+  }
+
   Future<void> _confirmarReserva() async {
+  final listaMateriales = _materialesLista;
   Navigator.push(
     context,
     MaterialPageRoute(
       builder: (_) => ResumenEntregaScreen(
         aliado: widget.aliado,
-        datosIA: widget.datosIA,
+        datosIA: listaMateriales.isNotEmpty ? listaMateriales.first : null,
+        materialesIA: listaMateriales,
         fecha: _fechaFormateada,
         hora: _horaFormateada,
         observaciones: observacionesController.text,
@@ -102,7 +113,27 @@ class _ReservasScreenState extends State<ReservasScreen> {
             );
             if (!mounted) return;
             setState(() => loading = false);
-            final exito = resultado['idReserva'] != null || resultado['mensaje'] != null;
+            final idReserva = resultado['idReserva'] ?? resultado['reserva']?['id'];
+            final exito = idReserva != null || resultado['mensaje'] != null;
+
+            if (exito && idReserva != null) {
+              for (final mat in listaMateriales) {
+                final imgPath = mat['imagenPath'] as String?;
+                if (imgPath != null && File(imgPath).existsSync()) {
+                  try {
+                    await ApiService.uploadImage(
+                      '/usuario/reservas/$idReserva/imagenes',
+                      'imagen',
+                      imgPath,
+                      auth: true,
+                    );
+                  } catch (_) {}
+                }
+              }
+            }
+
+            if (!mounted) return;
+            SesionReciclaje.limpiar();
             showDialog(
               context: context,
               barrierDismissible: false,
@@ -139,8 +170,7 @@ class _ReservasScreenState extends State<ReservasScreen> {
                     onPressed: () {
                       Navigator.pop(context);
                       if (exito) {
-                        Navigator.pop(context);
-                        Navigator.pop(context);
+                        Navigator.of(context).popUntil((route) => route.isFirst);
                       }
                     },
                     child: const Text('Aceptar'),
@@ -224,40 +254,103 @@ class _ReservasScreenState extends State<ReservasScreen> {
 
             const SizedBox(height: 20),
 
-            // ── Datos de la IA ────────────────────────────
-            if (widget.datosIA != null) ...[
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFFEAF3DE), width: 1.5),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.auto_awesome, color: Color(0xFF3B6D11), size: 18),
-                        const SizedBox(width: 6),
-                        const Text('Material detectado por IA',
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF3B6D11))),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        _infoIA('Material', widget.datosIA!['material'] ?? '-'),
-                        _infoIA('Cantidad', widget.datosIA!['cantidadEstimada'] ?? '-'),
-                        _infoIA('Peso aprox.', widget.datosIA!['pesoAproximado'] ?? '-'),
-                      ],
-                    ),
-                  ],
-                ),
+            // ── Materiales escaneados ──────────────────────
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: const Color(0xFFEAF3DE), width: 1.5),
               ),
-              const SizedBox(height: 20),
-            ],
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.inventory_2_outlined, color: Color(0xFF3B6D11), size: 18),
+                      const SizedBox(width: 6),
+                      Text('Materiales (${_materialesLista.length})',
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF3B6D11))),
+                      const Spacer(),
+                      GestureDetector(
+                        onTap: _agregarMaterial,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEAF3DE),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(Icons.add, size: 18, color: Color(0xFF3B6D11)),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  if (_materialesLista.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8),
+                      child: Text('No hay materiales escaneados',
+                          style: TextStyle(color: Colors.grey, fontSize: 13)),
+                    )
+                  else
+                    ...List.generate(_materialesLista.length, (i) {
+                      final m = _materialesLista[i];
+                      final imgPath = m['imagenPath'] as String?;
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF9FBF7),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            if (imgPath != null && File(imgPath).existsSync())
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.file(File(imgPath),
+                                    width: 44, height: 44, fit: BoxFit.cover),
+                              )
+                            else
+                              Container(
+                                width: 44, height: 44,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFEAF3DE),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(Icons.recycling, size: 22, color: Color(0xFF3B6D11)),
+                              ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(m['material'] ?? '-',
+                                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                                  Text('${m['cantidadEstimada']} · ${m['pesoAproximado']}',
+                                      style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: MaterialData.nivelBg(m['nivelReciclabilidad'] ?? 'Bajo'),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(m['nivelReciclabilidad'] ?? '',
+                                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600,
+                                      color: MaterialData.nivelColor(m['nivelReciclabilidad'] ?? 'Bajo'))),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
 
             // ── Estado ────────────────────────────────────
             Container(

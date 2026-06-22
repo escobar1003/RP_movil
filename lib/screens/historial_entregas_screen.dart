@@ -386,7 +386,9 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
 
   // ── CARD de entrega ──────────────────────────────────────
   Widget _buildCard(Map<String, dynamic> e) {
-    return Container(
+    return GestureDetector(
+      onTap: () => _mostrarDetalle(e),
+      child: Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -436,17 +438,23 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
                     Icon(Icons.store_outlined,
                         size: 12, color: Colors.grey[400]),
                     const SizedBox(width: 4),
-                    Text(
-                      e['supermercado'] as String,
-                      style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                    Flexible(
+                      child: Text(
+                        e['supermercado'] as String,
+                        style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                     const SizedBox(width: 8),
                     Icon(Icons.calendar_today_outlined,
                         size: 12, color: Colors.grey[400]),
                     const SizedBox(width: 4),
-                    Text(
-                      e['fecha'] as String,
-                      style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                    Flexible(
+                      child: Text(
+                        e['fecha'] as String,
+                        style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ],
                 ),
@@ -455,38 +463,146 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
           ),
 
           // Puntos y peso
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.stars_rounded,
-                      size: 14, color: Color(0xFF7BC043)),
-                  const SizedBox(width: 3),
-                  Text(
-                    (e['puntos'] as num) >= 0
-                        ? '+${e['puntos']} pts'
-                        : '${e['puntos']} pts',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: (e['puntos'] as num) >= 0
-                          ? const Color(0xFF2D5A1B)
-                          : const Color(0xFFC0392B),
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.stars_rounded,
+                        size: 14, color: Color(0xFF7BC043)),
+                    const SizedBox(width: 3),
+                    Flexible(
+                      child: Text(
+                        (e['puntos'] as num) >= 0
+                            ? '+${e['puntos']} pts'
+                            : '${e['puntos']} pts',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: (e['puntos'] as num) >= 0
+                              ? const Color(0xFF2D5A1B)
+                              : const Color(0xFFC0392B),
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                e['peso'] as String,
-                style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-              ),
-            ],
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  e['peso'] as String,
+                  style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                ),
+              ],
+            ),
           ),
 
         ],
       ),
+    ),
+    );
+  }
+
+  void _mostrarDetalle(Map<String, dynamic> e) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => Padding(
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Center(
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: e['bg'] as Color,
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                child: Icon(e['icon'] as IconData,
+                    color: e['color'] as Color, size: 32),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Center(
+              child: Text(
+                e['material'] as String,
+                style: const TextStyle(
+                  fontSize: 20, fontWeight: FontWeight.bold,
+                  color: Color(0xFF1E3A0F),
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: (e['estado'] as String) == 'completado'
+                      ? const Color(0xFFEAF3DE)
+                      : const Color(0xFFFAEEDA),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  (e['estado'] as String) == 'completado'
+                      ? 'Completado' : 'Pendiente',
+                  style: TextStyle(
+                    fontSize: 12, fontWeight: FontWeight.w600,
+                    color: (e['estado'] as String) == 'completado'
+                        ? const Color(0xFF3B6D11) : const Color(0xFFE67E22),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            _detalleFila(Icons.store_outlined, 'Supermercado', e['supermercado'] as String),
+            const Divider(height: 20),
+            _detalleFila(Icons.calendar_today_outlined, 'Fecha', e['fecha'] as String),
+            const Divider(height: 20),
+            _detalleFila(Icons.monitor_weight_outlined, 'Peso', e['peso'] as String),
+            const Divider(height: 20),
+            _detalleFila(Icons.stars_rounded, 'Puntos',
+                '${(e['puntos'] as num) >= 0 ? '+' : ''}${e['puntos']} pts'),
+            const Divider(height: 20),
+            _detalleFila(Icons.info_outline, 'Estado',
+                (e['estado'] as String) == 'completado'
+                    ? 'Entregado' : 'Pendiente de confirmación'),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _detalleFila(IconData icon, String label, String valor) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: const Color(0xFF6B7F66)),
+        const SizedBox(width: 10),
+        Text(label,
+            style: TextStyle(fontSize: 13, color: Colors.grey[500])),
+        const Spacer(),
+        Text(valor,
+            style: const TextStyle(
+              fontSize: 14, fontWeight: FontWeight.w600,
+              color: Color(0xFF1E3A0F),
+            )),
+      ],
     );
   }
 }

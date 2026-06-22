@@ -33,27 +33,41 @@ class NotificacionModel {
 
   // Convierte JSON del backend a modelo
   factory NotificacionModel.fromJson(Map<String, dynamic> json) {
+    final id = json['id_notificacion'] ?? json['id'] ?? 0;
+    final tipo = _tipoFromString(json['tipo'] ?? '');
+    final titulo = json['titulo'] ?? '';
+    final descripcion = json['descripcion'] ?? json['mensaje'] ?? '';
+    final fechaStr = json['fecha'] ?? json['created_at'] ?? '';
+    final fecha = DateTime.tryParse(fechaStr) ?? DateTime.now();
+    final leida = json['leida'] == true || json['leida'] == 1;
     return NotificacionModel(
-      id:          json['id'] ?? 0,
-      tipo:        _tipoFromString(json['tipo'] ?? ''),
-      titulo:      json['titulo'] ?? '',
-      descripcion: json['descripcion'] ?? '',
-      fecha:       DateTime.tryParse(json['fecha'] ?? '') ?? DateTime.now(),
-      leida:       json['leida'] == true || json['leida'] == 1,
-      extra:       json['extra'] != null
-                     ? Map<String, dynamic>.from(json['extra'])
-                     : null,
+      id: id is int ? id : int.tryParse(id.toString()) ?? 0,
+      tipo: tipo,
+      titulo: titulo,
+      descripcion: descripcion,
+      fecha: fecha,
+      leida: leida,
+      extra: json['extra'] != null
+               ? Map<String, dynamic>.from(json['extra'])
+               : (json['id_referencia'] != null
+                   ? {'id_referencia': json['id_referencia']}
+                   : null),
     );
   }
 
   static TipoNotificacion _tipoFromString(String tipo) {
     switch (tipo) {
-      case 'cita_aceptada':     return TipoNotificacion.citaAceptada;
-      case 'cita_rechazada':    return TipoNotificacion.citaRechazada;
+      case 'cita_aceptada':
+      case 'reserva':           return TipoNotificacion.citaAceptada;
+      case 'cita_rechazada':
+      case 'reserva_cancelada': return TipoNotificacion.citaRechazada;
       case 'cita_recordatorio': return TipoNotificacion.citaRecordatorio;
-      case 'cita_completada':   return TipoNotificacion.citaCompletada;
-      case 'puntos_ganados':    return TipoNotificacion.puntosGanados;
-      case 'canje_exitoso':     return TipoNotificacion.canjeExitoso;
+      case 'cita_completada':
+      case 'entrega':           return TipoNotificacion.citaCompletada;
+      case 'puntos_ganados':
+      case 'puntos':            return TipoNotificacion.puntosGanados;
+      case 'canje_exitoso':
+      case 'canje':             return TipoNotificacion.canjeExitoso;
       case 'logro_nivel':       return TipoNotificacion.logroNivel;
       case 'logro_entrega':     return TipoNotificacion.logroEntrega;
       default:                  return TipoNotificacion.sistemaInfo;
