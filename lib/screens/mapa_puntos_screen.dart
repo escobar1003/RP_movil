@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import '../theme/app_theme.dart';
-import '../data/puntos_reciclaje_data.dart';
+import '../services/api_service.dart';
 import 'reservas.dart';
 import 'package:geolocator/geolocator.dart';
 class MapaPuntosScreen extends StatefulWidget {
@@ -23,11 +23,56 @@ class _MapaPuntosScreenState extends State<MapaPuntosScreen> {
   final MapController _mapController = MapController();
   LatLng? _miUbicacion;
   bool _cargandoUbicacion = true;
+  List<Map<String, dynamic>> _puntos = [];
+  bool _cargandoPuntos = true;
+  bool _mostrarLista = false;
 
   @override
   void initState() {
     super.initState();
     _obtenerUbicacion();
+    _cargarPuntos();
+  }
+
+  Future<void> _cargarPuntos() async {
+    try {
+      final data = await ApiService.get('/puntos-reciclaje');
+      final lista = (data['puntos'] as List?) ?? [];
+      setState(() {
+        _puntos = lista
+          .map((p) => Map<String, dynamic>.from(p))
+          .where((p) => p['latitud'] != null && p['longitud'] != null)
+          .toList();
+        _cargandoPuntos = false;
+      });
+    } catch (_) {
+      setState(() => _cargandoPuntos = false);
+    }
+  }
+
+  String _formatMateriales(dynamic materiales) {
+    if (materiales == null) return 'Sin materiales';
+    if (materiales is String) return materiales;
+    if (materiales is List) {
+      return materiales.map((m) => m is Map ? m['nombre'] ?? '' : m.toString()).join(', ');
+    }
+    return materiales.toString();
+  }
+
+  List<Map<String, dynamic>> get _aliadosUnicos {
+    final vistos = <String>{};
+    return _puntos.where((p) {
+      final nombre = (p['aliado'] is Map ? p['aliado']['nombre'] : p['aliado'])?.toString() ?? '';
+      if (nombre.isEmpty || vistos.contains(nombre)) return false;
+      vistos.add(nombre);
+      return true;
+    }).map((p) => {
+      'nombre': (p['aliado'] is Map ? p['aliado']['nombre'] : p['aliado'])?.toString() ?? '',
+      'latitud': p['latitud'],
+      'longitud': p['longitud'],
+      'punto': p,
+    }).toList()
+      ..sort((a, b) => (a['nombre'] as String).compareTo(b['nombre'] as String));
   }
 
   Future<void> _obtenerUbicacion() async {
@@ -107,17 +152,23 @@ class _MapaPuntosScreenState extends State<MapaPuntosScreen> {
                         ),
                       ),
                     ),
-                  ...puntosReciclaje.map((punto) {
+                  ..._puntos.map((punto) {
                   final bool activo =
                       puntoSeleccionado?['nombre'] == punto['nombre'];
                   return Marker(
-                    point: punto['ubicacion'],
+                    point: LatLng(
+                      double.tryParse(punto['latitud']?.toString() ?? '') ?? 0,
+                      double.tryParse(punto['longitud']?.toString() ?? '') ?? 0,
+                    ),
                     width: 50,
                     height: 50,
                     child: GestureDetector(
                       onTap: () {
                         setState(() => puntoSeleccionado = punto);
-                        _mapController.move(punto['ubicacion'], 15.0);
+                        _mapController.move(LatLng(
+                          double.tryParse(punto['latitud']?.toString() ?? '') ?? 0,
+                          double.tryParse(punto['longitud']?.toString() ?? '') ?? 0,
+                        ), 15.0);
                       },
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
@@ -174,33 +225,44 @@ class _MapaPuntosScreenState extends State<MapaPuntosScreen> {
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(14),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.1),
-                              blurRadius: 8,
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.location_on,
-                                color: AppColors.primary, size: 18),
-                            const SizedBox(width: 8),
-                            Text(
-                              '${puntosReciclaje.length} puntos de reciclaje',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textDark,
+                      child: GestureDetector(
+                        onTap: () => setState(() => _mostrarLista = !_mostrarLista),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.1),
+                                blurRadius: 8,
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.location_on,
+                                  color: AppColors.primary, size: 18),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  _cargandoPuntos
+                                      ? 'Cargando puntos...'
+                                      : '${_aliadosUnicos.length} supermercados',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textDark,
+                                  ),
+                                ),
+                              ),
+                              Icon(
+                                _mostrarLista ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                                color: AppColors.textLight, size: 20,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -209,6 +271,100 @@ class _MapaPuntosScreenState extends State<MapaPuntosScreen> {
               ),
             ),
           ),
+
+          // ── LISTA de supermercados ────────────────────────
+          if (_mostrarLista && _aliadosUnicos.isNotEmpty)
+            Positioned(
+              top: 110, left: 16, right: 16,
+              bottom: MediaQuery.of(context).size.height * 0.25,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.12),
+                      blurRadius: 20,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        decoration: const BoxDecoration(
+                          color: AppColors.primary,
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.store_rounded, size: 16, color: Colors.white),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Supermercados (${_aliadosUnicos.length})',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: ListView.separated(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          itemCount: _aliadosUnicos.length,
+                          separatorBuilder: (_, __) => const Divider(height: 1, indent: 16, endIndent: 16),
+                          itemBuilder: (context, index) {
+                            final aliado = _aliadosUnicos[index];
+                            final esSeleccionado = puntoSeleccionado != null &&
+                                (puntoSeleccionado!['aliado'] is Map
+                                    ? puntoSeleccionado!['aliado']['nombre']
+                                    : puntoSeleccionado!['aliado'])?.toString() == aliado['nombre'];
+                            return ListTile(
+                              dense: true,
+                              leading: Icon(
+                                Icons.store_rounded,
+                                color: esSeleccionado ? AppColors.primary : AppColors.textLight,
+                                size: 20,
+                              ),
+                              title: Text(
+                                aliado['nombre'],
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: esSeleccionado ? FontWeight.w600 : FontWeight.normal,
+                                  color: AppColors.textDark,
+                                ),
+                              ),
+                              trailing: esSeleccionado
+                                  ? const Icon(Icons.check_circle, size: 16, color: AppColors.primary)
+                                  : null,
+                              onTap: () {
+                                final punto = aliado['punto'] as Map<String, dynamic>;
+                                setState(() {
+                                  puntoSeleccionado = punto;
+                                  _mostrarLista = false;
+                                });
+                                _mapController.move(
+                                  LatLng(
+                                    double.parse(punto['latitud'].toString()),
+                                    double.parse(punto['longitud'].toString()),
+                                  ),
+                                  15.0,
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
 
           // ── PANEL inferior ────────────────────────────────
           if (puntoSeleccionado != null)
@@ -275,14 +431,14 @@ class _MapaPuntosScreenState extends State<MapaPuntosScreen> {
                                       size: 13, color: AppColors.textLight),
                                   const SizedBox(width: 3),
                                   Expanded(
-                                    child: Text(
-                                      puntoSeleccionado!['direccion'],
-                                      style: const TextStyle(
-                                          fontSize: 12,
-                                          color: AppColors.textLight),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
+                                      child: Text(
+                                          puntoSeleccionado!['direccion'] ?? 'Sin dirección',
+                                          style: const TextStyle(
+                                              fontSize: 12,
+                                              color: AppColors.textLight),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
                                   ),
                                 ],
                               ),
@@ -301,7 +457,7 @@ class _MapaPuntosScreenState extends State<MapaPuntosScreen> {
                             size: 14, color: AppColors.textLight),
                         const SizedBox(width: 6),
                         Text(
-                          puntoSeleccionado!['materiales'],
+                          _formatMateriales(puntoSeleccionado!['materiales']),
                           style: const TextStyle(
                               fontSize: 12, color: AppColors.textMid),
                         ),

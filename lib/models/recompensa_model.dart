@@ -1,25 +1,37 @@
-// lib/models/recompensa_model.dart
-
 class RecompensaModel {
-  final String id;
-  final String tienda;
-  final String descripcion;
-  final int descuentoPorcentaje; // ej: 10 → "10%"
+  final int id;
+  final String nombre;
+  final String? descripcion;
   final int puntosRequeridos;
-  final int disponibles;
-  final String validoHasta;
-  final List<String> condiciones;
-  final String categoria; // 'descuento', 'producto', 'premio'
+  final int? stock;
+  final String? fechaInicio;
+  final String? fechaFin;
+  final String? tipoRecompensa;
+  final String? aliado;
 
   const RecompensaModel({
     required this.id,
-    required this.tienda,
-    required this.descripcion,
-    required this.descuentoPorcentaje,
+    required this.nombre,
+    this.descripcion,
     required this.puntosRequeridos,
-    required this.disponibles,
-    required this.validoHasta,
-    required this.condiciones,
-    required this.categoria,
+    this.stock,
+    this.fechaInicio,
+    this.fechaFin,
+    this.tipoRecompensa,
+    this.aliado,
   });
+
+  factory RecompensaModel.fromJson(Map<String, dynamic> json) {
+    return RecompensaModel(
+      id: json['idRecompensa'] ?? 0,
+      nombre: json['nombre'] ?? '',
+      descripcion: json['descripcion'],
+      puntosRequeridos: json['puntosRequeridos'] ?? 0,
+      stock: json['stock'],
+      fechaInicio: json['fechaInicio'],
+      fechaFin: json['fechaFin'],
+      tipoRecompensa: json['tipoRecompensa'],
+      aliado: json['aliado'],
+    );
+  }
 }

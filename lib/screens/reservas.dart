@@ -208,7 +208,7 @@ class _ReservasScreenState extends State<ReservasScreen> {
                                 const Icon(BootstrapIcons.geo_alt_fill, color: Colors.green, size: 14),
                                 const SizedBox(width: 4),
                                 Expanded(
-                                  child: Text(widget.aliado['direccion'],
+                                  child:                                   Text(widget.aliado['direccion'] ?? 'Sin dirección',
                                       style: TextStyle(fontSize: 12, color: Colors.grey[500])),
                                 ),
                               ],
