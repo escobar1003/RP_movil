@@ -28,6 +28,10 @@ class UsuarioService {
     });
   }
 
+  static Future<Map<String, dynamic>> updateFotoPerfil(String filePath) async {
+    return ApiService.uploadImage('/usuario/perfil/foto', 'foto', filePath);
+  }
+
   // ── PUNTOS ────────────────────────────────────────────────
   static Future<Map<String, dynamic>> getResumenPuntos() async {
     return ApiService.get('/usuario/puntos');

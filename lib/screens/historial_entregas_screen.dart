@@ -374,10 +374,13 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-      itemCount: _filtradas.length,
-      itemBuilder: (context, i) => _buildCard(_filtradas[i]),
+    return RefreshIndicator(
+      onRefresh: _cargarEntregas,
+      child: ListView.builder(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+        itemCount: _filtradas.length,
+        itemBuilder: (context, i) => _buildCard(_filtradas[i]),
+      ),
     );
   }
 

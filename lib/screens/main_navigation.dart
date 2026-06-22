@@ -18,12 +18,13 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
   bool _cargado = false;
+  int _homeRefresh = 0;
 
-  final List<Widget> _screens = const[
-    HomeScreen(),
-    HistorialEntregasScreen(),
-    RecompensasScreen(),
-    PerfilScreen(),
+  List<Widget> get _screens => [
+    HomeScreen(key: ValueKey('home_$_homeRefresh')),
+    const HistorialEntregasScreen(),
+    const RecompensasScreen(),
+    const PerfilScreen(),
   ];
 
   @override
@@ -124,7 +125,10 @@ class _MainNavigationState extends State<MainNavigation> {
 
   void _setTab(int i) {
     _guardarTab(i);
-    setState(() => _currentIndex = i);
+    setState(() {
+      _currentIndex = i;
+      if (i == 0) _homeRefresh++;
+    });
   }
 }
 

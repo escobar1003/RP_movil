@@ -82,7 +82,7 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 20),
 
             const Text(
-              'Bienvenido de nuevo 👋',
+              'Bienvenido de nuevo ',
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w800,

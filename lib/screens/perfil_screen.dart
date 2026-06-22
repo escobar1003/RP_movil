@@ -28,6 +28,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
   int _canjesCount = 0;
   int _puntosGanados = 0;
   String? _fotoPath; // ← MODIFICADO: ruta de la foto local
+  String? _fotoUrl;  // ← NUEVO: URL de Cloudinary
 
   @override
   void initState() {
@@ -44,11 +45,13 @@ class _PerfilScreenState extends State<PerfilScreen> {
 
     try {
       final perfil = await UsuarioService.getPerfil();
-      if (perfil['nombre'] != null) _nombre = perfil['nombre'];
-      if (perfil['apellido'] != null) _apellido = perfil['apellido'];
-      if (perfil['correo'] != null) _correo = perfil['correo'];
-      if (perfil['rol'] != null) _rol = perfil['rol'];
-      if (perfil['telefono'] != null) _telefono = perfil['telefono'];
+      final u = perfil['usuario'] ?? perfil;
+      if (u['nombre'] != null) _nombre = u['nombre'];
+      if (u['apellido'] != null) _apellido = u['apellido'];
+      if (u['correo'] != null) _correo = u['correo'];
+      if (u['rol'] != null) _rol = u['rol'];
+      if (u['telefono'] != null) _telefono = u['telefono'];
+      if (u['imagen'] != null) _fotoUrl = u['imagen'];
     } catch (_) {}
 
     try {
@@ -67,13 +70,13 @@ class _PerfilScreenState extends State<PerfilScreen> {
       _canjesCount = (canjes['canjes'] as List?)?.length ?? 0;
     } catch (_) {}
 
-    if (mounted) setState(() {});
-    // ← MODIFICADO: carga la ruta de la foto guardada
     final prefs = await SharedPreferences.getInstance();
     final savedPath = prefs.getString('foto_perfil_path');
     if (savedPath != null && File(savedPath).existsSync()) {
       _fotoPath = savedPath;
     }
+
+    if (mounted) setState(() {});
   }
 
   Future<void> _cerrarSesion() async {
@@ -90,7 +93,10 @@ class _PerfilScreenState extends State<PerfilScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6EF),
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: RefreshIndicator(
+          onRefresh: _cargarDatos,
+          child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
             children: [
               _buildHeader(context),
@@ -102,6 +108,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
               const SizedBox(height: 32),
             ],
           ),
+        ),
         ),
       ),
     );
@@ -134,15 +141,17 @@ class _PerfilScreenState extends State<PerfilScreen> {
                           color: const Color(0xFF7BC043),
                           borderRadius: BorderRadius.circular(45),
                           border: Border.all(color: Colors.white, width: 3),
-                          // ← MODIFICADO: muestra la foto si existe
-                          image: _fotoPath != null
+                          image: _fotoUrl != null
                               ? DecorationImage(
-                                  image: FileImage(File(_fotoPath!)),
+                                  image: NetworkImage(_fotoUrl!),
                                   fit: BoxFit.cover)
-                              : null,
+                              : (_fotoPath != null
+                                  ? DecorationImage(
+                                      image: FileImage(File(_fotoPath!)),
+                                      fit: BoxFit.cover)
+                                  : null),
                         ),
-                        // ← MODIFICADO: oculta el icono si hay foto
-                        child: _fotoPath == null
+                        child: _fotoUrl == null && _fotoPath == null
                             ? const Icon(Icons.person, color: Colors.white, size: 52)
                             : null,
                       ),

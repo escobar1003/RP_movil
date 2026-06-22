@@ -94,6 +94,23 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
       throw Exception(msg);
     }
 
+    if (_fotoArchivo != null) {
+      try {
+        final res = await UsuarioService.updateFotoPerfil(_fotoArchivo!.path);
+        if (mounted && (res['status'] == 'error' || res['error'] != null)) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('${res['mensaje'] ?? res['error'] ?? 'Error al subir foto'}'), backgroundColor: Colors.orange),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error al subir foto: $e'), backgroundColor: Colors.orange),
+          );
+        }
+      }
+    }
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('nombre_usuario', _nombreController.text.trim());
     await prefs.setString('usuario_apellido', _apellidoController.text.trim());

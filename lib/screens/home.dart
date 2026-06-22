@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:bootstrap_icons/bootstrap_icons.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
 import '../services/usuario_service.dart';
@@ -21,6 +23,8 @@ class _HomeScreenState extends State<HomeScreen> {
   int _puntos = 0;
   int _reciclajes = 0;
   double _pesoTotal = 0;
+  String? _fotoUrl;
+  String? _fotoPath;
 
   @override
   void initState() {
@@ -33,8 +37,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       final perfil = await UsuarioService.getPerfil();
-      if (perfil['nombre'] != null) _nombre = perfil['nombre'];
+      final u = perfil['usuario'] ?? perfil;
+      if (u['nombre'] != null) _nombre = u['nombre'];
+      if (u['imagen'] != null) _fotoUrl = u['imagen'];
     } catch (_) {}
+
+    final prefs = await SharedPreferences.getInstance();
+    final savedPath = prefs.getString('foto_perfil_path');
+    if (savedPath != null && File(savedPath).existsSync()) {
+      _fotoPath = savedPath;
+    }
 
     try {
       final puntos = await UsuarioService.getResumenPuntos();
@@ -56,7 +68,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6EF),
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: RefreshIndicator(
+          onRefresh: _cargarDatos,
+          child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,14 +80,21 @@ class _HomeScreenState extends State<HomeScreen> {
               // ------------------ HEADER ------------------
               Row(
                 children: [
-                  const CircleAvatar(
+                  CircleAvatar(
                     radius: 24,
                     backgroundColor: AppColors.green100,
-                    child: Icon(
-                      BootstrapIcons.person_fill,
-                      color: AppColors.primary,
-                      size: 26,
-                    ),
+                    backgroundImage: _fotoUrl != null
+                        ? NetworkImage(_fotoUrl!)
+                        : (_fotoPath != null
+                            ? FileImage(File(_fotoPath!))
+                            : null),
+                    child: _fotoUrl == null && _fotoPath == null
+                        ? const Icon(
+                            BootstrapIcons.person_fill,
+                            color: AppColors.primary,
+                            size: 26,
+                          )
+                        : null,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -253,6 +275,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             ],
           ),
+        ),
         ),
       ),
     );
