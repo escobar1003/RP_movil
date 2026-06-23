@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'theme/app_theme.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/main_navigation.dart';
+import 'services/socket_service.dart';
 
 
 void main() {
@@ -43,7 +44,11 @@ class _InicioAppState extends State<_InicioApp> {
   Future<bool> _tieneSesion() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
-    return token != null && token.isNotEmpty;
+    final tiene = token != null && token.isNotEmpty;
+    if (tiene) {
+      SocketService.instance.conectar();
+    }
+    return tiene;
   }
 
   @override

@@ -40,6 +40,21 @@ class NotificacionModel {
     final fechaStr = json['fecha'] ?? json['created_at'] ?? '';
     final fecha = DateTime.tryParse(fechaStr) ?? DateTime.now();
     final leida = json['leida'] == true || json['leida'] == 1;
+    final camposConocidos = {
+      'id_notificacion', 'id', 'tipo', 'titulo', 'descripcion',
+      'mensaje', 'fecha', 'created_at', 'leida', 'extra',
+    };
+    final extras = <String, dynamic>{};
+    for (final entry in json.entries) {
+      if (!camposConocidos.contains(entry.key)) {
+        extras[entry.key] = entry.value;
+      }
+    }
+    if (json['extra'] != null) {
+      final e = json['extra'];
+      extras.addAll(e is Map ? Map<String, dynamic>.from(e) : {});
+    }
+
     return NotificacionModel(
       id: id is int ? id : int.tryParse(id.toString()) ?? 0,
       tipo: tipo,
@@ -47,25 +62,25 @@ class NotificacionModel {
       descripcion: descripcion,
       fecha: fecha,
       leida: leida,
-      extra: json['extra'] != null
-               ? Map<String, dynamic>.from(json['extra'])
-               : (json['id_referencia'] != null
-                   ? {'id_referencia': json['id_referencia']}
-                   : null),
+      extra: extras.isNotEmpty ? extras : null,
     );
   }
 
   static TipoNotificacion _tipoFromString(String tipo) {
     switch (tipo) {
       case 'cita_aceptada':
-      case 'reserva':           return TipoNotificacion.citaAceptada;
+      case 'reserva':
+      case 'reserva_aceptada':  return TipoNotificacion.citaAceptada;
       case 'cita_rechazada':
-      case 'reserva_cancelada': return TipoNotificacion.citaRechazada;
+      case 'reserva_cancelada':
+      case 'reserva_rechazada': return TipoNotificacion.citaRechazada;
       case 'cita_recordatorio': return TipoNotificacion.citaRecordatorio;
       case 'cita_completada':
-      case 'entrega':           return TipoNotificacion.citaCompletada;
+      case 'entrega':
+      case 'nueva_entrega':     return TipoNotificacion.citaCompletada;
       case 'puntos_ganados':
-      case 'puntos':            return TipoNotificacion.puntosGanados;
+      case 'puntos':
+      case 'puntos_actualizados': return TipoNotificacion.puntosGanados;
       case 'canje_exitoso':
       case 'canje':             return TipoNotificacion.canjeExitoso;
       case 'logro_nivel':       return TipoNotificacion.logroNivel;
