@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/aliado_model.dart';
-import '../services/api_service.dart';
+import '../services/usuario_service.dart';
 import 'aliado_detalle_screen.dart';
 
 class AliadosScreen extends StatefulWidget {
@@ -40,8 +40,8 @@ class _AliadosScreenState extends State<AliadosScreen> {
   Future<void> _cargarDatos() async {
     setState(() => _cargando = true);
     try {
-      final res = await ApiService.get('/puntos-reciclaje');
-      final lista = (res['puntos'] as List?) ?? [];
+      final res = await UsuarioService.getAliados();
+      final lista = (res['aliados'] as List?) ?? [];
       setState(() {
         _aliados = lista.map((j) => AliadoModel.fromJson(j)).toList();
         _cargando = false;

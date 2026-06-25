@@ -67,6 +67,11 @@ class UsuarioService {
     return ApiService.put('/usuario/notificaciones/leer-todas');
   }
 
+  // ── ALIADOS ─────────────────────────────────────────────────
+  static Future<Map<String, dynamic>> getAliados() async {
+    return ApiService.get('/usuario/aliados');
+  }
+
   // ── RECOMPENSAS ────────────────────────────────────────────
   static Future<Map<String, dynamic>> getRecompensas() async {
     return ApiService.get('/usuario/recompensas');

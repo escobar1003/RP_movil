@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart';
+import '../services/socket_service.dart';
 import '../theme/app_theme.dart';
 import 'main_navigation.dart';
 import 'recuperar_password_screen.dart';
@@ -33,6 +34,8 @@ class _LoginScreenState extends State<LoginScreen> {
       // LOGIN EXITOSO
       if (response['token'] != null) {
         if (!mounted) return;
+
+        await SocketService.instance.conectar();
 
         Navigator.pushAndRemoveUntil(
           context,

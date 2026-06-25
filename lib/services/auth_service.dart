@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'socket_service.dart';
 
 class AuthService {
 
@@ -152,6 +153,7 @@ class AuthService {
         );
       }
     } catch (_) {}
+    SocketService.instance.desconectar();
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('nombre_usuario');
     await prefs.remove('token');

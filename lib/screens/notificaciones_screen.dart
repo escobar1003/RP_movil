@@ -1,8 +1,11 @@
 // lib/screens/notificaciones_screen.dart
 
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:bootstrap_icons/bootstrap_icons.dart';
 import '../models/notificacion_model.dart';
 import '../services/usuario_service.dart';
+import '../services/socket_service.dart';
 
 class NotificacionesScreen extends StatefulWidget {
   const NotificacionesScreen({super.key});
@@ -25,7 +28,16 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
   void initState() {
     super.initState();
     _cargarNotificaciones();
+    _subSocket = SocketService.instance.stream.listen((_) => _cargarNotificaciones());
   }
+
+  @override
+  void dispose() {
+    _subSocket?.cancel();
+    super.dispose();
+  }
+
+  StreamSubscription? _subSocket;
 
   Future<void> _cargarNotificaciones() async {
     setState(() {
@@ -160,7 +172,7 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.cloud_off_outlined, size: 64, color: Colors.grey[300]),
+              Icon(BootstrapIcons.cloud_slash, size: 64, color: Colors.grey[300]),
               const SizedBox(height: 12),
               Text(
                 _error!,
@@ -170,7 +182,7 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
               const SizedBox(height: 16),
               TextButton.icon(
                 onPressed: _cargarNotificaciones,
-                icon: const Icon(Icons.refresh),
+                icon: const Icon(BootstrapIcons.arrow_clockwise),
                 label: const Text('Reintentar'),
               ),
             ],
@@ -254,7 +266,7 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.notifications_none_rounded,
+          Icon(BootstrapIcons.bell,
               size: 64, color: Colors.grey[300]),
           const SizedBox(height: 12),
           const Text('Sin notificaciones',
@@ -276,26 +288,26 @@ class _NotifCard extends StatelessWidget {
     switch (notif.tipo) {
       case TipoNotificacion.citaAceptada:
       case TipoNotificacion.citaCompletada:
-        return _IconConfig(Icons.check_circle_outline_rounded,
+        return _IconConfig(BootstrapIcons.check_circle,
             const Color(0xFFEAF3DE), const Color(0xFF3B6D11));
       case TipoNotificacion.citaRechazada:
-        return _IconConfig(Icons.cancel_outlined,
+        return _IconConfig(BootstrapIcons.x_circle,
             const Color(0xFFFCEBEB), const Color(0xFFA32D2D));
       case TipoNotificacion.citaRecordatorio:
-        return _IconConfig(Icons.access_time_rounded,
+        return _IconConfig(BootstrapIcons.clock_fill,
             const Color(0xFFFAEEDA), const Color(0xFF854F0B));
       case TipoNotificacion.puntosGanados:
-        return _IconConfig(Icons.star_outline_rounded,
+        return _IconConfig(BootstrapIcons.star,
             const Color(0xFFEAF3DE), const Color(0xFF3B6D11));
       case TipoNotificacion.canjeExitoso:
-        return _IconConfig(Icons.card_giftcard_outlined,
+        return _IconConfig(BootstrapIcons.gift,
             const Color(0xFFE6F1FB), const Color(0xFF185FA5));
       case TipoNotificacion.logroNivel:
       case TipoNotificacion.logroEntrega:
-        return _IconConfig(Icons.emoji_events_outlined,
+        return _IconConfig(BootstrapIcons.trophy,
             const Color(0xFFE1F5EE), const Color(0xFF0F6E56));
       case TipoNotificacion.sistemaInfo:
-        return _IconConfig(Icons.info_outline_rounded,
+        return _IconConfig(BootstrapIcons.info_circle,
             const Color(0xFFF1EFE8), const Color(0xFF5F5E5A));
     }
   }

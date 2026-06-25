@@ -10,8 +10,14 @@ import 'package:geolocator/geolocator.dart';
 class MapaPuntosScreen extends StatefulWidget {
   final bool soloMapa;
   final Map<String, dynamic>? datosIA;
+  final List<Map<String, dynamic>>? materialesIA;
 
-  const MapaPuntosScreen({super.key, this.soloMapa = false, this.datosIA});
+  const MapaPuntosScreen({
+    super.key,
+    this.soloMapa = false,
+    this.datosIA,
+    this.materialesIA,
+  });
 
   @override
   State<MapaPuntosScreen> createState() => _MapaPuntosScreenState();
@@ -481,6 +487,7 @@ class _MapaPuntosScreenState extends State<MapaPuntosScreen> {
                                 builder: (_) => ReservasScreen(
                                   aliado: puntoSeleccionado!,
                                   datosIA: widget.datosIA,
+                                  materialesIA: widget.materialesIA,
                                 ),
                               ),
                             );

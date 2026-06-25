@@ -33,27 +33,56 @@ class NotificacionModel {
 
   // Convierte JSON del backend a modelo
   factory NotificacionModel.fromJson(Map<String, dynamic> json) {
+    final id = json['id_notificacion'] ?? json['id'] ?? 0;
+    final tipo = _tipoFromString(json['tipo'] ?? '');
+    final titulo = json['titulo'] ?? '';
+    final descripcion = json['descripcion'] ?? json['mensaje'] ?? '';
+    final fechaStr = json['fecha'] ?? json['created_at'] ?? '';
+    final fecha = DateTime.tryParse(fechaStr) ?? DateTime.now();
+    final leida = json['leida'] == true || json['leida'] == 1;
+    final camposConocidos = {
+      'id_notificacion', 'id', 'tipo', 'titulo', 'descripcion',
+      'mensaje', 'fecha', 'created_at', 'leida', 'extra',
+    };
+    final extras = <String, dynamic>{};
+    for (final entry in json.entries) {
+      if (!camposConocidos.contains(entry.key)) {
+        extras[entry.key] = entry.value;
+      }
+    }
+    if (json['extra'] != null) {
+      final e = json['extra'];
+      extras.addAll(e is Map ? Map<String, dynamic>.from(e) : {});
+    }
+
     return NotificacionModel(
-      id:          json['id'] ?? 0,
-      tipo:        _tipoFromString(json['tipo'] ?? ''),
-      titulo:      json['titulo'] ?? '',
-      descripcion: json['descripcion'] ?? '',
-      fecha:       DateTime.tryParse(json['fecha'] ?? '') ?? DateTime.now(),
-      leida:       json['leida'] == true || json['leida'] == 1,
-      extra:       json['extra'] != null
-                     ? Map<String, dynamic>.from(json['extra'])
-                     : null,
+      id: id is int ? id : int.tryParse(id.toString()) ?? 0,
+      tipo: tipo,
+      titulo: titulo,
+      descripcion: descripcion,
+      fecha: fecha,
+      leida: leida,
+      extra: extras.isNotEmpty ? extras : null,
     );
   }
 
   static TipoNotificacion _tipoFromString(String tipo) {
     switch (tipo) {
-      case 'cita_aceptada':     return TipoNotificacion.citaAceptada;
-      case 'cita_rechazada':    return TipoNotificacion.citaRechazada;
+      case 'cita_aceptada':
+      case 'reserva':
+      case 'reserva_aceptada':  return TipoNotificacion.citaAceptada;
+      case 'cita_rechazada':
+      case 'reserva_cancelada':
+      case 'reserva_rechazada': return TipoNotificacion.citaRechazada;
       case 'cita_recordatorio': return TipoNotificacion.citaRecordatorio;
-      case 'cita_completada':   return TipoNotificacion.citaCompletada;
-      case 'puntos_ganados':    return TipoNotificacion.puntosGanados;
-      case 'canje_exitoso':     return TipoNotificacion.canjeExitoso;
+      case 'cita_completada':
+      case 'entrega':
+      case 'nueva_entrega':     return TipoNotificacion.citaCompletada;
+      case 'puntos_ganados':
+      case 'puntos':
+      case 'puntos_actualizados': return TipoNotificacion.puntosGanados;
+      case 'canje_exitoso':
+      case 'canje':             return TipoNotificacion.canjeExitoso;
       case 'logro_nivel':       return TipoNotificacion.logroNivel;
       case 'logro_entrega':     return TipoNotificacion.logroEntrega;
       default:                  return TipoNotificacion.sistemaInfo;

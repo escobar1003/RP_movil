@@ -1,8 +1,8 @@
 // lib/screens/historial_entregas_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:bootstrap_icons/bootstrap_icons.dart';
 import '../services/usuario_service.dart';
-import '../theme/app_theme.dart';
 
 class HistorialEntregasScreen extends StatefulWidget {
   const HistorialEntregasScreen({super.key});
@@ -54,16 +54,18 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
   }
 
   Map<String, dynamic> _normalizarReserva(Map<String, dynamic> r) {
-    final punto = r['punto'] as Map<String, dynamic>? ?? r['aliado'] as Map<String, dynamic>? ?? {};
+    final punto = r['puntoReciclaje'] as Map<String, dynamic>? ?? {};
+    final nomEstado = (r['estado'] ?? '').toString();
+    final estado = nomEstado == 'completada' ? 'completado' : nomEstado;
     return {
-      'supermercado': punto['nombre'] ?? r['nombrePunto'] ?? 'Sin punto',
+      'supermercado': punto['nombre'] ?? 'Sin punto',
       'material': 'Pendiente de entrega',
       'peso': '-',
       'pesoNum': 0.0,
       'puntos': 0,
       'fecha': _formatearFecha(r['fecha'] ?? ''),
-      'estado': 'pendiente',
-      'icon': Icons.schedule_outlined,
+      'estado': estado,
+      'icon': BootstrapIcons.clock,
       'color': const Color(0xFFE67E22),
       'bg': const Color(0xFFFAEEDA),
     };
@@ -80,19 +82,19 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
 
     switch (tipo) {
       case 'ganados':
-        icon = Icons.add_circle_outlined;
+        icon = BootstrapIcons.plus_circle;
         color = const Color(0xFF2D5A1B);
         bg = const Color(0xFFE8F5E0);
         label = 'Entrega registrada';
         break;
       case 'descontados':
-        icon = Icons.remove_circle_outlined;
+        icon = BootstrapIcons.dash_circle;
         color = const Color(0xFFC0392B);
         bg = const Color(0xFFFDEDEC);
         label = 'Canje de recompensa';
         break;
       default:
-        icon = Icons.tune_outlined;
+        icon = BootstrapIcons.sliders;
         color = const Color(0xFFE67E22);
         bg = const Color(0xFFFAEEDA);
         label = 'Ajuste de puntos';
@@ -114,18 +116,30 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
   }
 
   Map<String, dynamic> _normalizarEntrega(Map<String, dynamic> item) {
-    final material = _materialConfig(item['material'] ?? '');
-    final punto = item['punto'] as Map<String, dynamic>? ?? {};
-    final rawPeso = item['pesoTotal'] ?? item['peso_total'] ?? 0;
+    final estadoObj = item['estadoEntrega'] as Map<String, dynamic>? ?? {};
+    final nomEstado = (estadoObj['nombre'] ?? item['idEstadoEntrega'] ?? '').toString();
+    final estado = nomEstado == 'completada' ? 'completado' : nomEstado;
+
+    final punto = item['puntoReciclaje'] as Map<String, dynamic>? ?? {};
+    final detalles = (item['detalles'] as List?) ?? [];
+    String primerMaterial = 'Material';
+    if (detalles.isNotEmpty) {
+      final d = detalles[0] as Map<String, dynamic>?;
+      final mat = d?['material'] as Map<String, dynamic>?;
+      primerMaterial = mat?['nombre']?.toString() ?? 'Material';
+    }
+    final material = _materialConfig(primerMaterial);
+
+    final rawPeso = item['pesoTotal'] ?? 0;
     final pesoNum = (rawPeso is num) ? rawPeso.toDouble() : 0.0;
     return {
-      'supermercado': punto['nombre'] ?? item['supermercado'] ?? 'Sin punto',
-      'material': item['material'] ?? 'Material',
+      'supermercado': punto['nombre'] ?? 'Sin punto',
+      'material': primerMaterial,
       'peso': _formatearPeso(pesoNum),
       'pesoNum': pesoNum,
-      'puntos': item['puntos'] ?? item['puntosObtenidos'] ?? 0,
-      'fecha': _formatearFecha(item['fecha'] ?? ''),
-      'estado': item['estado'] ?? 'pendiente',
+      'puntos': item['puntosTotales'] ?? 0,
+      'fecha': _formatearFecha(item['fechaEntrega'] ?? ''),
+      'estado': estado,
       'icon': material['icon'],
       'color': material['color'],
       'bg': material['bg'],
@@ -151,28 +165,39 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
     }
   }
 
+  String _normalizarMaterial(String m) {
+    return m.toLowerCase().trim()
+        .replaceAll('á', 'a').replaceAll('é', 'e')
+        .replaceAll('í', 'i').replaceAll('ó', 'o')
+        .replaceAll('ú', 'u');
+  }
+
   Map<String, dynamic> _materialConfig(String material) {
     final map = {
-      'plastico':   {'icon': Icons.water_drop_outlined,    'color': const Color(0xFF185FA5), 'bg': const Color(0xFFE6F1FB)},
-      'papel':      {'icon': Icons.description_outlined,   'color': const Color(0xFF3B6D11), 'bg': const Color(0xFFEAF3DE)},
-      'vidrio':     {'icon': Icons.wine_bar_outlined,      'color': const Color(0xFF0F6E56), 'bg': const Color(0xFFE1F5EE)},
-      'carton':     {'icon': Icons.inventory_2_outlined,   'color': const Color(0xFF854F0B), 'bg': const Color(0xFFFAEEDA)},
-      'metal':      {'icon': Icons.hardware_outlined,      'color': const Color(0xFF5F5E5A), 'bg': const Color(0xFFF1EFE8)},
-      'organico':   {'icon': Icons.eco_outlined,           'color': const Color(0xFF4A7C2E), 'bg': const Color(0xFFE8F5E0)},
-      'electronico':{'icon': Icons.devices_outlined,       'color': const Color(0xFF6B3FA0), 'bg': const Color(0xFFF0E6FA)},
+      'plastico':   {'icon': BootstrapIcons.water,    'color': const Color(0xFF185FA5), 'bg': const Color(0xFFE6F1FB)},
+      'papel':      {'icon': BootstrapIcons.file_text,   'color': const Color(0xFF3B6D11), 'bg': const Color(0xFFEAF3DE)},
+      'vidrio':     {'icon': BootstrapIcons.cup_straw,      'color': const Color(0xFF0F6E56), 'bg': const Color(0xFFE1F5EE)},
+      'carton':     {'icon': BootstrapIcons.box_seam,   'color': const Color(0xFF854F0B), 'bg': const Color(0xFFFAEEDA)},
+      'metal':      {'icon': BootstrapIcons.tools,      'color': const Color(0xFF5F5E5A), 'bg': const Color(0xFFF1EFE8)},
+      'organico':   {'icon': BootstrapIcons.tree,           'color': const Color(0xFF4A7C2E), 'bg': const Color(0xFFE8F5E0)},
+      'electronico':{'icon': BootstrapIcons.device_ssd,       'color': const Color(0xFF6B3FA0), 'bg': const Color(0xFFF0E6FA)},
     };
-    return map[material.toLowerCase().trim()] ?? {
-      'icon': Icons.recycling_outlined,
+    return map[_normalizarMaterial(material)] ?? {
+      'icon': BootstrapIcons.recycle,
       'color': const Color(0xFF2D5A1B),
       'bg': const Color(0xFFE8F0E0),
     };
+  }
+
+  bool _estadoEnRecientes(String estado) {
+    return estado == 'pendiente' || estado == 'confirmada';
   }
 
   List<Map<String, dynamic>> get _filtradas {
     if (_filtro == 'todos') return _entregas;
     return _entregas.where((e) {
       if (_filtro == 'recientes') {
-        return e['estado'] == 'completado' || e['estado'] == 'pendiente';
+        return _estadoEnRecientes(e['estado'] as String? ?? '');
       }
       return e['estado'] == _filtro;
     }).toList();
@@ -214,12 +239,12 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
             children: [
               GestureDetector(
                 onTap: () => Navigator.pop(context),
-                child: const Icon(Icons.arrow_back_ios_rounded,
+                child: const Icon(BootstrapIcons.chevron_left,
                     color: Colors.white, size: 20),
               ),
               const SizedBox(width: 12),
               const Text(
-                'Mi actividad',
+                  'Historial',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 20,
@@ -339,7 +364,7 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.cloud_off_outlined, size: 64, color: Colors.grey[300]),
+              Icon(BootstrapIcons.cloud_slash, size: 64, color: Colors.grey[300]),
               const SizedBox(height: 12),
               Text(
                 _error!,
@@ -349,7 +374,7 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
               const SizedBox(height: 16),
               TextButton.icon(
                 onPressed: _cargarEntregas,
-                icon: const Icon(Icons.refresh),
+                icon: const Icon(BootstrapIcons.arrow_clockwise),
                 label: const Text('Reintentar'),
               ),
             ],
@@ -363,7 +388,7 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.inbox_outlined, size: 64, color: Colors.grey[300]),
+            Icon(BootstrapIcons.inbox, size: 64, color: Colors.grey[300]),
             const SizedBox(height: 12),
           Text(
             'No hay movimientos aquí',
@@ -386,7 +411,9 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
 
   // ── CARD de entrega ──────────────────────────────────────
   Widget _buildCard(Map<String, dynamic> e) {
-    return Container(
+    return GestureDetector(
+      onTap: () => _mostrarDetalle(e),
+      child: Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -433,20 +460,29 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
                 const SizedBox(height: 3),
                 Row(
                   children: [
-                    Icon(Icons.store_outlined,
+                    Icon(BootstrapIcons.shop,
                         size: 12, color: Colors.grey[400]),
                     const SizedBox(width: 4),
-                    Text(
-                      e['supermercado'] as String,
-                      style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                    Flexible(
+                      child: Text(
+                        e['supermercado'] as String,
+                        style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                    const SizedBox(width: 8),
-                    Icon(Icons.calendar_today_outlined,
+                  ],
+                ),
+                Row(
+                  children: [
+                    Icon(BootstrapIcons.calendar,
                         size: 12, color: Colors.grey[400]),
                     const SizedBox(width: 4),
-                    Text(
-                      e['fecha'] as String,
-                      style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                    Flexible(
+                      child: Text(
+                        e['fecha'] as String,
+                        style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ],
                 ),
@@ -455,38 +491,150 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
           ),
 
           // Puntos y peso
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.stars_rounded,
-                      size: 14, color: Color(0xFF7BC043)),
-                  const SizedBox(width: 3),
-                  Text(
-                    (e['puntos'] as num) >= 0
-                        ? '+${e['puntos']} pts'
-                        : '${e['puntos']} pts',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: (e['puntos'] as num) >= 0
-                          ? const Color(0xFF2D5A1B)
-                          : const Color(0xFFC0392B),
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(BootstrapIcons.star_fill,
+                        size: 14, color: Color(0xFF7BC043)),
+                    const SizedBox(width: 3),
+                    Flexible(
+                      child: Text(
+                        (e['puntos'] as num) >= 0
+                            ? '+${e['puntos']} pts'
+                            : '${e['puntos']} pts',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: (e['puntos'] as num) >= 0
+                              ? const Color(0xFF2D5A1B)
+                              : const Color(0xFFC0392B),
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                e['peso'] as String,
-                style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-              ),
-            ],
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  e['peso'] as String,
+                  style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                ),
+              ],
+            ),
           ),
 
         ],
       ),
+    ),
+    );
+  }
+
+  void _mostrarDetalle(Map<String, dynamic> e) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => Padding(
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Center(
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: e['bg'] as Color,
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                child: Icon(e['icon'] as IconData,
+                    color: e['color'] as Color, size: 32),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Center(
+              child: Text(
+                e['material'] as String,
+                style: const TextStyle(
+                  fontSize: 20, fontWeight: FontWeight.bold,
+                  color: Color(0xFF1E3A0F),
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: (e['estado'] as String) == 'completado'
+                      ? const Color(0xFFEAF3DE)
+                      : const Color(0xFFFAEEDA),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  (e['estado'] as String) == 'completado'
+                      ? 'Completado' : 'Pendiente',
+                  style: TextStyle(
+                    fontSize: 12, fontWeight: FontWeight.w600,
+                    color: (e['estado'] as String) == 'completado'
+                        ? const Color(0xFF3B6D11) : const Color(0xFFE67E22),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            _detalleFila(BootstrapIcons.shop, 'Supermercado', e['supermercado'] as String),
+            const Divider(height: 20),
+            _detalleFila(BootstrapIcons.calendar, 'Fecha', e['fecha'] as String),
+            const Divider(height: 20),
+            _detalleFila(BootstrapIcons.box, 'Peso', e['peso'] as String),
+            const Divider(height: 20),
+            _detalleFila(BootstrapIcons.star_fill, 'Puntos',
+                '${((e['puntos'] is num ? e['puntos'] as num : num.tryParse('${e['puntos']}') ?? 0) >= 0 ? '+' : '')}${e['puntos']} pts'),
+            const Divider(height: 20),
+            _detalleFila(BootstrapIcons.info_circle, 'Estado',
+                (e['estado'] as String) == 'completado'
+                    ? 'Entregado' : 'Pendiente de confirmación'),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _detalleFila(IconData icon, String label, String valor) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: const Color(0xFF6B7F66)),
+        const SizedBox(width: 10),
+        Text(label,
+            style: TextStyle(fontSize: 13, color: Colors.grey[500])),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(valor,
+              textAlign: TextAlign.end,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 14, fontWeight: FontWeight.w600,
+                color: Color(0xFF1E3A0F),
+              )),
+        ),
+      ],
     );
   }
 }

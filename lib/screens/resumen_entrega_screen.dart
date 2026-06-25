@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import '../data/materiales_data.dart';
 
 class ResumenEntregaScreen extends StatelessWidget {
   final Map<String, dynamic> aliado;
   final Map<String, dynamic>? datosIA;
+  final List<Map<String, dynamic>>? materialesIA;
   final String fecha;
   final String hora;
   final String observaciones;
@@ -12,11 +14,17 @@ class ResumenEntregaScreen extends StatelessWidget {
     super.key,
     required this.aliado,
     this.datosIA,
+    this.materialesIA,
     required this.fecha,
     required this.hora,
     required this.observaciones,
     required this.onConfirmar,
   });
+
+  List<Map<String, dynamic>> get _listaMateriales =>
+      materialesIA ?? (datosIA != null ? [datosIA!] : []);
+
+  bool get _tieneMateriales => _listaMateriales.isNotEmpty;
 
   @override
   Widget build(BuildContext context) {
@@ -100,22 +108,62 @@ class ResumenEntregaScreen extends StatelessWidget {
 
             const SizedBox(height: 14),
 
-            // ── Material detectado (si viene de IA) ─────────
-            if (datosIA != null)
+            // ── Materiales a reciclar ─────────────────────
+            if (_tieneMateriales)
               _buildSection(
-                icon: Icons.auto_awesome,
+                icon: Icons.inventory_2_outlined,
                 color: const Color(0xFF185FA5),
-                title: 'Material a reciclar',
-                child: Row(
-                  children: [
-                    _itemResumen('Material', datosIA!['material'] ?? '-'),
-                    _itemResumen('Cantidad', datosIA!['cantidadEstimada'] ?? '-'),
-                    _itemResumen('Peso', datosIA!['pesoAproximado'] ?? '-'),
-                  ],
+                title: 'Materiales a reciclar (${_listaMateriales.length})',
+                child: Column(
+                  children: List.generate(_listaMateriales.length, (i) {
+                    final m = _listaMateriales[i];
+                    return Container(
+                      margin: i < _listaMateriales.length - 1 ? const EdgeInsets.only(bottom: 8) : EdgeInsets.zero,
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF9FBF7),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 36, height: 36,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEAF3DE),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(Icons.recycling, size: 18, color: Color(0xFF3B6D11)),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(m['material'] ?? '-',
+                                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                                Text('${m['cantidadEstimada']} · ${m['pesoAproximado']}',
+                                    style: TextStyle(fontSize: 11, color: Colors.grey[500])),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: MaterialData.nivelBg(m['nivelReciclabilidad'] ?? 'Bajo'),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(m['nivelReciclabilidad'] ?? '',
+                                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600,
+                                    color: MaterialData.nivelColor(m['nivelReciclabilidad'] ?? 'Bajo'))),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
                 ),
               ),
 
-            if (datosIA != null) const SizedBox(height: 14),
+            if (_tieneMateriales) const SizedBox(height: 14),
 
             // ── Fecha y hora ────────────────────────────────
             Row(
