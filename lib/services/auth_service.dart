@@ -161,6 +161,7 @@ class AuthService {
     await prefs.remove('usuario_correo');
     await prefs.remove('usuario_rol');
     await prefs.remove('usuario_telefono');
+    await prefs.remove('foto_perfil_path');
   }
 
   static Future<bool> estaLogueado() async {
