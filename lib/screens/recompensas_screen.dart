@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:bootstrap_icons/bootstrap_icons.dart';
+import '../models/aliado_model.dart';
 import '../models/recompensa_model.dart';
 import '../services/usuario_service.dart';
-import 'recompensa_detalle_screen.dart';
+import 'recompensas_por_aliado_screen.dart';
 
 class RecompensasScreen extends StatefulWidget {
   const RecompensasScreen({super.key});
@@ -11,10 +13,10 @@ class RecompensasScreen extends StatefulWidget {
 }
 
 class _RecompensasScreenState extends State<RecompensasScreen> {
-  List<RecompensaModel> _recompensas = [];
+  List<AliadoModel> _aliados = [];
+  Map<String, List<RecompensaModel>> _recompensasPorAliado = {};
   bool _cargando = true;
   String? _error;
-  int _puntosUsuario = 0;
 
   @override
   void initState() {
@@ -25,22 +27,37 @@ class _RecompensasScreenState extends State<RecompensasScreen> {
   Future<void> _cargarDatos() async {
     setState(() => _cargando = true);
     try {
-      final res = await UsuarioService.getRecompensas();
-      final lista = (res['recompensas'] as List?) ?? [];
+      final results = await Future.wait([
+        UsuarioService.getAliados(),
+        UsuarioService.getRecompensas(),
+      ]);
+
+      final resAliados = results[0];
+      final resRecompensas = results[1];
+
+      final listaAliados = (resAliados['aliados'] as List?) ?? [];
+      final listaRecompensas = (resRecompensas['recompensas'] as List?) ?? [];
+
+      final aliados = listaAliados.map((j) => AliadoModel.fromJson(j)).toList();
+      final recompensas = listaRecompensas.map((j) => RecompensaModel.fromJson(j)).toList();
+
+      final agrupadas = <String, List<RecompensaModel>>{};
+      for (final r in recompensas) {
+        final key = r.aliado ?? 'Otros';
+        agrupadas.putIfAbsent(key, () => []).add(r);
+      }
+
       setState(() {
-        _recompensas = lista.map((j) => RecompensaModel.fromJson(j)).toList();
+        _aliados = aliados;
+        _recompensasPorAliado = agrupadas;
         _cargando = false;
       });
     } catch (e) {
       setState(() {
-        _error = 'Error al cargar recompensas: $e';
+        _error = 'Error al cargar: $e';
         _cargando = false;
       });
     }
-    try {
-      final pts = await UsuarioService.getResumenPuntos();
-      _puntosUsuario = pts['saldo'] ?? 0;
-    } catch (_) {}
   }
 
   @override
@@ -63,7 +80,7 @@ class _RecompensasScreenState extends State<RecompensasScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.cloud_off, size: 48, color: Colors.grey[400]),
+                        Icon(BootstrapIcons.cloud_slash, size: 48, color: Colors.grey[400]),
                         const SizedBox(height: 12),
                         Text(_error!, textAlign: TextAlign.center,
                             style: TextStyle(color: Colors.grey[600])),
@@ -74,10 +91,10 @@ class _RecompensasScreenState extends State<RecompensasScreen> {
                   ),
                 ),
               )
-            else if (_recompensas.isEmpty)
+            else if (_aliados.isEmpty)
               const Expanded(
                 child: Center(
-                  child: Text('No hay recompensas disponibles',
+                  child: Text('No hay supermercados disponibles',
                       style: TextStyle(color: Colors.grey, fontSize: 15)),
                 ),
               )
@@ -87,9 +104,9 @@ class _RecompensasScreenState extends State<RecompensasScreen> {
                   onRefresh: _cargarDatos,
                   child: ListView.builder(
                     padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-                    itemCount: _recompensas.length,
+                    itemCount: _aliados.length,
                     itemBuilder: (context, index) =>
-                        _buildCard(context, _recompensas[index]),
+                        _buildAliadoCard(context, _aliados[index]),
                   ),
                 ),
               ),
@@ -123,7 +140,7 @@ class _RecompensasScreenState extends State<RecompensasScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Aliados que reciclan contigo',
+            'Supermercados aliados y sus recompensas',
             style: TextStyle(color: Colors.white.withValues(alpha: 0.65), fontSize: 13),
           ),
           const SizedBox(height: 20),
@@ -142,18 +159,18 @@ class _RecompensasScreenState extends State<RecompensasScreen> {
                     color: const Color(0xFF7BC043),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.stars_rounded, color: Colors.white, size: 24),
+                  child: const Icon(BootstrapIcons.star_fill, color: Colors.white, size: 24),
                 ),
                 const SizedBox(width: 14),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Tus puntos disponibles',
+                      'Supermercados disponibles',
                       style: TextStyle(color: Colors.white.withValues(alpha: 0.65), fontSize: 12),
                     ),
                     Text(
-                      '${_puntosUsuario} pts',
+                      '${_aliados.length} aliados',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 24,
@@ -170,15 +187,18 @@ class _RecompensasScreenState extends State<RecompensasScreen> {
     );
   }
 
-  Widget _buildCard(BuildContext context, RecompensaModel recompensa) {
-    final bool esProducto = recompensa.tipoRecompensa?.toLowerCase() == 'producto';
+  Widget _buildAliadoCard(BuildContext context, AliadoModel aliado) {
+    final recompensas = _recompensasPorAliado[aliado.nombre] ?? [];
 
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => RecompensaDetalleScreen(recompensa: recompensa),
+            builder: (_) => RecompensasPorAliadoScreen(
+              aliado: aliado,
+              recompensas: recompensas,
+            ),
           ),
         );
       },
@@ -206,9 +226,9 @@ class _RecompensasScreenState extends State<RecompensasScreen> {
                   color: const Color(0xFFEAF3DE),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Icon(
-                  esProducto ? Icons.card_giftcard : Icons.store_rounded,
-                  color: const Color(0xFF2D5A1B), size: 30,
+                child: const Icon(
+                  BootstrapIcons.shop,
+                  color: Color(0xFF2D5A1B), size: 30,
                 ),
               ),
               const SizedBox(width: 14),
@@ -217,52 +237,41 @@ class _RecompensasScreenState extends State<RecompensasScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      recompensa.aliado ?? recompensa.nombre,
+                      aliado.nombre,
                       style: const TextStyle(
-                        fontSize: 15,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF1E3A0F),
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      recompensa.descripcion ?? recompensa.nombre,
-                      style: const TextStyle(fontSize: 12, color: Color(0xFF9E9E9E)),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    Row(
+                      children: [
+                        Icon(BootstrapIcons.geo_alt,
+                            size: 13, color: Colors.grey[500]),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            aliado.direccion,
+                            style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEAF3DE),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            esProducto ? 'Producto' : (recompensa.tipoRecompensa ?? 'Descuento'),
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: Color(0xFF3B6D11),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF0E6B8),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            '${recompensa.puntosRequeridos} pts',
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: Color(0xFF854F0B),
-                              fontWeight: FontWeight.w600,
-                            ),
+                        Icon(BootstrapIcons.gift,
+                            size: 13, color: const Color(0xFF7BC043)),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${recompensas.length} recompensas',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF3B6D11),
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
@@ -270,7 +279,7 @@ class _RecompensasScreenState extends State<RecompensasScreen> {
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, color: Color(0xFF9E9E9E)),
+              const Icon(BootstrapIcons.chevron_right, color: Color(0xFF9E9E9E)),
             ],
           ),
         ),

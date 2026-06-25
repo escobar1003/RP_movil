@@ -1,46 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:bootstrap_icons/bootstrap_icons.dart';
 import '../models/recompensa_model.dart';
-import '../services/usuario_service.dart';
 
-class RecompensaDetalleScreen extends StatefulWidget {
+class RecompensaDetalleScreen extends StatelessWidget {
   final RecompensaModel recompensa;
 
   const RecompensaDetalleScreen({super.key, required this.recompensa});
 
   @override
-  State<RecompensaDetalleScreen> createState() => _RecompensaDetalleScreenState();
-}
-
-class _RecompensaDetalleScreenState extends State<RecompensaDetalleScreen> {
-  bool _canjeando = false;
-
-  Future<void> _canjear() async {
-    setState(() => _canjeando = true);
-    try {
-      await UsuarioService.canjearRecompensa(widget.recompensa.id);
-      if (mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('¡Canje realizado con éxito!'),
-            backgroundColor: Color(0xFF2D5A1B),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _canjeando = false);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final r = widget.recompensa;
+    final r = recompensa;
     final esProducto = r.tipoRecompensa?.toLowerCase() == 'producto';
 
     return Scaffold(
@@ -58,7 +27,6 @@ class _RecompensaDetalleScreenState extends State<RecompensaDetalleScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomButton(context),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -73,7 +41,7 @@ class _RecompensaDetalleScreenState extends State<RecompensaDetalleScreen> {
   }
 
   Widget _buildHero(bool esProducto) {
-    final r = widget.recompensa;
+    final r = recompensa;
     return Container(
       width: double.infinity,
       color: Colors.white,
@@ -88,7 +56,7 @@ class _RecompensaDetalleScreenState extends State<RecompensaDetalleScreen> {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Icon(
-              esProducto ? Icons.card_giftcard : Icons.store_rounded,
+              esProducto ? BootstrapIcons.gift : BootstrapIcons.percent,
               color: const Color(0xFF2D5A1B), size: 44,
             ),
           ),
@@ -124,7 +92,7 @@ class _RecompensaDetalleScreenState extends State<RecompensaDetalleScreen> {
   }
 
   Widget _buildInfoSection() {
-    final r = widget.recompensa;
+    final r = recompensa;
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       padding: const EdgeInsets.all(18),
@@ -141,14 +109,14 @@ class _RecompensaDetalleScreenState extends State<RecompensaDetalleScreen> {
       child: Column(
         children: [
           _buildInfoRow(
-            icon: Icons.inventory_2_outlined,
+            icon: BootstrapIcons.box_seam,
             iconColor: const Color(0xFF185FA5),
             label: 'Disponible',
             value: r.stock != null ? '${r.stock} unidades' : 'Ilimitado',
           ),
           Divider(height: 20, color: Colors.grey.withValues(alpha: 0.1)),
           _buildInfoRow(
-            icon: Icons.stars_rounded,
+            icon: BootstrapIcons.star_fill,
             iconColor: const Color(0xFF7BC043),
             label: 'Puntos necesarios',
             value: '${r.puntosRequeridos} puntos',
@@ -156,7 +124,7 @@ class _RecompensaDetalleScreenState extends State<RecompensaDetalleScreen> {
           if (r.fechaFin != null) ...[
             Divider(height: 20, color: Colors.grey.withValues(alpha: 0.1)),
             _buildInfoRow(
-              icon: Icons.calendar_today_outlined,
+              icon: BootstrapIcons.calendar,
               iconColor: const Color(0xFF854F0B),
               label: 'Válido hasta',
               value: r.fechaFin!,
@@ -201,7 +169,7 @@ class _RecompensaDetalleScreenState extends State<RecompensaDetalleScreen> {
   }
 
   Widget _buildCondiciones() {
-    final r = widget.recompensa;
+    final r = recompensa;
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 14, 20, 0),
       padding: const EdgeInsets.all(18),
@@ -243,7 +211,7 @@ class _RecompensaDetalleScreenState extends State<RecompensaDetalleScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.check_circle_outline, size: 16, color: Color(0xFF7BC043)),
+          const Icon(BootstrapIcons.check_circle, size: 16, color: Color(0xFF7BC043)),
           const SizedBox(width: 10),
           Expanded(
             child: Text(text,
@@ -251,127 +219,6 @@ class _RecompensaDetalleScreenState extends State<RecompensaDetalleScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildBottomButton(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 10,
-            offset: const Offset(0, -3),
-          ),
-        ],
-      ),
-      child: SizedBox(
-        width: double.infinity,
-        height: 54,
-        child: ElevatedButton(
-          onPressed: _canjeando ? null : () => _mostrarConfirmacion(context),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF2D5A1B),
-            foregroundColor: Colors.white,
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-          ),
-          child: _canjeando
-              ? const SizedBox(
-                  width: 24, height: 24,
-                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                )
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.card_giftcard_outlined, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Canjear por ${widget.recompensa.puntosRequeridos} puntos',
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-        ),
-      ),
-    );
-  }
-
-  void _mostrarConfirmacion(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (_) => Padding(
-        padding: const EdgeInsets.fromLTRB(24, 20, 24, 40),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40, height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Icon(Icons.stars_rounded, size: 52, color: Color(0xFF7BC043)),
-            const SizedBox(height: 16),
-            const Text(
-              '¿Confirmar canje?',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1E3A0F),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Se descontarán ${widget.recompensa.puntosRequeridos} puntos\nde tu saldo actual',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
-            ),
-            const SizedBox(height: 28),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: _canjeando ? null : _canjear,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2D5A1B),
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-                child: _canjeando
-                    ? const SizedBox(
-                        width: 20, height: 20,
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                      )
-                    : const Text('Sí, canjear',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text('Cancelar',
-                    style: TextStyle(fontSize: 16, color: Colors.grey[500])),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
