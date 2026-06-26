@@ -7,10 +7,10 @@ class MaterialData {
   final String deposito;
   final String descripcion;
   final Color colorCaneca;
-  final String cantidadEstimada;
   final String pesoAproximado;
   final String nivelReciclabilidad;
   final String recomendacionIA;
+  final String cantidadEstimada;
 
   const MaterialData({
     required this.nombre,
@@ -107,20 +107,28 @@ class MaterialData {
     );
   }
 
-  MaterialData copyWith({String? nombre}) => MaterialData(
-        nombre: nombre ?? this.nombre,
-        tipo: tipo,
-        caneco: caneco,
-        deposito: deposito,
-        descripcion: descripcion,
-        colorCaneca: colorCaneca,
-        cantidadEstimada: cantidadEstimada,
-        pesoAproximado: pesoAproximado,
-        nivelReciclabilidad: nivelReciclabilidad,
-        recomendacionIA: recomendacionIA,
-      );
+  MaterialData copyWith({
+    String? nombre,
+    String? cantidadEstimada,
+    String? pesoAproximado,
+  }) {
+    return MaterialData(
+      nombre: nombre ?? this.nombre,
+      tipo: this.tipo,
+      caneco: this.caneco,
+      deposito: this.deposito,
+      descripcion: this.descripcion,
+      colorCaneca: this.colorCaneca,
+      cantidadEstimada: cantidadEstimada ?? this.cantidadEstimada,
+      pesoAproximado:
+          pesoAproximado ?? this.pesoAproximado, // Ahora ya sabe qué es esto
+      nivelReciclabilidad: this.nivelReciclabilidad,
+      recomendacionIA: this.recomendacionIA,
+    );
+  }
 
-  String get estado => deposito == 'Aprovechable' ? 'Aprovechable' : 'No clasificado';
+  String get estado =>
+      deposito == 'Aprovechable' ? 'Aprovechable' : 'No clasificado';
 
   static Color nivelColor(String nivel) {
     switch (nivel) {
