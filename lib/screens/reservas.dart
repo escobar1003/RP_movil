@@ -109,6 +109,9 @@ class _ReservasScreenState extends State<ReservasScreen> {
                 'fecha': '${_fechaSeleccionada.year}-${_fechaSeleccionada.month.toString().padLeft(2,'0')}-${_fechaSeleccionada.day.toString().padLeft(2,'0')}',
                 'hora': _horaFormateada,
                 'notas': observacionesController.text,
+                'urlFoto': listaMateriales.isNotEmpty ? listaMateriales.first['fotoUrl'] : null,
+                'iaMaterial': listaMateriales.isNotEmpty ? listaMateriales.first['material'] : null,
+                'iaConfianza': listaMateriales.isNotEmpty ? listaMateriales.first['confianza']?.toString() : null,
               },
             );
             if (!mounted) return;
