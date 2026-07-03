@@ -98,11 +98,14 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
       final foto = await _cameraController!.takePicture();
       _rutaImagenLocal = foto.path;
 
-      final material = await IaService.escanear(foto.path);
+      final resultado = await IaService.escanear(foto.path);
+      final material = resultado['material'] as MaterialData;
+      final fotoUrl = resultado['fotoUrl'] as String?;
       if (mounted) {
         SesionReciclaje.agregar(MaterialEscaneado(
           data: material,
           imagenPath: foto.path,
+          fotoUrl: fotoUrl,
         ));
         if (widget.modoAgregar) {
           Navigator.pop(context, true);

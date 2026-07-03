@@ -3,8 +3,9 @@ import '../data/materiales_data.dart';
 class MaterialEscaneado {
   final MaterialData data;
   final String imagenPath;
+  final String? fotoUrl;
 
-  MaterialEscaneado({required this.data, required this.imagenPath});
+  MaterialEscaneado({required this.data, required this.imagenPath, this.fotoUrl});
 
   Map<String, dynamic> toMap() => {
     'material': data.nombre,
@@ -20,6 +21,7 @@ class MaterialEscaneado {
     'recomendacionIA': data.recomendacionIA,//
     'colorCaneca': '#${data.colorCaneca.toARGB32().toRadixString(16).padLeft(8, '0')}',
     'imagenPath': imagenPath,
+    'fotoUrl': fotoUrl,
   };
 }
 
