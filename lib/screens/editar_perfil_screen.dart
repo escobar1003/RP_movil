@@ -22,6 +22,7 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
   final _nombreController     = TextEditingController();
   final _apellidoController   = TextEditingController();
   final _telefonoController   = TextEditingController();
+  final _cedulaController = TextEditingController();
   final _infoController       = TextEditingController();
 
   bool _guardando   = false;
@@ -233,6 +234,18 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
                                   icon: Icons.phone_outlined,
                                   teclado: TextInputType.phone,
                                 ),
+
+                                _divider(),
+                                _campo(
+                                  label: 'Cédula',
+                                  controller: _cedulaController,
+                                  hint: '123456789',
+                                  icon: Icons.perm_identity_outlined,
+                                  teclado: TextInputType.number,
+                                ),
+
+
+
                                 _divider(),
                                 _campo(
                                   label: 'Info / Bio',

@@ -77,7 +77,7 @@ class WelcomeScreen extends StatelessWidget {
                     SizedBox(height: size.height * 0.06),
 
                     SizedBox(
-                      height: size.height * 0.4,
+                      height: size.height * 0.5,
                       child: Image.asset(
                         'assets/images/imagen_de_fondo.png',
                         fit: BoxFit.contain,
@@ -87,7 +87,7 @@ class WelcomeScreen extends StatelessWidget {
                     const SizedBox(height: 24),
 
                     Text(
-                      '¡Hola! 👋\nBienvenido reciclador',
+                      '¡Hola! \nBienvenido reciclador',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 28,
