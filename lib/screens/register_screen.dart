@@ -17,6 +17,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   final _telefono = TextEditingController();
+  final _cedula = TextEditingController();
 
   bool _obscure = true;
 
@@ -49,11 +50,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
     try {
       print("Conectando con el servidor: ${_email.text.trim()}");
 
-      final response = await AuthService.register(
+        final response = await AuthService.register(
         nombre: _nombre.text,
         correo: _email.text,
         password: _password.text,
         telefono: _telefono.text.isNotEmpty ? _telefono.text : null,
+        cedula: _cedula.text.isNotEmpty ? _cedula.text : null,
       );
 
       print("====== RESPUESTA RECIBIDA ======");
@@ -155,6 +157,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
 
             const SizedBox(height: 18),
+
+            // CÉDULA
+            _label('Cédula'),
+
+             const SizedBox(height: 6),
+
+            _field(
+             controller: _cedula,
+             hint: '1234567890',
+            icon: Icons.badge_outlined,
+            ),
+
 
             // TELÉFONO
             _label('Teléfono (opcional)'),
