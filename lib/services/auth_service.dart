@@ -56,6 +56,7 @@ class AuthService {
     required String correo,
     required String password,
     String? telefono,
+    String? cedula,
   }) async {
     final body = <String, dynamic>{
       'nombre': nombre,
@@ -64,6 +65,9 @@ class AuthService {
     };
     if (telefono != null && telefono.isNotEmpty) {
       body['telefono'] = telefono;
+    }
+    if (cedula != null && cedula.isNotEmpty) {
+      body['cedula'] = cedula;
     }
 
     final response = await http.post(
