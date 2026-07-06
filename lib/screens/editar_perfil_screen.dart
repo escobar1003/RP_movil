@@ -1,10 +1,10 @@
 // lib/screens/editar_perfil_screen.dart
-// ✅ Pon esto al inicio del archivo:
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart'; // ← necesario para kIsWeb
+import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:io';
 import '../services/auth_service.dart';
 import '../services/usuario_service.dart';
 import '../theme/app_theme.dart';
@@ -28,8 +28,9 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
   bool _cargando    = true;
 
   // Foto de perfil
-  File?   _fotoArchivo;       // foto nueva elegida del dispositivo
-  String? _fotoUrlActual;     // URL que ya viene del servidor
+  File?      _fotoArchivo;    // foto nueva elegida del dispositivo (mobile)
+  Uint8List? _fotoBytes;      // foto nueva elegida del dispositivo (web)
+  String?    _fotoUrlActual;  // URL que ya viene del servidor
 
   @override
   void initState() {
@@ -54,7 +55,7 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
     }
     final prefs = await SharedPreferences.getInstance();
     final savedPath = prefs.getString('foto_perfil_path');
-    if (savedPath != null && File(savedPath).existsSync()) {
+    if (!kIsWeb && savedPath != null && File(savedPath).existsSync()) {
       _fotoArchivo = File(savedPath);
     }
     if (mounted) setState(() => _cargando = false);
@@ -74,6 +75,9 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
     setState(() => _fotoArchivo = File(picked.path));
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('foto_perfil_path', picked.path);
+  } else {
+    final bytes = await picked.readAsBytes();
+    setState(() => _fotoBytes = bytes);
   }
 }
 
@@ -97,6 +101,22 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
     if (_fotoArchivo != null) {
       try {
         final res = await UsuarioService.updateFotoPerfil(_fotoArchivo!.path);
+        if (mounted && (res['status'] == 'error' || res['error'] != null)) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('${res['mensaje'] ?? res['error'] ?? 'Error al subir foto'}'), backgroundColor: Colors.orange),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error al subir foto: $e'), backgroundColor: Colors.orange),
+          );
+        }
+      }
+    }
+    if (_fotoBytes != null) {
+      try {
+        final res = await UsuarioService.updateFotoPerfilBytes(_fotoBytes!, 'foto_perfil.jpg');
         if (mounted && (res['status'] == 'error' || res['error'] != null)) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('${res['mensaje'] ?? res['error'] ?? 'Error al subir foto'}'), backgroundColor: Colors.orange),
@@ -143,6 +163,7 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
   Future<void> _restablecer() async {
     setState(() => _cargando = true);
     _fotoArchivo = null;
+    _fotoBytes = null;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('foto_perfil_path');
     await _cargarDatos();
@@ -242,10 +263,12 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
 
   // ── Widget: selector de avatar ──────────────────────────
   Widget _buildAvatarPicker() {
-  // Decide qué imagen mostrar: primero foto local, luego URL del servidor
+  // Decide qué imagen mostrar: foto nueva (bytes o archivo) > URL del servidor
   ImageProvider? imagenMostrar;
   if (!kIsWeb && _fotoArchivo != null) {
     imagenMostrar = FileImage(_fotoArchivo!);
+  } else if (kIsWeb && _fotoBytes != null) {
+    imagenMostrar = MemoryImage(_fotoBytes!);
   } else if (_fotoUrlActual != null && _fotoUrlActual!.isNotEmpty) {
     imagenMostrar = NetworkImage(_fotoUrlActual!);
   }

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:bootstrap_icons/bootstrap_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -44,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final prefs = await SharedPreferences.getInstance();
     final savedPath = prefs.getString('foto_perfil_path');
-    if (savedPath != null && File(savedPath).existsSync()) {
+    if (!kIsWeb && savedPath != null && File(savedPath).existsSync()) {
       _fotoPath = savedPath;
     }
 
@@ -85,10 +86,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     backgroundColor: AppColors.green100,
                     backgroundImage: _fotoUrl != null
                         ? NetworkImage(_fotoUrl!)
-                        : (_fotoPath != null
+                        : (!kIsWeb && _fotoPath != null
                             ? FileImage(File(_fotoPath!))
                             : null),
-                    child: _fotoUrl == null && _fotoPath == null
+                    child: _fotoUrl == null && (!kIsWeb ? _fotoPath == null : true)
                         ? const Icon(
                             BootstrapIcons.person_fill,
                             color: AppColors.primary,

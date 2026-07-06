@@ -66,7 +66,7 @@ class _PlatformGameViewState extends State<PlatformGameView> {
 
   void _startTimeout() {
     _cancelTimeout();
-    _timeoutTimer = Timer(const Duration(seconds: 20), () {
+    _timeoutTimer = Timer(const Duration(seconds: 60), () {
       if (mounted && _isLoading) {
         setState(() {
           _isLoading = false;

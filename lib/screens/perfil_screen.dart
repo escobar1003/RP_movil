@@ -1,4 +1,5 @@
-import 'dart:io'; // ← MODIFICADO: para FileImage
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // ← MODIFICADO
 import '../services/auth_service.dart';
@@ -72,7 +73,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
 
     final prefs = await SharedPreferences.getInstance();
     final savedPath = prefs.getString('foto_perfil_path');
-    if (savedPath != null && File(savedPath).existsSync()) {
+    if (!kIsWeb && savedPath != null && File(savedPath).existsSync()) {
       _fotoPath = savedPath;
     }
 
@@ -145,13 +146,12 @@ class _PerfilScreenState extends State<PerfilScreen> {
                               ? DecorationImage(
                                   image: NetworkImage(_fotoUrl!),
                                   fit: BoxFit.cover)
-                              : (_fotoPath != null
+                              : (!kIsWeb && _fotoPath != null
                                   ? DecorationImage(
                                       image: FileImage(File(_fotoPath!)),
                                       fit: BoxFit.cover)
                                   : null),
-                        ),
-                        child: _fotoUrl == null && _fotoPath == null
+                        child: _fotoUrl == null && (!kIsWeb ? _fotoPath == null : true)
                             ? const Icon(Icons.person, color: Colors.white, size: 52)
                             : null,
                       ),
