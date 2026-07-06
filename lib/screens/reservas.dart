@@ -116,7 +116,7 @@ class _ReservasScreenState extends State<ReservasScreen> {
             );
             if (!mounted) return;
             setState(() => loading = false);
-            final idReserva = resultado['idReserva'] ?? resultado['reserva']?['id'];
+            final idReserva = resultado['idReserva'] ?? resultado['reserva']?['idReserva'];
             final exito = idReserva != null || resultado['mensaje'] != null;
 
             if (exito && idReserva != null) {
