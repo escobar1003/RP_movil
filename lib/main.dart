@@ -8,17 +8,17 @@ import 'services/socket_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const EcoReciclaApp());
+  runApp(const RecyclingPointsApp());
 }
 
-class EcoReciclaApp extends StatelessWidget {
-  const EcoReciclaApp({super.key});
+class RecyclingPointsApp extends StatelessWidget {
+  const RecyclingPointsApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'EcoRecicla',
+      title: 'Recycling Points',
       theme: AppTheme.theme,
       home: const _InicioApp(),
     );

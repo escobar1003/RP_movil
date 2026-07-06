@@ -95,8 +95,8 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
         break;
       default:
         icon = BootstrapIcons.sliders;
-        color = const Color(0xFFE67E22);
-        bg = const Color(0xFFFAEEDA);
+        color = const Color.fromARGB(255, 235, 80, 8);
+        bg = const Color.fromARGB(255, 234, 227, 214);
         label = 'Ajuste de puntos';
         break;
     }
@@ -206,7 +206,7 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6EF),
+      backgroundColor: const Color.fromARGB(255, 234, 236, 230),
       body: SafeArea(
         child: Column(
           children: [
@@ -226,7 +226,12 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
       decoration: const BoxDecoration(
-        color: Color(0xFF2D5A1B),
+         gradient: LinearGradient(
+           begin: Alignment.topLeft,
+           end: Alignment.bottomRight,
+        colors:[Color.fromARGB(255, 20, 125, 35),Color.fromARGB(255, 46, 158, 55), Color.fromARGB(255, 30, 220, 40),Color.fromARGB(255, 170, 225, 90)],
+        stops: [0.0,0.35, 0.6, 1.0],
+        ),
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(28),
           bottomRight: Radius.circular(28),
@@ -240,7 +245,7 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
               GestureDetector(
                 onTap: () => Navigator.pop(context),
                 child: const Icon(BootstrapIcons.chevron_left,
-                    color: Colors.white, size: 20),
+                    color: Color.fromARGB(255, 249, 251, 248), size: 20),
               ),
               const SizedBox(width: 12),
               const Text(
@@ -281,7 +286,7 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.65),
+            color: const Color.fromARGB(255, 8, 8, 8).withValues(alpha: 0.65),
             fontSize: 12,
           ),
         ),
@@ -308,7 +313,7 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
               margin: const EdgeInsets.only(right: 8),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: activo ? const Color(0xFF2D5A1B) : Colors.white,
+                color: activo ? const Color.fromARGB(255, 201, 236, 168) : const Color.fromARGB(255, 206, 229, 185),
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
@@ -322,7 +327,7 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: activo ? Colors.white : Colors.grey[600],
+                  color: activo ? const Color.fromARGB(255, 12, 12, 12) : const Color.fromARGB(255, 17, 15, 15),
                 ),
               ),
             ),
@@ -342,7 +347,7 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
             '${_filtradas.length} movimientos',
             style: TextStyle(
               fontSize: 13,
-              color: Colors.grey[600],
+              color: const Color.fromARGB(255, 41, 41, 41),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -364,11 +369,11 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(BootstrapIcons.cloud_slash, size: 64, color: Colors.grey[300]),
+              Icon(BootstrapIcons.cloud_slash, size: 64, color: const Color.fromARGB(246, 188, 245, 127)),
               const SizedBox(height: 12),
               Text(
                 _error!,
-                style: TextStyle(color: Colors.grey[400], fontSize: 15),
+                style: TextStyle(color: const Color.fromARGB(255, 32, 31, 31), fontSize: 15),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
@@ -388,11 +393,11 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(BootstrapIcons.inbox, size: 64, color: Colors.grey[300]),
+            Icon(BootstrapIcons.inbox, size: 64, color: const Color.fromARGB(255, 225, 243, 212)),
             const SizedBox(height: 12),
           Text(
             'No hay movimientos aquí',
-            style: TextStyle(color: Colors.grey[400], fontSize: 15),
+            style: TextStyle(color: const Color.fromARGB(255, 79, 78, 78), fontSize: 15),
           ),
           ],
         ),
@@ -417,11 +422,11 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color.fromARGB(255, 237, 244, 234),
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: const Color.fromARGB(255, 20, 19, 19).withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -454,19 +459,19 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1E3A0F),
+                    color: Color.fromARGB(255, 13, 16, 11),
                   ),
                 ),
                 const SizedBox(height: 3),
                 Row(
                   children: [
                     Icon(BootstrapIcons.shop,
-                        size: 12, color: Colors.grey[400]),
+                        size: 12, color: const Color.fromARGB(255, 0, 0, 0)),
                     const SizedBox(width: 4),
                     Flexible(
                       child: Text(
                         e['supermercado'] as String,
-                        style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                        style: TextStyle(fontSize: 12, color: const Color.fromARGB(255, 20, 14, 14)),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -475,12 +480,12 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
                 Row(
                   children: [
                     Icon(BootstrapIcons.calendar,
-                        size: 12, color: Colors.grey[400]),
+                        size: 12, color: const Color.fromARGB(255, 19, 16, 16)),
                     const SizedBox(width: 4),
                     Flexible(
                       child: Text(
                         e['fecha'] as String,
-                        style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                        style: TextStyle(fontSize: 12, color: const Color.fromARGB(255, 17, 4, 4)),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -499,7 +504,7 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Icon(BootstrapIcons.star_fill,
-                        size: 14, color: Color(0xFF7BC043)),
+                        size: 14, color: Color.fromARGB(255, 142, 235, 66)),
                     const SizedBox(width: 3),
                     Flexible(
                       child: Text(
@@ -510,8 +515,8 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                           color: (e['puntos'] as num) >= 0
-                              ? const Color(0xFF2D5A1B)
-                              : const Color(0xFFC0392B),
+                              ? const Color.fromARGB(255, 8, 12, 7)
+                              : const Color.fromARGB(255, 202, 38, 20),
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -549,7 +554,7 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
               child: Container(
                 width: 40, height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: const Color.fromARGB(255, 41, 39, 39),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -572,7 +577,7 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
                 e['material'] as String,
                 style: const TextStyle(
                   fontSize: 20, fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E3A0F),
+                  color: Color.fromARGB(255, 34, 65, 17),
                 ),
               ),
             ),
@@ -582,8 +587,8 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 decoration: BoxDecoration(
                   color: (e['estado'] as String) == 'completado'
-                      ? const Color(0xFFEAF3DE)
-                      : const Color(0xFFFAEEDA),
+                      ? const Color.fromARGB(255, 203, 227, 171)
+                      : const Color.fromARGB(255, 198, 222, 168),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -592,7 +597,7 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
                   style: TextStyle(
                     fontSize: 12, fontWeight: FontWeight.w600,
                     color: (e['estado'] as String) == 'completado'
-                        ? const Color(0xFF3B6D11) : const Color(0xFFE67E22),
+                        ? const Color.fromARGB(255, 92, 162, 34) : const Color.fromARGB(255, 229, 89, 29),
                   ),
                 ),
               ),
@@ -620,10 +625,10 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
   Widget _detalleFila(IconData icon, String label, String valor) {
     return Row(
       children: [
-        Icon(icon, size: 18, color: const Color(0xFF6B7F66)),
+        Icon(icon, size: 18, color: const Color.fromARGB(255, 8, 19, 6)),
         const SizedBox(width: 10),
         Text(label,
-            style: TextStyle(fontSize: 13, color: Colors.grey[500])),
+            style: TextStyle(fontSize: 13, color: const Color.fromARGB(255, 32, 88, 13))),
         const SizedBox(width: 8),
         Expanded(
           child: Text(valor,
@@ -631,7 +636,7 @@ class _HistorialEntregasScreenState extends State<HistorialEntregasScreen> {
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 fontSize: 14, fontWeight: FontWeight.w600,
-                color: Color(0xFF1E3A0F),
+                color: Color.fromARGB(255, 25, 41, 17),
               )),
         ),
       ],

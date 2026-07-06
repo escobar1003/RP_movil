@@ -141,7 +141,7 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Perfil actualizado correctamente'),
-          backgroundColor: Color(0xFF2D5A1B),
+          backgroundColor: Color.fromARGB(255, 217, 238, 208),
         ),
       );
       Navigator.pop(context, true);
@@ -182,15 +182,15 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6EF),
+      backgroundColor: const Color.fromARGB(255, 231, 250, 225),
       appBar: AppBar(
         title: const Text('Editar perfil'),
-        backgroundColor: const Color(0xFF2D5A1B),
+        backgroundColor: const Color.fromARGB(255, 196, 233, 182),
         foregroundColor: Colors.white,
         elevation: 0,
       ),
       body: _cargando
-          ? const Center(child: CircularProgressIndicator(color: Color(0xFF2D5A1B)))
+          ? const Center(child: CircularProgressIndicator(color: Color.fromARGB(255, 9, 16, 6)))
           : Form(
               key: _formKey,
               child: Column(
@@ -294,15 +294,15 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
           height: 100,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: const Color(0xFFD6EFC7),
-            border: Border.all(color: const Color(0xFF2D5A1B), width: 3),
+            color: const Color.fromARGB(255, 180, 234, 149),
+            border: Border.all(color: const Color.fromARGB(255, 15, 21, 13), width: 3),
             image: imagenMostrar != null
                 ? DecorationImage(image: imagenMostrar, fit: BoxFit.cover)
                 : null,
           ),
           child: imagenMostrar == null
               ? const Icon(Icons.person_rounded,
-                  size: 50, color: Color(0xFF2D5A1B))
+                  size: 50, color: Color.fromARGB(255, 172, 235, 147))
               : null,
         ),
         Positioned(
@@ -316,7 +316,7 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
               decoration: BoxDecoration(
                 color: const Color(0xFF2D5A1B),
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 2),
+                border: Border.all(color: const Color.fromARGB(255, 195, 234, 170), width: 2),
               ),
               child: const Icon(Icons.camera_alt_rounded,
                   color: Colors.white, size: 16),
@@ -370,8 +370,8 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: enabled
-                      ? const Color(0xFF1E3A0F)
-                      : const Color(0xFF9DB8A0))),
+                      ? const Color.fromARGB(255, 12, 15, 11)
+                      : const Color.fromARGB(255, 6, 22, 8))),
           const SizedBox(height: 6),
           TextFormField(
             controller: controller,
@@ -382,19 +382,19 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
             style: TextStyle(
                 fontSize: 14,
                 color: enabled
-                    ? const Color(0xFF1E3A0F)
-                    : const Color(0xFF9DB8A0)),
+                    ? const Color.fromARGB(255, 16, 20, 15)
+                    : const Color.fromARGB(255, 15, 21, 16)),
             decoration: InputDecoration(
               hintText: hint,
               hintStyle:
-                  const TextStyle(color: Color(0xFF9DB8A0), fontSize: 14),
+                  const TextStyle(color: Color.fromARGB(255, 4, 8, 5), fontSize: 14),
               prefixIcon:
-                  Icon(icon, size: 18, color: const Color(0xFF5A7060)),
+                  Icon(icon, size: 18, color: const Color.fromARGB(255, 101, 150, 114)),
               suffixIcon: sufijo,
               filled: true,
               fillColor: enabled
-                  ? const Color(0xFFF4F6EF)
-                  : const Color(0xFFF0F0EE),
+                  ? const Color.fromARGB(255, 235, 243, 217)
+                  : const Color.fromARGB(255, 246, 246, 226),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
@@ -463,8 +463,8 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
             child: ElevatedButton(
               onPressed: _guardando ? null : _guardar,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2D5A1B),
-                foregroundColor: Colors.white,
+                backgroundColor: const Color.fromARGB(255, 174, 224, 155),
+                foregroundColor: const Color.fromARGB(255, 18, 8, 8),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14)),
                 padding: const EdgeInsets.symmetric(vertical: 14),

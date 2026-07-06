@@ -128,7 +128,7 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6EF),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF2D5A1B),
+        backgroundColor: const Color.fromARGB(255, 199, 233, 185),
         foregroundColor: Colors.white,
         title: Row(
           children: [
@@ -209,10 +209,10 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                   decoration: BoxDecoration(
-                    color: activo ? const Color(0xFF2D5A1B) : Colors.white,
+                    color: activo ? const Color.fromARGB(255, 141, 207, 114) : Colors.white,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: activo ? const Color(0xFF2D5A1B) : const Color(0xFFD3D1C7),
+                      color: activo ? const Color.fromARGB(255, 66, 79, 66) : const Color(0xFFD3D1C7),
                     ),
                   ),
                   child: Text(_filtros[i],
@@ -249,7 +249,10 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
                           ),
                           ...entry.value.map((n) => _NotifCard(
                                 notif: n,
-                                onTap: () => _marcarLeida(n.id),
+                                onTap: () {
+                                  _marcarLeida(n.id);
+                                  _mostrarDetalleNotificacion(n);
+                                },
                               )),
                         ],
                       );
@@ -259,6 +262,136 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
         ),
       ],
     );
+  }
+
+  void _mostrarDetalleNotificacion(NotificacionModel n) {
+    final config = _getNotifConfig(n.tipo);
+    final pill = _getPillConfig(n.tipo);
+
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: config.fondo,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(config.icono, color: config.color, size: 28),
+            ),
+            const SizedBox(height: 14),
+            Text(n.titulo,
+                style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1E3A0F)),
+                textAlign: TextAlign.center),
+            const SizedBox(height: 8),
+            Text(n.descripcion,
+                style: const TextStyle(
+                    fontSize: 14, color: Color(0xFF5F5E5A), height: 1.4),
+                textAlign: TextAlign.center),
+            if (n.extra != null && n.extra!.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              const Divider(height: 1),
+              const SizedBox(height: 8),
+              ...n.extra!.entries.map((e) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Row(
+                      children: [
+                        Text('${e.key}: ',
+                            style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF3B6D11))),
+                        Expanded(
+                          child: Text('${e.value}',
+                              style: const TextStyle(
+                                  fontSize: 12, color: Color(0xFF5F5E5A))),
+                        ),
+                      ],
+                    ),
+                  )),
+            ],
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: pill.fondo,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(pill.texto,
+                  style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: pill.color)),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cerrar',
+                style: TextStyle(color: Color(0xFF6B7F66))),
+          ),
+        ],
+      ),
+    );
+  }
+
+  _IconConfig _getNotifConfig(TipoNotificacion tipo) {
+    switch (tipo) {
+      case TipoNotificacion.citaAceptada:
+      case TipoNotificacion.citaCompletada:
+        return const _IconConfig(BootstrapIcons.check_circle,
+            Color(0xFFEAF3DE), Color(0xFF3B6D11));
+      case TipoNotificacion.citaRechazada:
+        return const _IconConfig(BootstrapIcons.x_circle,
+            Color(0xFFFCEBEB), Color(0xFFA32D2D));
+      case TipoNotificacion.citaRecordatorio:
+        return const _IconConfig(BootstrapIcons.clock_fill,
+            Color(0xFFFAEEDA), Color(0xFF854F0B));
+      case TipoNotificacion.puntosGanados:
+        return const _IconConfig(BootstrapIcons.star,
+            Color(0xFFEAF3DE), Color(0xFF3B6D11));
+      case TipoNotificacion.canjeExitoso:
+        return const _IconConfig(BootstrapIcons.gift,
+            Color(0xFFE6F1FB), Color(0xFF185FA5));
+      case TipoNotificacion.logroNivel:
+      case TipoNotificacion.logroEntrega:
+        return const _IconConfig(BootstrapIcons.trophy,
+            Color(0xFFE1F5EE), Color(0xFF0F6E56));
+      case TipoNotificacion.sistemaInfo:
+        return const _IconConfig(BootstrapIcons.info_circle,
+            Color(0xFFF1EFE8), Color(0xFF5F5E5A));
+    }
+  }
+
+  _PillConfig _getPillConfig(TipoNotificacion tipo) {
+    switch (tipo) {
+      case TipoNotificacion.citaAceptada:
+      case TipoNotificacion.citaCompletada:
+        return const _PillConfig('Aceptada', Color(0xFFEAF3DE), Color(0xFF3B6D11));
+      case TipoNotificacion.citaRechazada:
+        return const _PillConfig('Rechazada', Color(0xFFFCEBEB), Color(0xFFA32D2D));
+      case TipoNotificacion.citaRecordatorio:
+        return const _PillConfig('Recordatorio', Color(0xFFFAEEDA), Color(0xFF854F0B));
+      case TipoNotificacion.puntosGanados:
+        return const _PillConfig('Puntos', Color(0xFFEAF3DE), Color(0xFF3B6D11));
+      case TipoNotificacion.canjeExitoso:
+        return const _PillConfig('Canje', Color(0xFFE6F1FB), Color(0xFF185FA5));
+      case TipoNotificacion.logroNivel:
+      case TipoNotificacion.logroEntrega:
+        return const _PillConfig('Logro', Color(0xFFE1F5EE), Color(0xFF0F6E56));
+      case TipoNotificacion.sistemaInfo:
+        return const _PillConfig('Sistema', Color(0xFFF1EFE8), Color(0xFF5F5E5A));
+    }
   }
 
   Widget _buildVacia() {

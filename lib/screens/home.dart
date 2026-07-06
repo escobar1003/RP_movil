@@ -191,7 +191,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: const Color.fromARGB(60, 116, 229, 23),
+                  color: const Color.fromARGB(255, 219, 235, 215),
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [BoxShadow(color: const Color.fromARGB(255, 63, 247, 12).withValues(alpha: 0.05), blurRadius: 12, offset: const Offset(0, 5))],
                 ),
@@ -199,17 +199,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Row(
                       children: [
-                        Expanded(child: _ImpactoItem(icon: BootstrapIcons.recycle, value: '${_pesoTotal.toStringAsFixed(1)} kg', label: 'Peso total reciclado', color: AppColors.primary)),
+                        Expanded(child: _ImpactoItem(icon: BootstrapIcons.recycle, value: '${_pesoTotal.toStringAsFixed(1)} kg', label: 'Peso total reciclado', color: const Color.fromARGB(255, 22, 75, 7))),
                         const SizedBox(width: 14),
-                        Expanded(child: _ImpactoItem(icon: BootstrapIcons.truck, value: '$_reciclajes', label: 'Reciclajes', color: Colors.green)),
+                        Expanded(child: _ImpactoItem(icon: BootstrapIcons.truck, value: '$_reciclajes', label: 'Reciclajes', color: const Color.fromARGB(255, 38, 47, 210))),
                       ],
                     ),
                     const SizedBox(height: 14),
                     Row(
                       children: [
-                        Expanded(child: _ImpactoItem(icon: BootstrapIcons.leaf, value: '${(_pesoTotal * 1.5).toStringAsFixed(1)} kg', label: 'CO2 evitado', color: const Color.fromARGB(255, 102, 176, 17))),
+                        Expanded(child: _ImpactoItem(icon: BootstrapIcons.leaf, value: '${(_pesoTotal * 1.5).toStringAsFixed(1)} kg', label: 'CO2 evitado', color: const Color.fromARGB(255, 7, 206, 90))),
                         const SizedBox(width: 14),
-                        Expanded(child: _ImpactoItem(icon: BootstrapIcons.star_fill, value: '$_puntos', label: 'Puntos totales', color: Colors.amber)),
+                        Expanded(child: _ImpactoItem(icon: BootstrapIcons.star_fill, value: '$_puntos', label: 'Puntos totales', color: const Color.fromARGB(255, 237, 234, 17))),
                       ],
                     ),
                   ],
@@ -224,7 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: const Color.fromARGB(34, 152, 239, 45),
+                  color: const Color.fromARGB(255, 230, 244, 226),
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [BoxShadow(color: const Color.fromARGB(255, 0, 0, 0).withValues(alpha: 0.05), blurRadius: 12, offset: const Offset(0, 5))],
                 ),

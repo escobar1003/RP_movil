@@ -125,7 +125,12 @@ class _PerfilScreenState extends State<PerfilScreen> {
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(20, 28, 20, 28),
             decoration: const BoxDecoration(
-              color: Color(0xFF2D5A1B),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color.fromARGB(255, 20, 125, 35), Color.fromARGB(255, 46, 158, 55), Color.fromARGB(255, 30, 220, 40), Color.fromARGB(255, 170, 225, 90)],
+                stops: [0.0, 0.35, 0.6, 1.0],
+              ),
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(32),
                 bottomRight: Radius.circular(32),
@@ -141,7 +146,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                         decoration: BoxDecoration(
                           color: const Color(0xFF7BC043),
                           borderRadius: BorderRadius.circular(45),
-                          border: Border.all(color: Colors.white, width: 3),
+                          border: Border.all(color: const Color.fromARGB(255, 255, 255, 255), width: 3),
                           image: _fotoUrl != null
                               ? DecorationImage(
                                   image: NetworkImage(_fotoUrl!),
@@ -189,7 +194,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   Text(
                     _correo,
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.65),
+                      color: const Color.fromARGB(66, 46, 5, 5).withValues(alpha: 0.65),
                       fontSize: 13,
                     ),
                   ),
@@ -198,7 +203,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF7BC043),
+                    color: const Color.fromARGB(255, 123, 241, 26),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
@@ -264,7 +269,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
             child: IgnorePointer(
               child: CustomPaint(
                 painter: _WindPainter(
-                  color: Colors.white.withValues(alpha: 0.07),
+                  color: const Color.fromARGB(255, 238, 227, 227).withValues(alpha: 0.07),
                 ),
               ),
             ),
@@ -282,8 +287,8 @@ class _PerfilScreenState extends State<PerfilScreen> {
           Expanded(
             child: _buildStatCard(
               icon: Icons.recycling,
-              iconColor: const Color(0xFF2D5A1B),
-              iconBg: const Color(0xFFEAF3DE),
+              iconColor: const Color.fromARGB(255, 38, 118, 6),
+              iconBg: const Color.fromARGB(255, 202, 237, 160),
               value: '$_reciclajes',
               label: 'Reciclajes',
             ),
@@ -292,8 +297,8 @@ class _PerfilScreenState extends State<PerfilScreen> {
           Expanded(
             child: _buildStatCard(
               icon: Icons.stars_rounded,
-              iconColor: const Color(0xFF854F0B),
-              iconBg: const Color(0xFFFAEEDA),
+              iconColor: const Color.fromARGB(255, 32, 33, 4),
+              iconBg: const Color.fromARGB(255, 234, 234, 17),
               value: '$_puntos',
               label: 'Puntos',
             ),
@@ -302,8 +307,8 @@ class _PerfilScreenState extends State<PerfilScreen> {
           Expanded(
             child: _buildStatCard(
               icon: Icons.emoji_events_outlined,
-              iconColor: const Color(0xFF185FA5),
-              iconBg: const Color(0xFFE6F1FB),
+              iconColor: const Color.fromARGB(255, 15, 109, 202),
+              iconBg: const Color.fromARGB(184, 173, 207, 239),
               value: '$_canjesCount',
               label: 'Canjes',
             ),
@@ -323,7 +328,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color.fromARGB(238, 223, 244, 221),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -353,7 +358,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
               color: Color(0xFF1E3A0F),
             ),
           ),
-          Text(label, style: TextStyle(fontSize: 11, color: Colors.grey[500])),
+          Text(label, style: TextStyle(fontSize: 11, color: const Color.fromARGB(255, 135, 132, 132))),
         ],
       ),
     );
@@ -364,7 +369,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color.fromARGB(240, 231, 243, 228),
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
@@ -385,7 +390,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E3A0F),
+                  color: Color.fromARGB(255, 38, 54, 29),
                 ),
               ),
               Text(
@@ -400,8 +405,8 @@ class _PerfilScreenState extends State<PerfilScreen> {
             child: LinearProgressIndicator(
               value: (_puntos / 3000).clamp(0.0, 1.0),
               minHeight: 9,
-              backgroundColor: Color(0xFFEAF3DE),
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF7BC043)),
+              backgroundColor: Color.fromARGB(255, 241, 247, 234),
+              valueColor: AlwaysStoppedAnimation<Color>(Color.fromARGB(181, 89, 134, 53)),
             ),
           ),
           const SizedBox(height: 8),
@@ -418,7 +423,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color.fromARGB(235, 230, 238, 227),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -433,8 +438,8 @@ class _PerfilScreenState extends State<PerfilScreen> {
           _buildMenuRow(
             icon: Icons.person_outline,
             label: 'Editar perfil',
-            color: const Color(0xFF2D5A1B),
-            bg: const Color(0xFFEAF3DE),
+            color: const Color.fromARGB(255, 5, 9, 3),
+            bg: const Color.fromARGB(255, 203, 209, 197),
             onTap: () async {
               await Navigator.push(
                 context,
@@ -443,12 +448,12 @@ class _PerfilScreenState extends State<PerfilScreen> {
               _cargarDatos();
             },
           ),
-          Divider(height: 1, color: Colors.grey.withValues(alpha: 0.1), indent: 60),
+          Divider(height: 1, color: const Color.fromARGB(255, 83, 82, 82).withValues(alpha: 0.1), indent: 60),
 
           _buildMenuRow(
             icon: Icons.history,
             label: 'Mis entregas',
-            color: const Color(0xFF185FA5),
+            color: const Color.fromARGB(255, 3, 71, 140),
             bg: const Color(0xFFE6F1FB),
             onTap: () => Navigator.push(
               context,
@@ -457,47 +462,47 @@ class _PerfilScreenState extends State<PerfilScreen> {
               ),
             ),
           ),
-          Divider(height: 1, color: Colors.grey.withValues(alpha: 0.1), indent: 60),
+          Divider(height: 1, color: const Color.fromARGB(255, 87, 86, 86).withValues(alpha: 0.1), indent: 60),
 
           _buildMenuRow(
             icon: Icons.card_giftcard_outlined,
             label: 'Mis canjes',
-            color: const Color(0xFF854F0B),
-            bg: const Color(0xFFFAEEDA),
+            color: const Color.fromARGB(255, 218, 122, 5),
+            bg: const Color.fromARGB(255, 243, 233, 215),
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const MisCanjesScreen()),
             ),
           ),
-          Divider(height: 1, color: Colors.grey.withValues(alpha: 0.1), indent: 60),
+          Divider(height: 1, color: const Color.fromARGB(255, 106, 104, 104).withValues(alpha: 0.1), indent: 60),
 
           _buildMenuRow(
             icon: Icons.settings_outlined,
             label: 'Configuración',
-            color: const Color(0xFF5F5E5A),
-            bg: const Color(0xFFF1EFE8),
+            color: const Color.fromARGB(255, 3, 3, 3),
+            bg: const Color.fromARGB(255, 234, 234, 229),
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const ConfiguracionScreen()),
             ),
           ),
-          Divider(height: 1, color: Colors.grey.withValues(alpha: 0.1), indent: 60),
+          Divider(height: 1, color: const Color.fromARGB(255, 96, 93, 93).withValues(alpha: 0.1), indent: 60),
 
           _buildMenuRow(
             icon: Icons.help_outline,
             label: 'Ayuda',
-            color: const Color(0xFF5F5E5A),
+            color: const Color.fromARGB(255, 9, 9, 8),
             bg: const Color(0xFFF1EFE8),
             onTap: () {},
           ),
 
-          Divider(height: 1, color: Colors.grey.withValues(alpha: 0.15)),
+          Divider(height: 1, color: const Color.fromARGB(255, 87, 86, 86).withValues(alpha: 0.15)),
 
           _buildMenuRow(
             icon: Icons.logout,
             label: 'Cerrar sesión',
-            color: const Color(0xFFA32D2D),
-            bg: const Color(0xFFFCEBEB),
+            color: const Color.fromARGB(255, 212, 7, 7),
+            bg: const Color.fromARGB(255, 197, 191, 191),
             onTap: _cerrarSesion,
           ),
         ],
