@@ -33,16 +33,17 @@ class NotificacionModel {
 
   // Convierte JSON del backend a modelo
   factory NotificacionModel.fromJson(Map<String, dynamic> json) {
-    final id = json['id_notificacion'] ?? json['id'] ?? 0;
+    final id = json['idNotificacion'] ?? json['id_notificacion'] ?? json['id'] ?? 0;
     final tipo = _tipoFromString(json['tipo'] ?? '');
     final titulo = json['titulo'] ?? '';
     final descripcion = json['descripcion'] ?? json['mensaje'] ?? '';
-    final fechaStr = json['fecha'] ?? json['created_at'] ?? '';
+    final fechaStr = json['createdAt'] ?? json['created_at'] ?? json['fecha'] ?? '';
     final fecha = DateTime.tryParse(fechaStr) ?? DateTime.now();
     final leida = json['leida'] == true || json['leida'] == 1;
     final camposConocidos = {
-      'id_notificacion', 'id', 'tipo', 'titulo', 'descripcion',
-      'mensaje', 'fecha', 'created_at', 'leida', 'extra',
+      'idNotificacion', 'id_notificacion', 'id', 'tipo', 'titulo',
+      'descripcion', 'mensaje', 'createdAt', 'created_at', 'fecha', 'leida',
+      'idReferencia', 'id_referencia', 'extra', 'updatedAt',
     };
     final extras = <String, dynamic>{};
     for (final entry in json.entries) {

@@ -17,11 +17,11 @@ class RecompensaDetalleScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Color(0xFF1E3A0F)),
+        iconTheme: const IconThemeData(color: Color.fromARGB(255, 104, 233, 34)),
         title: Text(
           r.aliado ?? 'Recompensa',
           style: const TextStyle(
-            color: Color(0xFF1E3A0F),
+            color: Color.fromARGB(255, 114, 217, 58),
             fontWeight: FontWeight.bold,
             fontSize: 17,
           ),
@@ -57,7 +57,7 @@ class RecompensaDetalleScreen extends StatelessWidget {
             ),
             child: Icon(
               esProducto ? BootstrapIcons.gift : BootstrapIcons.percent,
-              color: const Color(0xFF2D5A1B), size: 44,
+              color: const Color.fromARGB(255, 20, 49, 9), size: 44,
             ),
           ),
           const SizedBox(height: 20),

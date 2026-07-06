@@ -63,7 +63,7 @@ class _RecompensasScreenState extends State<RecompensasScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6EF),
+      backgroundColor: const Color.fromARGB(255, 229, 246, 225),
       body: SafeArea(
         child: Column(
           children: [
@@ -80,10 +80,10 @@ class _RecompensasScreenState extends State<RecompensasScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(BootstrapIcons.cloud_slash, size: 48, color: Colors.grey[400]),
+                        Icon(BootstrapIcons.cloud_slash, size: 48, color: const Color.fromARGB(255, 70, 69, 69)),
                         const SizedBox(height: 12),
                         Text(_error!, textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.grey[600])),
+                            style: TextStyle(color: const Color.fromARGB(255, 88, 87, 87))),
                         const SizedBox(height: 16),
                         TextButton(onPressed: _cargarDatos, child: const Text('Reintentar')),
                       ],
@@ -95,7 +95,7 @@ class _RecompensasScreenState extends State<RecompensasScreen> {
               const Expanded(
                 child: Center(
                   child: Text('No hay supermercados disponibles',
-                      style: TextStyle(color: Colors.grey, fontSize: 15)),
+                      style: TextStyle(color: Color.fromARGB(255, 80, 78, 78), fontSize: 15)),
                 ),
               )
             else
@@ -121,7 +121,12 @@ class _RecompensasScreenState extends State<RecompensasScreen> {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
       decoration: const BoxDecoration(
-        color: Color(0xFF2D5A1B),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color.fromARGB(255, 20, 125, 35), Color.fromARGB(255, 46, 158, 55), Color.fromARGB(255, 30, 220, 40), Color.fromARGB(255, 170, 225, 90)],
+          stops: [0.0, 0.35, 0.6, 1.0],
+        ),
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(28),
           bottomRight: Radius.circular(28),
@@ -133,7 +138,7 @@ class _RecompensasScreenState extends State<RecompensasScreen> {
           const Text(
             'Recompensas',
             style: TextStyle(
-              color: Colors.white,
+              color: Color.fromARGB(255, 239, 240, 239),
               fontSize: 22,
               fontWeight: FontWeight.bold,
             ),
@@ -141,13 +146,13 @@ class _RecompensasScreenState extends State<RecompensasScreen> {
           const SizedBox(height: 4),
           Text(
             'Supermercados aliados y sus recompensas',
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.65), fontSize: 13),
+            style: TextStyle(color: const Color.fromARGB(255, 255, 255, 255).withValues(alpha: 0.65), fontSize: 13),
           ),
           const SizedBox(height: 20),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.12),
+              color: const Color.fromARGB(255, 251, 247, 247).withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -156,7 +161,7 @@ class _RecompensasScreenState extends State<RecompensasScreen> {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF7BC043),
+                    color: const Color.fromARGB(255, 115, 235, 18),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(BootstrapIcons.star_fill, color: Colors.white, size: 24),
@@ -167,7 +172,7 @@ class _RecompensasScreenState extends State<RecompensasScreen> {
                   children: [
                     Text(
                       'Supermercados disponibles',
-                      style: TextStyle(color: Colors.white.withValues(alpha: 0.65), fontSize: 12),
+                      style: TextStyle(color: const Color.fromARGB(255, 244, 245, 244).withValues(alpha: 0.65), fontSize: 12),
                     ),
                     Text(
                       '${_aliados.length} aliados',
@@ -205,11 +210,11 @@ class _RecompensasScreenState extends State<RecompensasScreen> {
       child: Container(
         margin: const EdgeInsets.only(bottom: 14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: const Color.fromARGB(255, 234, 244, 226),
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: const Color.fromARGB(255, 10, 9, 9).withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 3),
             ),
@@ -223,12 +228,12 @@ class _RecompensasScreenState extends State<RecompensasScreen> {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEAF3DE),
+                  color: const Color.fromARGB(162, 179, 238, 102),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: const Icon(
                   BootstrapIcons.shop,
-                  color: Color(0xFF2D5A1B), size: 30,
+                  color: Color.fromARGB(255, 19, 22, 17), size: 30,
                 ),
               ),
               const SizedBox(width: 14),
@@ -248,7 +253,7 @@ class _RecompensasScreenState extends State<RecompensasScreen> {
                     Row(
                       children: [
                         Icon(BootstrapIcons.geo_alt,
-                            size: 13, color: Colors.grey[500]),
+                            size: 13, color: const Color.fromARGB(255, 12, 9, 9)),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
@@ -264,7 +269,7 @@ class _RecompensasScreenState extends State<RecompensasScreen> {
                     Row(
                       children: [
                         Icon(BootstrapIcons.gift,
-                            size: 13, color: const Color(0xFF7BC043)),
+                            size: 13, color: const Color.fromARGB(255, 109, 233, 8)),
                         const SizedBox(width: 4),
                         Text(
                           '${recompensas.length} recompensas',
@@ -279,7 +284,7 @@ class _RecompensasScreenState extends State<RecompensasScreen> {
                   ],
                 ),
               ),
-              const Icon(BootstrapIcons.chevron_right, color: Color(0xFF9E9E9E)),
+              const Icon(BootstrapIcons.chevron_right, color: Color.fromARGB(255, 79, 78, 78)),
             ],
           ),
         ),
