@@ -150,7 +150,8 @@ class _PerfilScreenState extends State<PerfilScreen> {
                                   ? DecorationImage(
                                       image: FileImage(File(_fotoPath!)),
                                       fit: BoxFit.cover)
-                                  : null),
+                                   : null),
+                          ),
                         child: _fotoUrl == null && (!kIsWeb ? _fotoPath == null : true)
                             ? const Icon(Icons.person, color: Colors.white, size: 52)
                             : null,
