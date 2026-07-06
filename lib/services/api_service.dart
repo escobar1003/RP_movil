@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import '../services/auth_service.dart';
 
@@ -107,6 +108,30 @@ class ApiService {
     print("--- RESPUESTA RECIBIDA ---");
     print("STATUS CODE: ${response.statusCode}");
     print("CUERPO: ${response.body}");
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Error del servidor: ${response.statusCode}");
+    }
+  }
+
+  static Future<Map<String, dynamic>> uploadImageBytes(
+    String path,
+    String field,
+    Uint8List bytes,
+    String filename, {
+    bool auth = true,
+  }) async {
+    final request = http.MultipartRequest('POST', Uri.parse('$baseUrl$path'));
+    final headers = await _headers(auth: auth);
+    request.headers.addAll(headers);
+    request.files.add(http.MultipartFile.fromBytes(field, bytes, filename: filename));
+
+    final streamedResponse = await request.send().timeout(
+      const Duration(seconds: 90),
+    );
+    final response = await http.Response.fromStream(streamedResponse);
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return jsonDecode(response.body);

@@ -3,6 +3,11 @@ import 'game_platform_stub.dart'
     if (dart.library.html) 'game_platform_web.dart'
     if (dart.library.io) 'game_platform_mobile.dart';
 
+const String _gameUrl = String.fromEnvironment(
+  'GAME_URL',
+  defaultValue: 'http://192.168.1.10:5173/',
+);
+
 class JuegoScreen extends StatefulWidget {
   const JuegoScreen({super.key});
 
@@ -11,7 +16,6 @@ class JuegoScreen extends StatefulWidget {
 }
 
 class _JuegoScreenState extends State<JuegoScreen> {
-  final String _gameUrl = 'http://192.168.1.10:5173/';
 
   @override
   Widget build(BuildContext context) {

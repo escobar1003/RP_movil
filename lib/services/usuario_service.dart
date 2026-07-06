@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'api_service.dart';
 
 class UsuarioService {
@@ -30,6 +31,10 @@ class UsuarioService {
 
   static Future<Map<String, dynamic>> updateFotoPerfil(String filePath) async {
     return ApiService.uploadImage('/usuario/perfil/foto', 'foto', filePath);
+  }
+
+  static Future<Map<String, dynamic>> updateFotoPerfilBytes(Uint8List bytes, String filename) async {
+    return ApiService.uploadImageBytes('/usuario/perfil/foto', 'foto', bytes, filename);
   }
 
   // ── PUNTOS ────────────────────────────────────────────────
