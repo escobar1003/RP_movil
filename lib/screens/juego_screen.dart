@@ -5,7 +5,7 @@ import 'game_platform_stub.dart'
 
 const String _gameUrl = String.fromEnvironment(
   'GAME_URL',
-  defaultValue: 'http://192.168.1.10:5173/',
+  defaultValue: 'https://juego-gules-nine.vercel.app/',
 );
 
 class JuegoScreen extends StatefulWidget {
