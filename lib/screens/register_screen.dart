@@ -103,7 +103,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           children: [
             const SizedBox(height: 20),
             const Text(
-              'Únete a EcoRecicla 🌱',
+              'Únete a Recycing Points',
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
@@ -121,7 +121,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             const SizedBox(height: 6),
             _field(
               controller: _nombre,
-              hint: 'Ana Martínez',
+              hint: 'Ingresa Tu Nombre',
               icon: Icons.person_outline,
             ),
             const SizedBox(height: 18),
@@ -130,7 +130,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             const SizedBox(height: 6),
             _field(
               controller: _email,
-              hint: 'tu@correo.com',
+              hint: 'Ingresa tu@correo.com',
               icon: Icons.email_outlined,
             ),
             const SizedBox(height: 18),

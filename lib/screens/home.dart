@@ -67,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6EF),
+      backgroundColor: const Color.fromARGB(255, 227, 241, 227),
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _cargarDatos,
@@ -113,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 2),
                         const Text(
                           'Gracias por cuidar el planeta!',
-                          style: TextStyle(fontSize: 13, color: AppColors.textMid),
+                          style: TextStyle(fontSize: 13, color: Color.fromARGB(255, 4, 17, 8)),
                         ),
                       ],
                     ),
@@ -147,7 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.all(22),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFF2E9E6F), Color(0xFF57C58A)],
+                    colors: [Color.fromARGB(255, 20, 125, 35),Color.fromARGB(255, 46, 158, 55), Color.fromARGB(255, 30, 220, 40),Color.fromARGB(255, 170, 225, 90)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -160,25 +160,25 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Puntos disponibles', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                          const Text('Puntos disponibles', style: TextStyle(color: Color.fromARGB(193, 214, 232, 170), fontSize: 14)),
                           const SizedBox(height: 10),
                           Row(
                             children: [
-                              Text(_puntos.toString(), style: const TextStyle(color: Colors.white, fontSize: 38, fontWeight: FontWeight.w900)),
+                              Text(_puntos.toString(), style: const TextStyle(color: Color.fromARGB(221, 241, 251, 184), fontSize: 38, fontWeight: FontWeight.w900)),
                               const SizedBox(width: 8),
                               Container(
                                 padding: const EdgeInsets.all(6),
                                 decoration: BoxDecoration(color: Colors.amber, borderRadius: BorderRadius.circular(50)),
-                                child: const Icon(BootstrapIcons.coin, color: Colors.white, size: 18),
+                                child: const Icon(BootstrapIcons.coin, color: Color.fromARGB(145, 23, 9, 9), size: 18),
                               ),
                             ],
                           ),
                           const SizedBox(height: 10),
-                          const Text('Sigue asi, cada accion suma un cambio.', style: TextStyle(color: Colors.white, fontSize: 14)),
+                          const Text('Sigue asi, cada accion suma un cambio.', style: TextStyle(color: Color.fromARGB(106, 0, 0, 0), fontSize: 14)),
                         ],
                       ),
                     ),
-                    const Icon(BootstrapIcons.recycle, color: Colors.white, size: 70),
+                    const Icon(BootstrapIcons.recycle, color: Color.fromARGB(255, 239, 241, 238), size: 70),
                   ],
                 ),
               ),
@@ -186,14 +186,14 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 24),
 
               // ------------------ RESUMEN IMPACTO ------------------
-              const Text('Resumen De Impacto', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17, color: AppColors.textDark)),
+              const Text('Resumen De Impacto', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17, color: Color.fromARGB(255, 14, 28, 9))),
               const SizedBox(height: 14),
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: const Color.fromARGB(60, 116, 229, 23),
                   borderRadius: BorderRadius.circular(20),
-                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 12, offset: const Offset(0, 5))],
+                  boxShadow: [BoxShadow(color: const Color.fromARGB(255, 63, 247, 12).withValues(alpha: 0.05), blurRadius: 12, offset: const Offset(0, 5))],
                 ),
                 child: Column(
                   children: [
@@ -207,7 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 14),
                     Row(
                       children: [
-                        Expanded(child: _ImpactoItem(icon: BootstrapIcons.leaf, value: '${(_pesoTotal * 1.5).toStringAsFixed(1)} kg', label: 'CO2 evitado', color: Colors.lightGreen)),
+                        Expanded(child: _ImpactoItem(icon: BootstrapIcons.leaf, value: '${(_pesoTotal * 1.5).toStringAsFixed(1)} kg', label: 'CO2 evitado', color: const Color.fromARGB(255, 102, 176, 17))),
                         const SizedBox(width: 14),
                         Expanded(child: _ImpactoItem(icon: BootstrapIcons.star_fill, value: '$_puntos', label: 'Puntos totales', color: Colors.amber)),
                       ],
@@ -224,9 +224,9 @@ class _HomeScreenState extends State<HomeScreen> {
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: const Color.fromARGB(34, 152, 239, 45),
                   borderRadius: BorderRadius.circular(20),
-                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 12, offset: const Offset(0, 5))],
+                  boxShadow: [BoxShadow(color: const Color.fromARGB(255, 0, 0, 0).withValues(alpha: 0.05), blurRadius: 12, offset: const Offset(0, 5))],
                 ),
                 child: Column(
                   children: [
@@ -234,7 +234,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text('Nivel: Verde', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
-                        Text('$_puntos pts', style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.primary)),
+                        Text('$_puntos pts', style: const TextStyle(fontWeight: FontWeight.w700, color: Color.fromARGB(121, 6, 8, 1))),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -244,7 +244,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         value: (_puntos / 3000).clamp(0.0, 1.0),
                         minHeight: 10,
                         backgroundColor: AppColors.green100,
-                        valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                        valueColor: const AlwaysStoppedAnimation<Color>(Color.fromARGB(184, 3, 147, 25)),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -270,7 +270,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   Expanded(child: _AccionCard(icon: BootstrapIcons.geo_alt, label: 'Mapa', color: Color(0xFFE3F2FD), iconColor: Colors.blue, onTap: () { Navigator.push(context, MaterialPageRoute(builder: (_) => const MapaPuntosScreen(soloMapa: false))); })),
                   const SizedBox(width: 12),
-                  Expanded(child: _AccionCard(icon: BootstrapIcons.joystick, label: 'Juego Babilon', color: Color(0xFFF3E5F5), iconColor: Colors.purple, onTap: () { Navigator.push(context, MaterialPageRoute(builder: (_) => const JuegoScreen())); })),
+                  Expanded(child: _AccionCard(icon: BootstrapIcons.joystick, label: 'Juego ', color: Color(0xFFF3E5F5), iconColor: Colors.purple, onTap: () { Navigator.push(context, MaterialPageRoute(builder: (_) => const JuegoScreen())); })),
                 ],
               ),
 
@@ -297,9 +297,9 @@ class _ImpactoItem extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color.fromARGB(250, 228, 245, 227),
         borderRadius: BorderRadius.circular(18),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [BoxShadow(color: const Color.fromARGB(255, 10, 181, 50).withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: Row(
         children: [
@@ -315,7 +315,7 @@ class _ImpactoItem extends StatelessWidget {
               children: [
                 Text(value, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: AppColors.textDark)),
                 const SizedBox(height: 4),
-                Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textMid)),
+                Text(label, style: const TextStyle(fontSize: 12, color: Color.fromARGB(255, 2, 3, 3))),
               ],
             ),
           ),
