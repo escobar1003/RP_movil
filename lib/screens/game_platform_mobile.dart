@@ -23,6 +23,8 @@ class _PlatformGameViewState extends State<PlatformGameView> {
     super.initState();
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(const Color(0xFF0f1726))
+      ..enableZoom(false)
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (_) {
@@ -168,7 +170,7 @@ class _PlatformGameViewState extends State<PlatformGameView> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Verifica que el servidor del juego\nesté ejecutándose en tu PC',
+            'Verifica tu conexión a internet\ne intenta de nuevo',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
