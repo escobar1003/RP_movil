@@ -5,6 +5,7 @@ enum TipoNotificacion {
   citaRechazada,
   citaRecordatorio,
   citaCompletada,
+  citaPendiente,
   puntosGanados,
   canjeExitoso,
   logroNivel,
@@ -76,6 +77,8 @@ class NotificacionModel {
       case 'reserva_cancelada':
       case 'reserva_rechazada': return TipoNotificacion.citaRechazada;
       case 'cita_recordatorio': return TipoNotificacion.citaRecordatorio;
+      case 'cita_pendiente':
+      case 'reserva_pendiente': return TipoNotificacion.citaPendiente;
       case 'cita_completada':
       case 'entrega':
       case 'nueva_entrega':     return TipoNotificacion.citaCompletada;

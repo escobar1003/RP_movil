@@ -1,6 +1,7 @@
 // lib/screens/login_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/auth_service.dart';
 import '../services/socket_service.dart';
@@ -36,6 +37,9 @@ class _LoginScreenState extends State<LoginScreen> {
         if (!mounted) return;
 
         await SocketService.instance.conectar();
+
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt('tab_index', 0);
 
         Navigator.pushAndRemoveUntil(
           context,

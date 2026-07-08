@@ -22,9 +22,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscure = true;
 
   Future<void> _register() async {
-    // Control para verificar en terminal que el botón funciona
-    print("====== INTENTO DE REGISTRO INICIADO ======");
-
     if (_nombre.text.trim().isEmpty ||
         _email.text.trim().isEmpty ||
         _password.text.trim().isEmpty) {
@@ -41,6 +38,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('La contraseña debe tener mínimo 6 caracteres'),
+          backgroundColor: Color(0xFFA32D2D),
+        ),
+      );
+      return;
+    }
+
+    final cedulaText = _cedula.text.trim();
+    if (cedulaText.isNotEmpty) {
+      if (cedulaText.length < 5) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('La cédula debe tener mínimo 5 caracteres'),
+            backgroundColor: Color(0xFFA32D2D),
+          ),
+        );
+        return;
+      }
+      if (!RegExp(r'^\d+$').hasMatch(cedulaText)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('La cédula solo debe contener números'),
+            backgroundColor: Color(0xFFA32D2D),
+          ),
+        );
+        return;
+      }
+    }
+
+    final telefonoText = _telefono.text.trim();
+    if (telefonoText.isNotEmpty && telefonoText.length < 5) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('El teléfono debe tener mínimo 5 caracteres'),
           backgroundColor: Color(0xFFA32D2D),
         ),
       );
@@ -164,9 +194,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
              const SizedBox(height: 6),
 
             _field(
-             controller: _cedula,
-             hint: '1234567890',
-            icon: Icons.badge_outlined,
+              controller: _cedula,
+              hint: '1234567890',
+              icon: Icons.badge_outlined,
+              teclado: TextInputType.number,
             ),
 
 
@@ -215,10 +246,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
     required IconData icon,
     bool obscure = false,
     Widget? suffix,
+    TextInputType teclado = TextInputType.text,
   }) {
     return TextField(
       controller: controller,
       obscureText: obscure,
+      keyboardType: teclado,
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(color: AppColors.textLight),
