@@ -23,9 +23,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscure = true;
 
   Future<void> _register() async {
-    // Control para verificar en terminal que el botón funciona
-    print("====== INTENTO DE REGISTRO INICIADO ======");
-
     if (_nombre.text.trim().isEmpty ||
         _email.text.trim().isEmpty ||
         _password.text.trim().isEmpty) {
@@ -48,9 +45,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
-    if (_cedula.text.trim().isNotEmpty) {
-      final ced = _cedula.text.trim();
-      if (ced.length < 5 || ced.length > 15) {
+    final cedulaText = _cedula.text.trim();
+    if (cedulaText.isNotEmpty) {
+      if (cedulaText.length < 5 || cedulaText.length > 15) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('La cédula debe tener entre 5 y 15 dígitos'),
@@ -59,8 +56,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
         );
         return;
       }
+      if (!RegExp(r'^\d+$').hasMatch(cedulaText)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('La cédula solo debe contener números'),
+            backgroundColor: Color(0xFFA32D2D),
+          ),
+        );
+        return;
+      }
     }
 
+    final telefonoText = _telefono.text.trim();
+    if (telefonoText.isNotEmpty && telefonoText.length < 5) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('El teléfono debe tener mínimo 5 caracteres'),
+          backgroundColor: Color(0xFFA32D2D),
+        ),
+      );
+      return;
+    }
     try {
       print("Conectando con el servidor: ${_email.text.trim()}");
 
