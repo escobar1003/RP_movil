@@ -1,6 +1,7 @@
 // lib/screens/register_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
 import 'login_screen.dart';
@@ -45,6 +46,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
       );
       return;
+    }
+
+    if (_cedula.text.trim().isNotEmpty) {
+      final ced = _cedula.text.trim();
+      if (ced.length < 5 || ced.length > 15) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('La cédula debe tener entre 5 y 15 dígitos'),
+            backgroundColor: Color(0xFFA32D2D),
+          ),
+        );
+        return;
+      }
     }
 
     try {
@@ -164,9 +178,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
              const SizedBox(height: 6),
 
             _field(
-             controller: _cedula,
-             hint: '1234567890',
-            icon: Icons.badge_outlined,
+              controller: _cedula,
+              hint: '1234567890',
+              icon: Icons.badge_outlined,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),
 
 
@@ -215,10 +231,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
     required IconData icon,
     bool obscure = false,
     Widget? suffix,
+    TextInputType keyboardType = TextInputType.text,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return TextField(
       controller: controller,
       obscureText: obscure,
+      keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(color: AppColors.textLight),

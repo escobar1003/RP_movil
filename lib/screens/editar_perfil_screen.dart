@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/auth_service.dart';
@@ -242,6 +243,13 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
                                   hint: '123456789',
                                   icon: Icons.perm_identity_outlined,
                                   teclado: TextInputType.number,
+                                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                  validator: (v) {
+                                    if (v == null || v.trim().isEmpty) return null;
+                                    if (v.trim().length < 5) return 'Mínimo 5 dígitos';
+                                    if (v.trim().length > 15) return 'Máximo 15 dígitos';
+                                    return null;
+                                  },
                                 ),
 
 
@@ -359,6 +367,7 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
     bool enabled = true,
     int maxLines = 1,
     Widget? sufijo,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -379,6 +388,7 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
             keyboardType: teclado,
             maxLines: maxLines,
             validator: validator,
+            inputFormatters: inputFormatters,
             style: TextStyle(
                 fontSize: 14,
                 color: enabled
