@@ -31,14 +31,6 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
 
   MaterialData? _material;
 
-  // Datos de entrega (quemados)
-  final String _puntoEntrega = 'Éxito Panamericana';
-  final String _direccionEntrega = 'Cra 9 #18N-230, Popayán';
-  final String _horarioEntrega = 'Lun–Sáb 8:00–18:00';
-  final String _puntosEstimados = '150 pts';
-  final String _instruccionesEntrega =
-      'Entregar en el punto de reciclaje ubicado en el parqueadero.';
-
   @override
   void initState() {
     super.initState();
@@ -212,8 +204,6 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
               _buildRecomendacionCard(),
               const SizedBox(height: 10),
               _buildCanecoCard(),
-              const SizedBox(height: 10),
-              _buildEntregaCard(),
               const SizedBox(height: 20),
             ],
             _buildBotonEscanear(),
@@ -489,70 +479,6 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
     );
   }
 
-  Widget _buildEntregaCard() {
-    return _buildCard(
-      margin: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE3F0FF),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(Icons.local_shipping_outlined,
-                    color: Color(0xFF185FA5), size: 18),
-              ),
-              const SizedBox(width: 10),
-              const Text('Información de entrega',
-                  style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14,
-                      color: AppColors.textDark)),
-            ],
-          ),
-          const SizedBox(height: 12),
-          _entregaFila(Icons.store_rounded, 'Punto sugerido', _puntoEntrega),
-          const SizedBox(height: 8),
-          _entregaFila(
-              Icons.location_on_outlined, 'Dirección', _direccionEntrega),
-          const SizedBox(height: 8),
-          _entregaFila(Icons.access_time_rounded, 'Horario', _horarioEntrega),
-          const SizedBox(height: 8),
-          _entregaFila(Icons.stars_rounded, 'Puntos estimados',
-              _puntosEstimados,
-              valorColor: const Color(0xFF854F0B)),
-          const SizedBox(height: 10),
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5F5F5),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(Icons.info_outline,
-                    size: 16, color: AppColors.textLight),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(_instruccionesEntrega,
-                      style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textLight,
-                          height: 1.4)),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildBotonEscanear() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
@@ -619,25 +545,6 @@ class _ReciclarScreenState extends State<ReciclarScreen> {
                   const TextStyle(fontSize: 10, color: AppColors.textLight)),
         ],
       ),
-    );
-  }
-
-  Widget _entregaFila(IconData icon, String label, String valor,
-      {Color? valorColor}) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: AppColors.textLight),
-        const SizedBox(width: 8),
-        Text(label,
-            style:
-                const TextStyle(fontSize: 12, color: AppColors.textLight)),
-        const Spacer(),
-        Text(valor,
-            style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: valorColor ?? AppColors.textDark)),
-      ],
     );
   }
 

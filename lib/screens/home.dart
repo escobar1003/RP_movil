@@ -11,6 +11,7 @@ import 'reciclar_screen.dart';
 import 'mis_canjes_screen.dart';
 import 'notificaciones_screen.dart';
 import 'juego_screen.dart';
+import 'perfil_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -81,21 +82,26 @@ class _HomeScreenState extends State<HomeScreen> {
               // ------------------ HEADER ------------------
               Row(
                 children: [
-                  CircleAvatar(
-                    radius: 24,
-                    backgroundColor: AppColors.green100,
-                    backgroundImage: _fotoUrl != null
-                        ? NetworkImage(_fotoUrl!)
-                        : (!kIsWeb && _fotoPath != null
-                            ? FileImage(File(_fotoPath!))
-                            : null),
-                    child: _fotoUrl == null && (!kIsWeb ? _fotoPath == null : true)
-                        ? const Icon(
-                            BootstrapIcons.person_fill,
-                            color: AppColors.primary,
-                            size: 26,
-                          )
-                        : null,
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const PerfilScreen()));
+                    },
+                    child: CircleAvatar(
+                      radius: 24,
+                      backgroundColor: AppColors.green100,
+                      backgroundImage: _fotoUrl != null
+                          ? NetworkImage(_fotoUrl!)
+                          : (!kIsWeb && _fotoPath != null
+                              ? FileImage(File(_fotoPath!))
+                              : null),
+                      child: _fotoUrl == null && (!kIsWeb ? _fotoPath == null : true)
+                          ? const Icon(
+                              BootstrapIcons.person_fill,
+                              color: AppColors.primary,
+                              size: 26,
+                            )
+                          : null,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(

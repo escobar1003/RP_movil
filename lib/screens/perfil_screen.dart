@@ -1,7 +1,8 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // ← MODIFICADO
+import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/auth_service.dart';
 import '../services/usuario_service.dart';
 import 'historial_entregas_screen.dart';
@@ -78,6 +79,69 @@ class _PerfilScreenState extends State<PerfilScreen> {
     }
 
     if (mounted) setState(() {});
+  }
+
+  Future<void> _cambiarFoto() async {
+    final source = await showDialog<ImageSource>(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Cambiar foto de perfil',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: const Text('Galería'),
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt_outlined),
+              title: const Text('Cámara'),
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (source == null) return;
+
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(
+      source: source,
+      imageQuality: 80,
+      maxWidth: 600,
+    );
+    if (picked == null) return;
+
+    try {
+      if (!kIsWeb) {
+        final res = await UsuarioService.updateFotoPerfil(picked.path);
+        if (mounted && (res['status'] == 'error' || res['error'] != null)) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(res['mensaje'] ?? res['error'] ?? 'Error al subir foto'), backgroundColor: Colors.orange),
+          );
+        }
+      } else {
+        final bytes = await picked.readAsBytes();
+        final res = await UsuarioService.updateFotoPerfilBytes(bytes, 'foto_perfil.jpg');
+        if (mounted && (res['status'] == 'error' || res['error'] != null)) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(res['mensaje'] ?? res['error'] ?? 'Error al subir foto'), backgroundColor: Colors.orange),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al subir foto: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+
+    if (mounted) _cargarDatos();
   }
 
   Future<void> _cerrarSesion() async {
@@ -164,17 +228,20 @@ class _PerfilScreenState extends State<PerfilScreen> {
                     Positioned(
                       bottom: 0,
                       right: 0,
-                      child: Container(
-                        width: 28,
-                        height: 28,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: const Icon(
-                          Icons.camera_alt_outlined,
-                          size: 16,
-                          color: Color(0xFF2D5A1B),
+                      child: GestureDetector(
+                        onTap: _cambiarFoto,
+                        child: Container(
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: const Icon(
+                            Icons.camera_alt_outlined,
+                            size: 16,
+                            color: Color(0xFF2D5A1B),
+                          ),
                         ),
                       ),
                     ),
@@ -487,16 +554,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
             ),
           ),
           Divider(height: 1, color: const Color.fromARGB(255, 96, 93, 93).withValues(alpha: 0.1), indent: 60),
-
-          _buildMenuRow(
-            icon: Icons.help_outline,
-            label: 'Ayuda',
-            color: const Color.fromARGB(255, 9, 9, 8),
-            bg: const Color(0xFFF1EFE8),
-            onTap: () {},
-          ),
-
-          Divider(height: 1, color: const Color.fromARGB(255, 87, 86, 86).withValues(alpha: 0.15)),
 
           _buildMenuRow(
             icon: Icons.logout,

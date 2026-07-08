@@ -16,9 +16,11 @@ class NotificacionesScreen extends StatefulWidget {
 
 class _NotificacionesScreenState extends State<NotificacionesScreen> {
   List<NotificacionModel> _todas = [];
+  List<NotificacionModel> _reservas = [];
   String _filtroActivo = 'Todas';
   bool _cargando = true;
   String? _error;
+  int _limite = 10;
 
   final List<String> _filtros = [
     'Todas', 'Citas', 'Puntos', 'Canjes', 'Logros', 'Sistema'
@@ -45,10 +47,28 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
       _error = null;
     });
     try {
-      final data = await UsuarioService.getNotificaciones();
+      final results = await Future.wait([
+        UsuarioService.getNotificaciones(),
+        UsuarioService.getReservas(),
+      ]);
+      final data = results[0];
+      final reservasData = results[1];
       final lista = (data['notificaciones'] as List?) ?? [];
+      final reservasList = (reservasData['reservas'] as List?) ?? [];
       setState(() {
         _todas = lista.map((e) => NotificacionModel.fromJson(e as Map<String, dynamic>)).toList();
+        _reservas = reservasList.map((r) {
+          final alias = r is Map<String, dynamic> ? r : <String, dynamic>{};
+          return NotificacionModel(
+            id: int.tryParse('${alias['id'] ?? alias['idReserva'] ?? 0}') ?? 0,
+            tipo: TipoNotificacion.citaPendiente,
+            titulo: 'Reserva en ${alias['nombre'] ?? alias['aliado'] ?? 'Punto de reciclaje'}',
+            descripcion: 'Reserva para el ${alias['fecha'] ?? ''} a las ${alias['hora'] ?? ''}',
+            fecha: DateTime.tryParse('${alias['createdAt'] ?? alias['fecha'] ?? ''}') ?? DateTime.now(),
+            leida: true,
+            extra: {'estado': alias['estado'] ?? 'pendiente'},
+          );
+        }).toList();
         _cargando = false;
       });
     } catch (e) {
@@ -78,14 +98,18 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
     });
   }
 
-  List<NotificacionModel> get _filtradas {
+  List<NotificacionModel> get _filtradasCompletas {
     switch (_filtroActivo) {
       case 'Citas':
-        return _todas.where((n) =>
-          n.tipo == TipoNotificacion.citaAceptada ||
-          n.tipo == TipoNotificacion.citaRechazada ||
-          n.tipo == TipoNotificacion.citaRecordatorio ||
-          n.tipo == TipoNotificacion.citaCompletada).toList();
+        return [
+          ..._todas.where((n) =>
+            n.tipo == TipoNotificacion.citaAceptada ||
+            n.tipo == TipoNotificacion.citaRechazada ||
+            n.tipo == TipoNotificacion.citaRecordatorio ||
+            n.tipo == TipoNotificacion.citaCompletada ||
+            n.tipo == TipoNotificacion.citaPendiente),
+          ..._reservas,
+        ]..sort((a, b) => b.fecha.compareTo(a.fecha));
       case 'Puntos':
         return _todas.where((n) =>
           n.tipo == TipoNotificacion.puntosGanados).toList();
@@ -103,6 +127,12 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
         return _todas;
     }
   }
+
+  List<NotificacionModel> get _filtradas {
+    return _filtradasCompletas.take(_limite).toList();
+  }
+
+  bool get _hayMas => _filtradasCompletas.length > _limite;
 
   int get _noLeidas => _todas.where((n) => !n.leida).length;
 
@@ -205,7 +235,10 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
             itemBuilder: (_, i) {
               final activo = _filtros[i] == _filtroActivo;
               return GestureDetector(
-                onTap: () => setState(() => _filtroActivo = _filtros[i]),
+                onTap: () => setState(() {
+                  _filtroActivo = _filtros[i];
+                  _limite = 10;
+                }),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                   decoration: BoxDecoration(
@@ -234,29 +267,47 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
                   onRefresh: _cargarNotificaciones,
                   child: ListView(
                     padding: const EdgeInsets.fromLTRB(12, 4, 12, 20),
-                    children: grupos.entries.map((entry) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(4, 12, 4, 6),
-                            child: Text(entry.key,
-                                style: const TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(0xFF9DB8A0),
-                                    letterSpacing: 0.5)),
+                    children: [
+                      ...grupos.entries.map((entry) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(4, 12, 4, 6),
+                              child: Text(entry.key,
+                                  style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w500,
+                                      color: Color(0xFF9DB8A0),
+                                      letterSpacing: 0.5)),
+                            ),
+                            ...entry.value.map((n) => _NotifCard(
+                                  notif: n,
+                                  onTap: () {
+                                    _marcarLeida(n.id);
+                                    _mostrarDetalleNotificacion(n);
+                                  },
+                                )),
+                          ],
+                        );
+                      }).toList(),
+                      if (_hayMas)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Center(
+                            child: TextButton.icon(
+                              onPressed: () {
+                                setState(() => _limite += 10);
+                              },
+                              icon: const Icon(Icons.expand_more, size: 18),
+                              label: const Text('Ver más'),
+                              style: TextButton.styleFrom(
+                                foregroundColor: const Color(0xFF3B6D11),
+                              ),
+                            ),
                           ),
-                          ...entry.value.map((n) => _NotifCard(
-                                notif: n,
-                                onTap: () {
-                                  _marcarLeida(n.id);
-                                  _mostrarDetalleNotificacion(n);
-                                },
-                              )),
-                        ],
-                      );
-                    }).toList(),
+                        ),
+                    ],
                   ),
                 ),
         ),
@@ -355,6 +406,7 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
         return const _IconConfig(BootstrapIcons.x_circle,
             Color(0xFFFCEBEB), Color(0xFFA32D2D));
       case TipoNotificacion.citaRecordatorio:
+      case TipoNotificacion.citaPendiente:
         return const _IconConfig(BootstrapIcons.clock_fill,
             Color(0xFFFAEEDA), Color(0xFF854F0B));
       case TipoNotificacion.puntosGanados:
@@ -381,7 +433,8 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
       case TipoNotificacion.citaRechazada:
         return const _PillConfig('Rechazada', Color(0xFFFCEBEB), Color(0xFFA32D2D));
       case TipoNotificacion.citaRecordatorio:
-        return const _PillConfig('Recordatorio', Color(0xFFFAEEDA), Color(0xFF854F0B));
+      case TipoNotificacion.citaPendiente:
+        return const _PillConfig('Pendiente', Color(0xFFFAEEDA), Color(0xFF854F0B));
       case TipoNotificacion.puntosGanados:
         return const _PillConfig('Puntos', Color(0xFFEAF3DE), Color(0xFF3B6D11));
       case TipoNotificacion.canjeExitoso:
@@ -427,6 +480,7 @@ class _NotifCard extends StatelessWidget {
         return _IconConfig(BootstrapIcons.x_circle,
             const Color(0xFFFCEBEB), const Color(0xFFA32D2D));
       case TipoNotificacion.citaRecordatorio:
+      case TipoNotificacion.citaPendiente:
         return _IconConfig(BootstrapIcons.clock_fill,
             const Color(0xFFFAEEDA), const Color(0xFF854F0B));
       case TipoNotificacion.puntosGanados:
@@ -453,7 +507,8 @@ class _NotifCard extends StatelessWidget {
       case TipoNotificacion.citaRechazada:
         return _PillConfig('Rechazada', const Color(0xFFFCEBEB), const Color(0xFFA32D2D));
       case TipoNotificacion.citaRecordatorio:
-        return _PillConfig('Recordatorio', const Color(0xFFFAEEDA), const Color(0xFF854F0B));
+      case TipoNotificacion.citaPendiente:
+        return _PillConfig('Pendiente', const Color(0xFFFAEEDA), const Color(0xFF854F0B));
       case TipoNotificacion.puntosGanados:
         return _PillConfig('Puntos', const Color(0xFFEAF3DE), const Color(0xFF3B6D11));
       case TipoNotificacion.canjeExitoso:
@@ -464,6 +519,14 @@ class _NotifCard extends StatelessWidget {
       case TipoNotificacion.sistemaInfo:
         return _PillConfig('Sistema', const Color(0xFFF1EFE8), const Color(0xFF5F5E5A));
     }
+  }
+
+  String get _descripcionCorregida {
+    final d = notif.descripcion;
+    if (notif.tipo == TipoNotificacion.citaPendiente) return d;
+    if (d.toLowerCase().contains('material')) return 'Se ha registrado un nuevo escaneo de tus materiales.';
+    if (d.length > 120) return '${d.substring(0, 120)}…';
+    return d;
   }
 
   String _tiempoRelativo(DateTime fecha) {
@@ -522,7 +585,7 @@ class _NotifCard extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                           color: Color(0xFF1E3A0F))),
                   const SizedBox(height: 3),
-                  Text(notif.descripcion,
+                  Text(_descripcionCorregida,
                       style: const TextStyle(
                           fontSize: 12,
                           color: Color(0xFF5F5E5A),
