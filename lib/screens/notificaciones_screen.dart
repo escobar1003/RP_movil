@@ -524,7 +524,6 @@ class _NotifCard extends StatelessWidget {
   String get _descripcionCorregida {
     final d = notif.descripcion;
     if (notif.tipo == TipoNotificacion.citaPendiente) return d;
-    if (d.toLowerCase().contains('material')) return 'Se ha registrado un nuevo escaneo de tus materiales.';
     if (d.length > 120) return '${d.substring(0, 120)}…';
     return d;
   }
