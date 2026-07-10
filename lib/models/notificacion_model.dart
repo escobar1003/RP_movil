@@ -89,6 +89,11 @@ class NotificacionModel {
       case 'canje':             return TipoNotificacion.canjeExitoso;
       case 'logro_nivel':       return TipoNotificacion.logroNivel;
       case 'logro_entrega':     return TipoNotificacion.logroEntrega;
+      case 'analisis':
+      case 'analisis_completado':
+      case 'escaneo':
+      case 'escaneo_completado':
+      case 'material_detectado': return TipoNotificacion.puntosGanados;
       default:                  return TipoNotificacion.sistemaInfo;
     }
   }

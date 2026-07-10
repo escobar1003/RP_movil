@@ -119,22 +119,6 @@ class _ReservasScreenState extends State<ReservasScreen> {
             final idReserva = resultado['idReserva'] ?? resultado['reserva']?['idReserva'];
             final exito = idReserva != null || resultado['mensaje'] != null;
 
-            if (exito && idReserva != null) {
-              for (final mat in listaMateriales) {
-                final imgPath = mat['imagenPath'] as String?;
-                if (imgPath != null && File(imgPath).existsSync()) {
-                  try {
-                    await ApiService.uploadImage(
-                      '/usuario/reservas/$idReserva/imagenes',
-                      'imagen',
-                      imgPath,
-                      auth: true,
-                    );
-                  } catch (_) {}
-                }
-              }
-            }
-
             if (!mounted) return;
             SesionReciclaje.limpiar();
             showDialog(
@@ -181,11 +165,58 @@ class _ReservasScreenState extends State<ReservasScreen> {
                 ],
               ),
             );
+
+            if (exito && idReserva != null) {
+              for (final mat in listaMateriales) {
+                final imgPath = mat['imagenPath'] as String?;
+                if (imgPath != null && File(imgPath).existsSync()) {
+                  ApiService.uploadImage(
+                    '/usuario/reservas/$idReserva/imagenes',
+                    'imagen',
+                    imgPath,
+                    auth: true,
+                  );
+                }
+              }
+            }
           } catch (e) {
             if (!mounted) return;
             setState(() => loading = false);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+            if (!mounted) return;
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (_) => AlertDialog(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFEBEB),
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                      child: const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text('Error al reservar',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    Text(
+                      e.toString(),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                    ),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Aceptar'),
+                  ),
+                ],
+              ),
             );
           }
         },
